@@ -16,7 +16,7 @@ function App() {
           />
 
           <Home1
-            Title="IT Engineering"
+            Title="EC Engineering"
             Description="Information Technology is an undergraduate engineering course which focuses on expanding and growing in terms of dissemination of knowledge within and outside curriculum and skill development activities."
           />
 
