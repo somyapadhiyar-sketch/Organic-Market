@@ -1,4 +1,40 @@
-import './App.css'
+import React from "react";
+import {ImageComponent} from "./ImageComponent";
+
+function App() {
+  return (
+    <div className="min-h-screen p-6 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
+      <h1 className="text-3xl font-bold text-center text-white mb-8">
+        Day 2 Task 1
+      </h1>
+
+      <div className="flex flex-row flex-wrap justify-center gap-8">
+        <ImageComponent
+          image="https://images.unsplash.com/photo-1615829253947-faef9cf73097"
+          text="Nature"
+        />
+
+        <ImageComponent
+          image="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee"
+          text="Mountain"
+        />
+
+        <ImageComponent
+          image="https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
+          text="Sea"
+        />
+      </div>
+    </div>
+  );
+}
+
+export {App};
+
+
+
+
+
+/*import './App.css'
 import { Home1 } from './Home1'
 
 function App() {
@@ -30,12 +66,7 @@ function App() {
   )
 }
 
-export { App }
-
-
-
-
-
+export { App }*/
 
 
 
@@ -66,7 +97,6 @@ return (
 </div>
 );
 } export {App};*/
-
 
 
 
