@@ -7,11 +7,11 @@ function App() {
       <div className="min-h-screen bg-gradient-to-r from-purple-200 to-sky-500 py-10 px-6">
         <h1 className="text-3xl font-bold text-center text-black mb-10">
           Departments
-        </h1>
+        </h1> 
 
         <div className="flex flex-col md:flex-row gap-8 justify-center items-stretch">
           <Home1
-            Title="Computer Engineering"
+            Title="ICT Engineering"
             Description="Computer Engineering is a four year undergraduate programme introducing its students to realms of computer, including the theory and design of data storage, software, operating systems."
           />
 
