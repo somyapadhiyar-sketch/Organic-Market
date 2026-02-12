@@ -4,7 +4,7 @@ import {ProductCard} from "./ProductCard";
 // Imported downloaded images
 import watch from "./assets/watch.jpg";
 import headphones from "./assets/headphone.jpg";
-import tv from "./assets/tv.jpg";
+import tv from "./assets/tv.jpg"; 
 import laptop from "./assets/laptop.jpg";
 import phone from "./assets/phone.jpg";
 import camera from "./assets/camera.jpg";
