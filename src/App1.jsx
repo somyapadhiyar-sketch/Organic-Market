@@ -20,9 +20,9 @@ function App1() {
         <ProductCard image={watch} name="Smart Watch" price="2999" />
         <ProductCard image={headphones} name="Headphones" price="1999" />
         <ProductCard image={tv} name="tv" price="35499" />
-        <ProductCard image={laptop} name="Laptop" price="55999" />
-        <ProductCard image={phone} name="Smart Phone" price="18999" />
-        <ProductCard image={camera} name="Camera" price="24999" />
+        <ProductCard image={laptop} name="Laptop" price="74999" />
+        <ProductCard image={phone} name="Smart Phone" price="149999" />
+        <ProductCard image={camera} name="Camera" price="49999" />
       </div>
     </div>
   );
