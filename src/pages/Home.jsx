@@ -3,29 +3,30 @@ import { Link } from 'react-router-dom'
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-700 via-purple-600 to-indigo-800 text-white flex flex-col">
-      {/* Header - TRANSPARENT GLASS */}
+      {/* Header */}
       <header className="text-center py-12 px-5 animate-fade-in-down">
         <h1 className="text-5xl md:text-6xl font-extrabold mb-4 drop-shadow-lg tracking-tight">🌿 Organic Market</h1>
         <p className="text-xl opacity-90 font-light tracking-wide">Fresh, organic produce delivered to your doorstep</p>
       </header>
 
-      {/* Navigation - COLORFUL BUTTONS */}
-      <nav className="flex flex-wrap justify-center items-center gap-4 px-4 animate-fade-in-up">
-        <Link to="/fruits" className="px-6 py-3 bg-blue-500 hover:bg-blue-600 border border-white/20 rounded-full text-white font-bold hover:scale-105 transition-all duration-300 shadow-lg shadow-blue-500/30">
-          🍎 Fruits
-        </Link>
-        <Link to="/vegetables" className="px-6 py-3 bg-green-500 hover:bg-green-600 border border-white/20 rounded-full text-white font-bold hover:scale-105 transition-all duration-300 shadow-lg shadow-green-500/30">
-          🥦 Vegetables
-        </Link>
-        <Link to="/pulses" className="px-6 py-3 bg-orange-500 hover:bg-orange-600 border border-white/20 rounded-full text-white font-bold hover:scale-105 transition-all duration-300 shadow-lg shadow-orange-500/30">
-          🌾 Pulses
-        </Link>
-        <Link to="/cart" className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 border border-white/20 rounded-full text-white font-bold hover:scale-105 transition-all duration-300 shadow-lg shadow-yellow-500/30">
-          🛒 Cart
-        </Link>
-        <Link to="/about" className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 border border-white/20 rounded-full text-white font-bold hover:scale-105 transition-all duration-300 shadow-lg shadow-indigo-500/30">
-          ℹ️ About
-        </Link>
+      {/* Navigation - UNIFORM COLOR & ROPE ANIMATION */}
+      <nav className="flex flex-wrap justify-center items-center gap-4 px-4 overflow-hidden py-4">
+        {[
+          { name: '🍎 Fruits', path: '/fruits' },
+          { name: '🥦 Vegetables', path: '/vegetables' },
+          { name: '🌾 Pulses', path: '/pulses' },
+          { name: '🛒 Cart', path: '/cart' },
+          { name: 'ℹ️ About', path: '/about' }
+        ].map((item, index) => (
+          <Link 
+            key={item.name}
+            to={item.path} 
+            className="px-6 py-3 bg-black/75 backdrop-blur-md border-2 border-white/30 rounded-full text-white font-bold hover:bg-white hover:text-purple-800 hover:scale-110 transition-all duration-300 shadow-lg animate-rope-drop"
+            style={{ animationDelay: `${index * 0.15}s` }} /* Staggered Drop */
+          >
+            {item.name}
+          </Link>
+        ))}
       </nav>
 
       {/* Hero Section */}
