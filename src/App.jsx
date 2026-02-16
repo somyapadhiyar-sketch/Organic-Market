@@ -6,10 +6,9 @@ import Pulses from './pages/Pulses'
 import Cart from './pages/Cart'
 import About from './pages/About'
 import Payment from './pages/Payment'
-import Apple from './pages/Apple'
+import ProductDetails from './pages/ProductDetails' // Import the new file
 
 function App() {
-  
   return (
     <Routes>
       <Route path="/" element={<Home />} />
@@ -19,7 +18,9 @@ function App() {
       <Route path="/cart" element={<Cart />} />
       <Route path="/about" element={<About />} />
       <Route path="/payment" element={<Payment />} />
-      <Route path="/apple" element={<Apple />} />
+      
+      {/* This Dynamic Route handles ANY product click */}
+      <Route path="/product/:name" element={<ProductDetails />} />
     </Routes>
   )
 }

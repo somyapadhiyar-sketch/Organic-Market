@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
 import { useCart } from '../context/CartContext'
 
 const vegetablesData = [
@@ -19,80 +18,59 @@ const vegetablesData = [
   { id: 14, name: 'Ladifingur', price: 70, image: '/vegetable/ladifingur.png' },
 ]
 
-const quantityOptions = [
-  { value: 0.1, label: '100g' },
-  { value: 0.5, label: '500g' },
-  { value: 1, label: '1kg' },
-  { value: 5, label: '5kg' },
-  { value: 10, label: '10kg' },
-  { value: 20, label: '20kg' },
-]
-
 export default function Vegetables() {
   const { addToCart } = useCart()
-  const [quantities, setQuantities] = useState({})
-
-  const handleQuantityChange = (vegId, value) => {
-    setQuantities({ ...quantities, [vegId]: value })
-  }
-
-  const handleAddToCart = (veg) => {
-    const weight = quantities[veg.id] || 1
-    addToCart(veg.name, veg.price, weight)
-    alert(`${veg.name} (${weight}kg) added to cart! Total: ₹${veg.price * weight}`)
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-400 via-green-500 to-green-600">
+    <div className="min-h-screen bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 font-sans text-white">
+      
       {/* Header */}
-      <header className="bg-white/90 shadow-md py-5 animate-slide-down">
-        <h1 className="text-4xl font-bold text-center text-gray-800">🥦 Organic Vegetables</h1>
-        <nav className="flex justify-center gap-4 mt-3">
-          <Link to="/" className="text-green-700 hover:text-green-900 font-bold transition-colors">Home</Link>
-          <Link to="/fruits" className="text-green-700 hover:text-green-900 font-bold transition-colors">Fruits</Link>
-          <Link to="/pulses" className="text-green-700 hover:text-green-900 font-bold transition-colors">Pulses</Link>
-          <Link to="/cart" className="text-green-700 hover:text-green-900 font-bold transition-colors">Cart</Link>
-        </nav>
+      <header className="bg-white/10 backdrop-blur-md shadow-lg border-b border-white/20 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+          <h1 className="text-3xl font-bold drop-shadow-md">🥦 Organic Vegetables</h1>
+          
+          <nav className="flex flex-wrap justify-center items-center gap-3">
+            <Link to="/" className="px-5 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">Home</Link>
+            <Link to="/fruits" className="px-5 py-2 bg-blue-500 hover:bg-blue-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">Fruits</Link>
+            <Link to="/pulses" className="px-5 py-2 bg-orange-500 hover:bg-orange-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">Pulses</Link>
+            <Link to="/cart" className="px-5 py-2 bg-yellow-500 hover:bg-yellow-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">🛒 Cart</Link>
+          </nav>
+        </div>
       </header>
 
-      {/* Products Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 p-5 max-w-6xl mx-auto">
-        {vegetablesData.map((veg, index) => (
-          <div 
-            key={veg.id} 
-            className="bg-white rounded-2xl p-5 text-center shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-in-up"
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            <img 
-              src={veg.image} 
-              alt={veg.name}
-              className="w-full h-40 object-cover rounded-xl mb-4 hover:scale-105 transition-transform duration-300"
-            />
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">{veg.name}</h3>
-            <p className="text-lg font-bold text-green-700 mb-2">₹{veg.price} / kg</p>
-            <select 
-              className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3 focus:border-green-500 outline-none transition-colors"
-              onChange={(e) => handleQuantityChange(veg.id, parseFloat(e.target.value))}
-              defaultValue={1}
+      <section className="max-w-7xl mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {vegetablesData.map((veg, index) => (
+            <div 
+              key={veg.id} 
+              className="group bg-white/90 backdrop-blur-sm rounded-3xl p-4 shadow-xl hover:shadow-2xl hover:bg-white transition-all duration-300 hover:-translate-y-2 animate-fade-in-up"
+              style={{ animationDelay: `${index * 0.05}s` }}
             >
-              {quantityOptions.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-            <button 
-              onClick={() => handleAddToCart(veg)}
-              className="w-full py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-full hover:from-green-600 hover:to-green-700 transition-all duration-300 hover:shadow-lg"
-            >
-              Add to Cart
-            </button>
-          </div>
-        ))}
+              <Link 
+                to={`/product/${veg.name}`}
+                state={{ product: veg }}
+                className="block relative overflow-hidden rounded-2xl bg-white mb-4 h-48 flex items-center justify-center border border-slate-100"
+              >
+                <img 
+                  src={veg.image} 
+                  alt={veg.name}
+                  className="h-32 object-contain drop-shadow-md transform transition-transform duration-500 group-hover:scale-110"
+                />
+              </Link>
+              <div className="px-2 text-center text-slate-800">
+                <h3 className="text-xl font-bold mb-1">{veg.name}</h3>
+                <p className="text-green-600 font-bold text-lg mb-4">₹{veg.price} <span className="text-xs text-slate-400 font-normal">/kg</span></p>
+                <button 
+                  onClick={() => { addToCart(veg.name, veg.price, 1); alert('Added to cart'); }}
+                  className="w-full py-2 bg-green-700 text-white font-bold rounded-xl hover:bg-green-800 transition-all shadow-lg active:scale-95"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-black/80 text-white text-center py-5 mt-10">
-        <p>Contact: somyapadhiyar@gmail.com | Phone: 7990360899</p>
-      </footer>
     </div>
   )
 }
