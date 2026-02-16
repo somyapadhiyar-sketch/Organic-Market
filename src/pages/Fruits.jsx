@@ -24,16 +24,27 @@ export default function Fruits() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 font-sans text-white">
       
-      {/* Header - TRANSPARENT + COLORFUL BUTTONS */}
+      {/* Header */}
       <header className="bg-white/10 backdrop-blur-md shadow-lg border-b border-white/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <h1 className="text-3xl font-bold drop-shadow-md">🍎 Organic Fruits</h1>
           
           <nav className="flex flex-wrap justify-center items-center gap-3">
-            <Link to="/" className="px-5 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">Home</Link>
-            <Link to="/vegetables" className="px-5 py-2 bg-green-500 hover:bg-green-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">Vegetables</Link>
-            <Link to="/pulses" className="px-5 py-2 bg-orange-500 hover:bg-orange-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">Pulses</Link>
-            <Link to="/cart" className="px-5 py-2 bg-yellow-500 hover:bg-yellow-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">🛒 Cart</Link>
+             {[
+               {name: 'Home', path: '/'},
+               {name: '🥦Vegetables', path: '/vegetables'},
+               {name: '🌾Pulses', path: '/pulses'},
+               {name: '🛒 Cart', path: '/cart'}
+             ].map((btn, idx) => (
+               <Link 
+                 key={btn.name} 
+                 to={btn.path} 
+                 className="px-5 py-2 bg-black/75 hover:bg-white hover:text-blue-600 border border-white/30 rounded-full transition-all text-sm font-bold backdrop-blur-sm animate-rope-drop"
+                 style={{ animationDelay: `${idx * 0.1}s` }}
+               >
+                 {btn.name}
+               </Link>
+             ))}
           </nav>
         </div>
       </header>

@@ -30,10 +30,21 @@ export default function Vegetables() {
           <h1 className="text-3xl font-bold drop-shadow-md">🥦 Organic Vegetables</h1>
           
           <nav className="flex flex-wrap justify-center items-center gap-3">
-            <Link to="/" className="px-5 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">Home</Link>
-            <Link to="/fruits" className="px-5 py-2 bg-blue-500 hover:bg-blue-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">Fruits</Link>
-            <Link to="/pulses" className="px-5 py-2 bg-orange-500 hover:bg-orange-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">Pulses</Link>
-            <Link to="/cart" className="px-5 py-2 bg-yellow-500 hover:bg-yellow-600 rounded-full transition-all text-sm font-bold shadow-md hover:scale-105 border border-white/20">🛒 Cart</Link>
+             {[
+               {name: 'Home', path: '/'},
+               {name: '🍎 Fruits', path: '/fruits'},
+               {name: '🌾 Pulses', path: '/pulses'},
+               {name: '🛒 Cart', path: '/cart'}
+             ].map((btn, idx) => (
+               <Link 
+                 key={btn.name} 
+                 to={btn.path} 
+                 className="px-5 py-2 bg-black/75 hover:bg-white hover:text-green-600 border border-white/30 rounded-full transition-all text-sm font-bold backdrop-blur-sm animate-rope-drop"
+                 style={{ animationDelay: `${idx * 0.1}s` }}
+               >
+                 {btn.name}
+               </Link>
+             ))}
           </nav>
         </div>
       </header>
