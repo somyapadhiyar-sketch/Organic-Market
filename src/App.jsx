@@ -9,6 +9,7 @@ import Payment from './pages/Payment'
 import Apple from './pages/Apple'
 
 function App() {
+  
   return (
     <Routes>
       <Route path="/" element={<Home />} />
