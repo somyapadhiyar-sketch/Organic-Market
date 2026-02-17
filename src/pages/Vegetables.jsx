@@ -23,25 +23,17 @@ export default function Vegetables() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 font-sans text-white">
-      
-      {/* Header */}
       <header className="bg-white/10 backdrop-blur-md shadow-lg border-b border-white/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <h1 className="text-3xl font-bold drop-shadow-md">🥦 Organic Vegetables</h1>
-          
           <nav className="flex flex-wrap justify-center items-center gap-3">
              {[
-               {name: 'Home', path: '/'},
-               {name: '🍎 Fruits', path: '/fruits'},
-               {name: '🌾 Pulses', path: '/pulses'},
-               {name: '🛒 Cart', path: '/cart'}
+               {name: 'Home', path: '/', color: 'bg-indigo-500'},
+               {name: 'Fruits', path: '/fruits', color: 'bg-blue-500'},
+               {name: 'Pulses', path: '/pulses', color: 'bg-orange-500'},
+               {name: '🛒 Cart', path: '/cart', color: 'bg-yellow-500'}
              ].map((btn, idx) => (
-               <Link 
-                 key={btn.name} 
-                 to={btn.path} 
-                 className="px-5 py-2 bg-black/75 hover:bg-white hover:text-green-600 border border-white/30 rounded-full transition-all text-sm font-bold backdrop-blur-sm animate-rope-drop"
-                 style={{ animationDelay: `${idx * 0.1}s` }}
-               >
+               <Link key={btn.name} to={btn.path} className={`px-5 py-2 ${btn.color} border border-white/20 rounded-full transition-all text-sm font-bold shadow-lg hover:scale-110 animate-rope-drop`} style={{ animationDelay: `${idx * 0.1}s` }}>
                  {btn.name}
                </Link>
              ))}
@@ -52,29 +44,14 @@ export default function Vegetables() {
       <section className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {vegetablesData.map((veg, index) => (
-            <div 
-              key={veg.id} 
-              className="group bg-white/90 backdrop-blur-sm rounded-3xl p-4 shadow-xl hover:shadow-2xl hover:bg-white transition-all duration-300 hover:-translate-y-2 animate-fade-in-up"
-              style={{ animationDelay: `${index * 0.05}s` }}
-            >
-              <Link 
-                to={`/product/${veg.name}`}
-                state={{ product: veg }}
-                className="block relative overflow-hidden rounded-2xl bg-white mb-4 h-48 flex items-center justify-center border border-slate-100"
-              >
-                <img 
-                  src={veg.image} 
-                  alt={veg.name}
-                  className="h-32 object-contain drop-shadow-md transform transition-transform duration-500 group-hover:scale-110"
-                />
+            <div key={veg.id} className="group bg-white/90 backdrop-blur-sm rounded-3xl p-4 shadow-xl hover:shadow-2xl hover:bg-white transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${index * 0.05}s` }}>
+              <Link to={`/product/${veg.name}`} state={{ product: veg }} className="block relative overflow-hidden rounded-2xl bg-white mb-4 h-48 flex items-center justify-center border border-slate-100">
+                <img src={veg.image} alt={veg.name} className="h-32 object-contain drop-shadow-md transform transition-transform duration-500 group-hover:scale-110" />
               </Link>
               <div className="px-2 text-center text-slate-800">
                 <h3 className="text-xl font-bold mb-1">{veg.name}</h3>
                 <p className="text-green-600 font-bold text-lg mb-4">₹{veg.price} <span className="text-xs text-slate-400 font-normal">/kg</span></p>
-                <button 
-                  onClick={() => { addToCart(veg.name, veg.price, 1); alert('Added to cart'); }}
-                  className="w-full py-2 bg-green-700 text-white font-bold rounded-xl hover:bg-green-800 transition-all shadow-lg active:scale-95"
-                >
+                <button onClick={() => { addToCart(veg.name, veg.price, 1); alert('Added to cart'); }} className="w-full py-2 bg-green-700 text-white font-bold rounded-xl hover:bg-green-800 transition-all shadow-lg active:scale-95">
                   Add to Cart
                 </button>
               </div>
