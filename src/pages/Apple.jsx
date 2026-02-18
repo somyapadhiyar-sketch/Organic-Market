@@ -23,10 +23,9 @@ export default function Apple() {
   }
 
   return (
-    /* New Professional Background: Soft Slate Mesh */
+
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-green-100">
-      
-      {/* Header: Sticky Glassmorphism Effect */}
+
       <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-slate-200 py-4 transition-all">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <h1 className="text-2xl font-bold tracking-tight text-slate-800">🍎 Apple Details</h1>
@@ -45,10 +44,9 @@ export default function Apple() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-12">
-        {/* Main Product Card */}
+
         <section className="flex flex-col lg:flex-row gap-12 items-start">
           
-          {/* Product Image: Professional Reveal Animation */}
           <div className="flex-1 w-full animate-in fade-in zoom-in duration-700">
             <div className="relative group overflow-hidden rounded-3xl bg-white shadow-2xl shadow-slate-200/50">
               <img 
@@ -59,7 +57,6 @@ export default function Apple() {
             </div>
           </div>
 
-          {/* Product Info: Staggered Content Animation */}
           <div className="flex-1 space-y-8 animate-in fade-in slide-in-from-right-8 duration-700 delay-200">
             <div>
               <span className="text-green-600 font-semibold tracking-widest uppercase text-xs">Premium Organic</span>
@@ -88,7 +85,6 @@ export default function Apple() {
 
             <hr className="border-slate-100" />
 
-            {/* Information Grid: Using "Reveal on Scroll" vibes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <InfoSection title="About" delay="delay-300">
                 <p className="text-slate-500 leading-relaxed text-sm">
@@ -116,7 +112,6 @@ export default function Apple() {
         </section>
       </main>
 
-      {/* Modern Minimal Footer */}
       <footer className="mt-20 border-t border-slate-200 bg-white py-12">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <p className="text-slate-400 text-sm">Questions? Reach out at <span className="text-slate-900 font-medium">somyapadhiyar@gmail.com</span></p>
@@ -126,7 +121,6 @@ export default function Apple() {
   )
 }
 
-// Helper Component for Cleanliness
 function InfoSection({ title, children, delay }) {
   return (
     <div className={`animate-in fade-in slide-in-from-bottom-4 duration-700 ${delay}`}>

@@ -20,39 +20,52 @@ const vegetablesData = [
 
 export default function Vegetables() {
   const { addToCart } = useCart()
+  
+  // HEAVY SHADOW BUTTON STYLE
+  // The custom shadow-[...] class creates that deep, floating "3D" look
+  const navBtnStyle = "px-6 py-2 bg-slate-900 text-white font-bold rounded-full shadow-[0px_10px_25px_rgba(0,0,0,0.5)] hover:scale-110 transition-all text-sm animate-rope-drop border border-slate-700"
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 font-sans text-white">
-      <header className="bg-white/10 backdrop-blur-md shadow-lg border-b border-white/20 sticky top-0 z-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-200 via-emerald-100 to-teal-200 font-sans text-slate-800">
+      
+      {/* Header: Transparent Glass + Slide Down Animation */}
+      <header className="bg-white/40 backdrop-blur-md border-b border-white/30 sticky top-0 z-50 animate-slide-down">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <h1 className="text-3xl font-bold drop-shadow-md">🥦 Organic Vegetables</h1>
-          <nav className="flex flex-wrap justify-center items-center gap-3">
-             {[
-               {name: 'Home', path: '/', color: 'bg-indigo-500'},
-               {name: 'Fruits', path: '/fruits', color: 'bg-blue-500'},
-               {name: 'Pulses', path: '/pulses', color: 'bg-orange-500'},
-               {name: '🛒 Cart', path: '/cart', color: 'bg-yellow-500'}
-             ].map((btn, idx) => (
-               <Link key={btn.name} to={btn.path} className={`px-5 py-2 ${btn.color} border border-white/20 rounded-full transition-all text-sm font-bold shadow-lg hover:scale-110 animate-rope-drop`} style={{ animationDelay: `${idx * 0.1}s` }}>
-                 {btn.name}
-               </Link>
-             ))}
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight drop-shadow-sm">🥦 Fresh Vegetables</h1>
+          <nav className="flex flex-wrap justify-center gap-3">
+             <Link to="/" className={navBtnStyle} style={{animationDelay: '0.1s'}}>Home</Link>
+             <Link to="/fruits" className={navBtnStyle} style={{animationDelay: '0.2s'}}>Fruits</Link>
+             <Link to="/pulses" className={navBtnStyle} style={{animationDelay: '0.3s'}}>Pulses</Link>
+             <Link to="/cart" className={navBtnStyle} style={{animationDelay: '0.4s'}}>🛒 Cart</Link>
           </nav>
         </div>
       </header>
 
-      <section className="max-w-7xl mx-auto px-6 py-12">
+      {/* Main Grid: Fade In Up Animation */}
+      <section className="max-w-7xl mx-auto px-6 py-12 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {vegetablesData.map((veg, index) => (
-            <div key={veg.id} className="group bg-white/90 backdrop-blur-sm rounded-3xl p-4 shadow-xl hover:shadow-2xl hover:bg-white transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${index * 0.05}s` }}>
-              <Link to={`/product/${veg.name}`} state={{ product: veg }} className="block relative overflow-hidden rounded-2xl bg-white mb-4 h-48 flex items-center justify-center border border-slate-100">
+            <div key={veg.id} className="group bg-white/80 backdrop-blur-sm rounded-3xl p-5 shadow-sm border border-white/50 hover:bg-white hover:shadow-2xl hover:border-green-300 transition-all duration-300 hover:-translate-y-2">
+              
+              {/* Product Image */}
+              <Link to={`/product/${veg.name}`} state={{ product: veg }} className="block relative overflow-hidden rounded-2xl bg-green-50 mb-4 h-48 flex items-center justify-center">
                 <img src={veg.image} alt={veg.name} className="h-32 object-contain drop-shadow-md transform transition-transform duration-500 group-hover:scale-110" />
               </Link>
-              <div className="px-2 text-center text-slate-800">
-                <h3 className="text-xl font-bold mb-1">{veg.name}</h3>
-                <p className="text-green-600 font-bold text-lg mb-4">₹{veg.price} <span className="text-xs text-slate-400 font-normal">/kg</span></p>
-                <button onClick={() => { addToCart(veg.name, veg.price, 1); alert('Added to cart'); }} className="w-full py-2 bg-green-700 text-white font-bold rounded-xl hover:bg-green-800 transition-all shadow-lg active:scale-95">
-                  Add to Cart
+              
+              {/* Info & Button */}
+              <div>
+                <h3 className="text-lg font-bold text-slate-800 mb-1">{veg.name}</h3>
+                <div className="flex justify-between items-end mb-4">
+                  <p className="text-slate-500 text-sm">1 kg</p>
+                  <p className="text-slate-900 font-bold text-xl">₹{veg.price}</p>
+                </div>
+                
+                {/* Heavy Shadow 'Add' Button */}
+                <button 
+                  onClick={() => { addToCart(veg.name, veg.price, 1); alert('Added!'); }} 
+                  className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl shadow-[0px_10px_20px_rgba(0,0,0,0.4)] hover:shadow-[0px_15px_35px_rgba(0,0,0,0.5)] hover:bg-green-600 transition-all active:scale-95"
+                >
+                  ADD TO CART
                 </button>
               </div>
             </div>
