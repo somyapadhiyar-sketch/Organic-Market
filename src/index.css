@@ -6,54 +6,45 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Arial', sans-serif;
-  background-color: #f8fafc;
+  overflow-x: hidden;
+  background-color: #f8fafc; /* Slate-50 */
 }
 
-/* Hide Scrollbar for Horizontal Lists */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* --- ANIMATIONS --- */
+/* --- CUSTOM ANIMATIONS --- */
 @layer utilities {
+  
+  /* 1. BUTTONS: Rope Drop (Bouncy Entry) */
   .animate-rope-drop {
-    animation: ropeDrop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: ropeDrop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     opacity: 0;
+    transform-origin: top center;
   }
+  
+  /* 2. MIDDLE CONTENT: Fade In Up (Professional Slide) */
   .animate-fade-in-up {
     animation: fadeInUp 0.8s ease-out forwards;
     opacity: 0;
+    transform: translateY(30px);
   }
-  .animate-fade-in-down {
-    animation: fadeInDown 0.8s ease-out forwards;
-  }
-  .animate-zoom-in {
-    animation: zoomIn 0.5s ease-out forwards;
+
+  /* 3. Header Slide Down */
+  .animate-slide-down {
+    animation: slideDown 0.8s ease-out forwards;
   }
 }
 
 @keyframes ropeDrop {
-  0% { opacity: 0; transform: translateY(-100px); }
+  0% { opacity: 0; transform: translateY(-50px); }
   60% { opacity: 1; transform: translateY(10px); }
   80% { transform: translateY(-5px); }
   100% { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes zoomIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

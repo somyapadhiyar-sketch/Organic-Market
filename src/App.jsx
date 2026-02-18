@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
-import { useEffect } from 'react' // Import useEffect
-import { useCart } from './context/CartContext' // Import Cart Context
+import { useEffect } from 'react' 
+import { useCart } from './context/CartContext' 
 import Home from './pages/Home'
 import Fruits from './pages/Fruits'
 import Vegetables from './pages/Vegetables'
@@ -10,17 +10,18 @@ import About from './pages/About'
 import Payment from './pages/Payment'
 import ProductDetails from './pages/ProductDetails'
 
+
 function App() {
   const { cart } = useCart()
 
-  // 1. USE EFFECT: Updates the browser tab title whenever 'cart' changes
+  
   useEffect(() => {
     if (cart.length > 0) {
       document.title = `(${cart.length}) Cart | Organic Market`
     } else {
       document.title = "Organic Market - Fresh & Healthy"
     }
-  }, [cart]) // Dependency array: runs only when 'cart' updates
+  }, [cart]) 
 
   return (
     <Routes>
