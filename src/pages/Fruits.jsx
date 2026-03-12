@@ -1,69 +1,31 @@
-import { Link } from 'react-router-dom'
-import { useCart } from '../context/CartContext'
-
-const fruitsData = [
-  { id: 1, name: 'Apple', price: 160, image: '/fruits/apple.png' },
-  { id: 2, name: 'Banana', price: 60, image: '/fruits/banana.png' },
-  { id: 3, name: 'Orange', price: 80, image: '/fruits/orange.png' },
-  { id: 4, name: 'Grapes', price: 120, image: '/fruits/grapes.png' },
-  { id: 5, name: 'Mango', price: 200, image: '/fruits/manog.png' },
-  { id: 6, name: 'Pineapple', price: 100, image: '/fruits/pineapple.png' },
-  { id: 7, name: 'Strawberry', price: 300, image: '/fruits/strawberry.png' },
-  { id: 8, name: 'Kiwi', price: 250, image: '/fruits/kiwi.png' },
-  { id: 9, name: 'Papaya', price: 50, image: '/fruits/papaya.png' },
-  { id: 10, name: 'Guava', price: 70, image: '/fruits/gwava.png' },
-  { id: 11, name: 'Pomegranate', price: 180, image: '/fruits/promogrenate.png' },
-  { id: 12, name: 'Watermelon', price: 40, image: '/fruits/watermelon.png' },
-  { id: 13, name: 'Cherry', price: 400, image: '/fruits/cherry.png' },
-  { id: 14, name: 'Peach', price: 150, image: '/fruits/peach.png' },
-]
+import { useStore } from '../context/StoreContext';
+import Navbar from '../components/Navbar';
+import ProductCard from '../components/ProductCard';
 
 export default function Fruits() {
-  const { addToCart } = useCart()
-  
-  // HEAVY SHADOW STYLE FOR NAV
-  const navBtnStyle = "px-6 py-2 bg-slate-900 text-white font-bold rounded-full shadow-[0px_10px_25px_rgba(0,0,0,0.5)] hover:scale-110 transition-all text-sm animate-rope-drop"
+  const { products } = useStore();
+  const categoryData = products.filter(p => p.category === 'Fruits');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-200 via-sky-100 to-indigo-200 font-sans text-slate-800">
+    <div className="min-h-screen bg-[#F4F6F9] font-sans">
+      <Navbar />
       
-      <header className="bg-white/40 backdrop-blur-md border-b border-white/30 sticky top-0 z-50 animate-slide-down">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">🍎 Premium Fruits</h1>
-          <nav className="flex flex-wrap justify-center gap-3">
-             <Link to="/" className={navBtnStyle} style={{animationDelay: '0.1s'}}>Home</Link>
-             <Link to="/vegetables" className={navBtnStyle} style={{animationDelay: '0.2s'}}>Vegetables</Link>
-             <Link to="/pulses" className={navBtnStyle} style={{animationDelay: '0.3s'}}>Pulses</Link>
-             <Link to="/cart" className={navBtnStyle} style={{animationDelay: '0.4s'}}>🛒 Cart</Link>
-          </nav>
+      {/* 130px pt to clear the Zepto double-header */}
+      <main className="max-w-[1280px] mx-auto px-4 md:px-6 pt-[140px] pb-12">
+        <div className="mb-6 flex justify-between items-end">
+          <div>
+            <h2 className="text-[24px] font-black text-[#1C1C1C]">Buy Fresh Fruits Online</h2>
+            <p className="text-gray-500 text-[14px] font-medium mt-1">Directly sourced, delivered in 10 minutes.</p>
+          </div>
         </div>
-      </header>
-
-      <section className="max-w-7xl mx-auto px-6 py-12 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {fruitsData.map((fruit) => (
-            <div key={fruit.id} className="group bg-white/80 backdrop-blur-sm rounded-3xl p-5 shadow-sm border border-white/50 hover:bg-white hover:shadow-2xl hover:border-blue-200 transition-all duration-300 hover:-translate-y-2">
-              <Link to={`/product/${fruit.name}`} state={{ product: fruit }} className="block relative overflow-hidden rounded-2xl bg-blue-50 mb-4 h-48 flex items-center justify-center">
-                <img src={fruit.image} alt={fruit.name} className="h-32 object-contain drop-shadow-md transform transition-transform duration-500 group-hover:scale-110" />
-              </Link>
-              <div>
-                <h3 className="text-lg font-bold text-slate-800 mb-1">{fruit.name}</h3>
-                <div className="flex justify-between items-end mb-4">
-                  <p className="text-slate-500 text-sm">1 kg</p>
-                  <p className="text-slate-900 font-bold text-xl">₹{fruit.price}</p>
-                </div>
-                {/* Heavy Shadow on Add Button */}
-                <button 
-                  onClick={() => { addToCart(fruit.name, fruit.price, 1); alert('Added!'); }} 
-                  className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl shadow-[0px_10px_20px_rgba(0,0,0,0.4)] hover:shadow-[0px_15px_30px_rgba(0,0,0,0.5)] hover:bg-blue-600 transition-all active:scale-95"
-                >
-                  ADD TO CART
-                </button>
-              </div>
-            </div>
+        
+        {/* Zepto 6-column grid on large screens */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+          {categoryData.map(item => (
+            <ProductCard key={item.id} product={item} />
           ))}
         </div>
-      </section>
+      </main>
     </div>
   )
 }

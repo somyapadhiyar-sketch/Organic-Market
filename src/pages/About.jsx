@@ -1,57 +1,75 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { useStore } from '../context/StoreContext'
+import { ShoppingBag, User } from 'lucide-react'
 
 export default function About() {
-  const navBtnStyle = "px-5 py-2 bg-slate-800 text-white font-bold rounded-full shadow-md hover:bg-slate-700 hover:scale-105 transition-all text-sm animate-rope-drop border border-slate-600"
+  const { currentUser, cart, logout } = useStore()
+  const navigate = useNavigate()
+  const handleLogout = () => { logout(); navigate('/login'); };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-gray-200 to-zinc-100 font-sans text-slate-800 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 font-sans text-slate-800">
       
-      <header className="bg-white/40 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 animate-slide-down">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">ℹ️ About Us</h1>
-          <nav className="flex flex-wrap justify-center gap-3">
-             <Link to="/" className={navBtnStyle} style={{animationDelay: '0.1s'}}>Home</Link>
-             <Link to="/fruits" className={navBtnStyle} style={{animationDelay: '0.2s'}}>Fruits</Link>
-             <Link to="/vegetables" className={navBtnStyle} style={{animationDelay: '0.3s'}}>Vegetables</Link>
-             <Link to="/pulses" className={navBtnStyle} style={{animationDelay: '0.4s'}}>Pulses</Link>
-             <Link to="/cart" className={navBtnStyle} style={{animationDelay: '0.5s'}}>Cart</Link>
+      <header className="hidden md:flex fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-8 py-4 justify-between items-center shadow-sm">
+        <div className="flex items-center gap-12">
+          <Link to="/user/home" className="flex items-center gap-2 group">
+            <span className="text-3xl">🌿</span>
+            <h1 className="text-3xl font-black text-slate-900 italic tracking-tighter group-hover:text-violet-700 transition-colors">Zesty</h1>
+          </Link>
+          <nav className="flex gap-6">
+            {['Fruits', 'Vegetables', 'Pulses', 'About'].map(item => (
+              <Link key={item} to={`/user/${item.toLowerCase()}`} className="font-bold text-slate-500 hover:text-violet-700 transition-colors text-sm uppercase tracking-wide">{item}</Link>
+            ))}
           </nav>
         </div>
-      </header>
-     
-      <div className="flex-grow max-w-4xl mx-auto p-6 w-full animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-        <div className="bg-white/80 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-2xl text-center">
-          <h2 className="text-4xl font-bold mb-6 text-slate-800">Our Mission</h2>
-          <p className="text-lg text-slate-600 mb-12 leading-relaxed max-w-2xl mx-auto">
-            We are dedicated to bringing the freshest organic produce directly from farmers to your table. No middlemen, no chemicals—just pure nature.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            {[
-              { icon: '🚜', title: 'Direct from Farm', desc: 'Sourced from certified organic farmers.' },
-              { icon: '🚀', title: 'Fast Delivery', desc: 'Freshness delivered in 15 minutes.' },
-              { icon: '✅', title: 'Quality Check', desc: 'Every item is handpicked & verified.' }
-            ].map((item, idx) => (
-               <div key={idx} className="p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-lg transition-all">
-                 <div className="text-4xl mb-3">{item.icon}</div>
-                 <h3 className="font-bold text-slate-900 mb-2">{item.title}</h3>
-                 <p className="text-sm text-slate-500">{item.desc}</p>
-               </div>
-            ))}
-          </div>
-
-          <div className="bg-slate-900 text-white p-8 rounded-2xl shadow-xl">
-            <h3 className="text-2xl font-bold mb-4">Contact Us</h3>
-            <p className="opacity-80 mb-2">📞 +91 7990360899</p>
-            <p className="opacity-80 mb-6">📧 somyapadhiyar@gmail.com</p>
-            <p className="text-sm opacity-50">Near Chavand Gate, Main Bazar, Lathi, Amreli, Gujarat</p>
+        <div className="flex items-center gap-6">
+          <Link to="/user/cart" className="relative p-2 hover:bg-slate-100 rounded-full transition-colors">
+            <ShoppingBag size={24} className="text-slate-700" />
+            {cart.length > 0 && <span className="absolute top-0 right-0 w-5 h-5 bg-violet-600 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">{cart.length}</span>}
+          </Link>
+          <div className="flex items-center gap-3 pl-6 border-l border-slate-200">
+            <div className="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm">
+              {currentUser?.name?.charAt(0) || <User size={20} />}
+            </div>
+            <div className="text-right hidden lg:block">
+              <p className="text-sm font-black text-slate-900 leading-none">{currentUser?.name || 'Guest'}</p>
+              <button onClick={handleLogout} className="text-xs font-bold text-red-500 hover:text-red-600">Logout</button>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <footer className="bg-white/50 text-center py-6">
-        <p className="text-sm text-slate-500 font-bold">© 2026 Organic Market</p>
-      </footer>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-6 py-16 text-center pt-32">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="bg-white/80 backdrop-blur-xl p-12 rounded-[3rem] shadow-[0px_25px_60px_rgba(0,0,0,0.1)] border border-white/80">
+          
+          <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ repeat: Infinity, duration: 5 }} className="text-7xl mb-6 inline-block">👨‍🌾</motion.div>
+          <h2 className="text-5xl font-black text-slate-900 mb-6 tracking-tight">Our Mission</h2>
+          <p className="text-xl text-slate-600 leading-relaxed font-medium mb-12 max-w-2xl mx-auto">
+            We believe that healthy living starts with healthy eating. Our mission is to connect local farmers directly with you, bringing 100% organic, chemical-free produce straight to your doorstep in minutes.
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-6 text-left">
+            <motion.div whileHover={{ y: -10 }} className="bg-green-50 p-8 rounded-[2rem] border border-green-100 shadow-sm">
+              <h3 className="text-xl font-black text-green-800 mb-3">🌱 100% Organic</h3>
+              <p className="text-slate-600 font-medium">Certified produce grown without synthetic pesticides or harmful fertilizers.</p>
+            </motion.div>
+            <motion.div whileHover={{ y: -10 }} className="bg-blue-50 p-8 rounded-[2rem] border border-blue-100 shadow-sm">
+              <h3 className="text-xl font-black text-blue-800 mb-3">⚡ 12-Min Delivery</h3>
+              <p className="text-slate-600 font-medium">Our lightning-fast delivery partners ensure your food arrives fresh and crisp.</p>
+            </motion.div>
+            <motion.div whileHover={{ y: -10 }} className="bg-purple-50 p-8 rounded-[2rem] border border-purple-100 shadow-sm">
+              <h3 className="text-xl font-black text-purple-800 mb-3">🤝 Fair Trade</h3>
+              <p className="text-slate-600 font-medium">We ensure farmers get a fair price for their hard work and dedication.</p>
+            </motion.div>
+          </div>
+
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-12 pt-8 border-t border-slate-200">
+            <Link to="/user/fruits" className="inline-block px-12 py-5 bg-slate-900 text-white font-black text-lg rounded-2xl shadow-[0px_15px_30px_rgba(0,0,0,0.4)] hover:bg-green-600 transition-colors">Start Shopping Now</Link>
+          </motion.div>
+
+        </motion.div>
+      </main>
     </div>
   )
 }
