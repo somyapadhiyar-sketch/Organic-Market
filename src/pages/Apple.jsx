@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { useCart } from '../context/CartContext'
+import { useStore } from '../context/StoreContext'
+import { ShoppingBag, User } from 'lucide-react'
 
 const quantityOptions = [
   { value: 0.1, label: '100g' },
@@ -12,38 +13,52 @@ const quantityOptions = [
 ]
 
 export default function Apple() {
-  const { addToCart } = useCart()
+  const { addToCart, showToast, currentUser, cart, logout } = useStore()
   const [quantity, setQuantity] = useState(1)
+  const navigate = useNavigate()
+  const handleLogout = () => { logout(); navigate('/login'); };
 
   const handleAddToCart = () => {
     const pricePerKg = 160
     const total = pricePerKg * quantity
-    addToCart('Apple', pricePerKg, quantity)
-    alert(`Apple (${quantity}kg) added to cart! Total: ₹${total}`)
+    addToCart('Apple', pricePerKg, quantity, '/fruits/apple.png', 'f1')
+    showToast(`Apple (${quantity}kg) added to cart! Total: ₹${total}`)
   }
 
   return (
 
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-green-100">
 
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-slate-200 py-4 transition-all">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800">🍎 Apple Details</h1>
+      <header className="hidden md:flex fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-8 py-4 justify-between items-center shadow-sm">
+        <div className="flex items-center gap-12">
+          <Link to="/user/home" className="flex items-center gap-2 group">
+            <span className="text-3xl">🌿</span>
+            <h1 className="text-3xl font-black text-slate-900 italic tracking-tighter group-hover:text-violet-700 transition-colors">Zesty</h1>
+          </Link>
           <nav className="flex gap-6">
-            {['Home', 'Vegetables', 'Pulses', 'Fruits', 'Cart'].map((item) => (
-              <Link 
-                key={item}
-                to={item === 'Home' ? '/' : `/${item.toLowerCase()}`} 
-                className="text-sm font-medium text-slate-600 hover:text-green-600 transition-colors duration-200"
-              >
-                {item}
-              </Link>
+            {['Fruits', 'Vegetables', 'Pulses'].map(item => (
+              <Link key={item} to={`/user/${item.toLowerCase()}`} className="font-bold text-slate-500 hover:text-violet-700 transition-colors text-sm uppercase tracking-wide">{item}</Link>
             ))}
           </nav>
         </div>
+        <div className="flex items-center gap-6">
+          <Link to="/user/cart" className="relative p-2 hover:bg-slate-100 rounded-full transition-colors">
+            <ShoppingBag size={24} className="text-slate-700" />
+            {cart.length > 0 && <span className="absolute top-0 right-0 w-5 h-5 bg-violet-600 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">{cart.length}</span>}
+          </Link>
+          <div className="flex items-center gap-3 pl-6 border-l border-slate-200">
+            <div className="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm">
+              {currentUser?.name?.charAt(0) || <User size={20} />}
+            </div>
+            <div className="text-right hidden lg:block">
+              <p className="text-sm font-black text-slate-900 leading-none">{currentUser?.name || 'Guest'}</p>
+              <button onClick={handleLogout} className="text-xs font-bold text-red-500 hover:text-red-600">Logout</button>
+            </div>
+          </div>
+        </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
+      <main className="max-w-6xl mx-auto px-6 py-12 pt-32">
 
         <section className="flex flex-col lg:flex-row gap-12 items-start">
           
