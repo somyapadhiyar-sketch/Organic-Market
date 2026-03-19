@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Gradient Background for Login/Register */
+.gradient-bg {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+  overflow-x: hidden;
+  background-color: #f8fafc; /* Slate-50 */
+}
+
+/* --- CUSTOM ANIMATIONS --- */
+@layer utilities {
+  
+  /* 1. BUTTONS: Rope Drop (Bouncy Entry) */
+  .animate-rope-drop {
+    animation: ropeDrop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    opacity: 0;
+    transform-origin: top center;
+  }
+  
+  /* 2. MIDDLE CONTENT: Fade In Up (Professional Slide) */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  /* 3. Header Slide Down */
+  .animate-slide-down {
+    animation: slideDown 0.8s ease-out forwards;
+  }
+}
+
+@keyframes ropeDrop {
+  0% { opacity: 0; transform: translateY(-50px); }
+  60% { opacity: 1; transform: translateY(10px); }
+  80% { transform: translateY(-5px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
