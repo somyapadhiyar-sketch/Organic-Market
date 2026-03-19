@@ -1,221 +1,191 @@
+import { useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { LifeBuoy, ShieldCheck, ShoppingBag, ArrowRight, Star } from 'lucide-react'
+import Footer from '../components/Footer'
+import Navbar from '../components/Navbar'
 import { useStore } from '../context/StoreContext'
-import { LogOut, Menu, X, LifeBuoy, ShieldCheck, BookOpen, ShoppingBag, User } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
 
-const ScrollAnimatedSection = ({ children }) => (
+const FadeIn = ({ children, delay = 0 }) => (
   <motion.div
-    initial={{ opacity: 0, y: 100, scale: 0.95 }}
+    initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0, scale: 1 }}
-    viewport={{ amount: 0.4, margin: "0px 0px -100px 0px" }}
-    transition={{ duration: 0.8, ease: 'easeOut' }}
+    viewport={{ once: true, margin: "-50px" }}
+    transition={{ duration: 0.6, delay, ease: "easeOut" }}
   >
     {children}
   </motion.div>
 );
 
 export default function Home() {
-  const { currentUser, logout, getCartTotal, cart } = useStore();
   const navigate = useNavigate();
-  const handleLogout = () => { logout(); navigate('/login'); };
-  const [isOpen, setIsOpen] = useState(false);
-  const timeoutRef = useRef(null);
+  const containerRef = useRef(null);
+  const { currentUser } = useStore();
 
-  const sidebarAnim = { 
-    hidden: { x: '-100%', opacity: 0 }, 
-    show: { x: 0, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 30 } } 
-  };
-
-
-  // Auto-open on mobile mount
   useEffect(() => {
-    if (window.innerWidth < 768) setIsOpen(true);
-  }, []);
+    if (currentUser?.role === 'admin') navigate('/admin', { replace: true });
+    else if (currentUser?.role === 'delivery') navigate('/delivery', { replace: true });
+  }, [currentUser, navigate]);
 
-  // Timer Logic for Auto-Close
-  const resetTimer = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => setIsOpen(false), 5000);
-  };
-
-  const clearTimer = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-  };
-
-  // Manage timer based on state
-  useEffect(() => {
-    if (isOpen) resetTimer();
-    return () => clearTimer();
-  }, [isOpen]);
+  const { scrollY } = useScroll({ container: containerRef });
+  
+  const y1 = useTransform(scrollY, [0, 500], [0, 200]);
+  const y2 = useTransform(scrollY, [0, 500], [0, -150]);
 
   return (
-    <div className="h-screen bg-[#f8fafc] font-sans text-slate-800 flex overflow-hidden">
+    <div className="h-screen bg-white font-sans text-slate-900 flex overflow-hidden">
       
-      {/* DESKTOP HEADER */}
-      <header className="hidden md:flex fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-8 py-4 justify-between items-center shadow-sm">
-        <div className="flex items-center gap-12">
-          <Link to="/user/home" className="flex items-center gap-2 group">
-            <span className="text-3xl">🌿</span>
-            <h1 className="text-3xl font-black text-slate-900 italic tracking-tighter group-hover:text-violet-700 transition-colors">Zesty</h1>
-          </Link>
-          <nav className="flex gap-6">
-            {['Fruits', 'Vegetables', 'Pulses'].map(item => (
-              <Link key={item} to={`/user/${item.toLowerCase()}`} className="font-bold text-slate-500 hover:text-violet-700 transition-colors text-sm uppercase tracking-wide">{item}</Link>
-            ))}
-          </nav>
-        </div>
-        
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-full">
-            <span className="text-slate-400">📍</span>
-            <span className="text-sm font-bold text-slate-600 truncate max-w-[150px]">{currentUser?.address || "Select Location"}</span>
-          </div>
-          <Link to="/user/cart" className="relative p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <ShoppingBag size={24} className="text-slate-700" />
-            {cart.length > 0 && <span className="absolute top-0 right-0 w-5 h-5 bg-violet-600 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">{cart.length}</span>}
-          </Link>
-          <div className="flex items-center gap-3 pl-6 border-l border-slate-200">
-            <div className="text-right hidden lg:block">
-              <p className="text-sm font-black text-slate-900 leading-none">{currentUser?.name || 'Guest'}</p>
-              <button onClick={handleLogout} className="text-xs font-bold text-red-500 hover:text-red-600">Logout</button>
-            </div>
-            <div className="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm">
-              {currentUser?.name?.charAt(0) || <User size={20} />}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
-      {/* MOBILE TRIGGER */}
-      <div 
-        className="md:hidden fixed top-4 left-4 w-16 h-16 z-[60] flex items-center justify-center cursor-pointer group"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <motion.div 
-          key={isOpen ? 'open' : 'closed'}
-          initial={{ scale: 0, opacity: 0, rotate: -90 }}
-          animate={{ scale: 1, opacity: 1, rotate: 0 }}
-          className={`p-3 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-slate-200 transition-all duration-300 hover:scale-110`}>
-           {isOpen ? <X size={24} className="text-slate-700" /> : <Menu size={24} className="text-slate-700" />}
-        </motion.div>
-      </div>
-      
-      {/* SIDEBAR (Mobile Only) */}
-      <motion.aside 
-        variants={sidebarAnim} 
-        initial="hidden" 
-        animate={isOpen ? "show" : "hidden"}
-        onMouseEnter={clearTimer}
-        className="md:hidden fixed top-0 left-0 h-full w-full bg-white/95 backdrop-blur-xl border-r border-white/40 flex flex-col shadow-2xl z-50"
-      >
-        {/* User Profile Section */}
-        <div className="p-8 flex flex-col items-center text-center border-b border-white/40 bg-gradient-to-b from-white/40 to-transparent">
-          <div className="w-24 h-24 bg-gradient-to-br from-violet-200 to-fuchsia-200 rounded-full mb-4 flex items-center justify-center text-4xl shadow-inner border-4 border-white">
-            👤
-          </div>
-          <h2 className="text-xl font-black text-slate-900 mb-1">{currentUser?.name || 'Guest'}</h2>
-          <div className="text-xs font-bold text-slate-500 space-y-1 mb-3">
-             <p className="flex items-center justify-center gap-1 opacity-80">{currentUser?.email || 'No Email'}</p>
-             <p className="flex items-center justify-center gap-1 opacity-80">{currentUser?.phone || 'No Phone'}</p>
-             <p className="flex items-center justify-center gap-1 opacity-80">{currentUser?.address || 'No Address'}</p>
-          </div>
-          <button className="px-4 py-1.5 bg-white/80 border border-white/50 rounded-full text-[10px] font-bold text-indigo-600 hover:bg-white transition-colors shadow-sm">
-            Edit Details ✏️
-          </button>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-6 space-y-3 overflow-y-auto custom-scrollbar">
-          <p className="text-xs font-black text-slate-400 uppercase tracking-widest px-2 mb-2">Menu</p>
-          {[
-            { path: '/user/fruits', emoji: '🍎', name: 'Fruits', color: 'text-red-500', bg: 'bg-red-50' },
-            { path: '/user/vegetables', emoji: '🥦', name: 'Vegetables', color: 'text-green-600', bg: 'bg-green-50' },
-            { path: '/user/pulses', emoji: '🌾', name: 'Pulses', color: 'text-amber-600', bg: 'bg-amber-50' },
-            { path: '/user/wishlist', emoji: '❤️', name: 'Wishlist', color: 'text-pink-500', bg: 'bg-pink-50' },
-            { path: '/user/cart', emoji: '🛒', name: 'Cart', color: 'text-blue-600', bg: 'bg-blue-50' }
-          ].map((item) => (
-            <Link key={item.name} to={item.path} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/50 transition-all group">
-              <span 
-                className={`w-10 h-10 flex items-center justify-center rounded-xl ${item.bg} ${item.color} text-lg shadow-sm group-hover:scale-110 transition-transform`}
-              >{item.emoji}</span>
-              <span className="font-bold text-slate-600 group-hover:text-slate-900">{item.name}</span>
-            </Link>
-          ))}
-        </nav>
-
-        {/* Logout */}
-        <div className="p-6 border-t border-white/40 bg-white/20">
-          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-3 py-3 bg-red-50 text-red-600 rounded-xl font-black hover:bg-red-100 transition-colors text-sm">
-            <LogOut size={18} strokeWidth={3} /> Logout
-          </button>
-        </div>
-      </motion.aside>
-      
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 relative flex flex-col overflow-y-auto custom-scrollbar md:pt-20">
+      <main ref={containerRef} className="flex-1 relative flex flex-col overflow-y-auto custom-scrollbar pt-[130px] md:pt-[140px]">
         
-        <div className="min-h-screen flex flex-col w-full">
+        {/* HERO SECTION - Realistic E-commerce Style */}
+        <section className="relative w-full bg-[#F3F5F7] overflow-hidden min-h-[600px] flex items-center py-20 md:py-0">
           
-          {/* Center Hero - Full Viewport Height */}
-          <div className="min-h-full h-full flex-grow flex items-center justify-center p-10 relative shrink-0">
-            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 100, ease: "linear" }} className="absolute -top-[20%] -right-[10%] w-[50vw] h-[50vw] bg-purple-200/30 rounded-full blur-[100px] pointer-events-none"></motion.div>
-            <motion.div animate={{ rotate: -360 }} transition={{ repeat: Infinity, duration: 120, ease: "linear" }} className="absolute -bottom-[20%] -left-[10%] w-[50vw] h-[50vw] bg-indigo-200/30 rounded-full blur-[100px] pointer-events-none"></motion.div>
+          {/* Decorative Background blob - simpler and positioned better */}
+          <motion.div style={{ y: y1 }} className="absolute top-0 right-0 w-[600px] h-[600px] bg-green-200/20 rounded-full blur-3xl translate-x-1/3 -translate-y-1/4"></motion.div>
+          <motion.div style={{ y: y2 }} className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-orange-100/40 rounded-full blur-3xl -translate-x-1/4 translate-y-1/4"></motion.div>
+
+          <div className="max-w-7xl mx-auto px-6 w-full relative z-10 grid md:grid-cols-2 gap-12 items-center">
             
+            {/* Hero Content */}
+            <div className="space-y-8 text-center md:text-left pt-8 md:pt-0">
+              <FadeIn>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-slate-100 mb-6">
+                  <span className="text-green-600 font-bold text-xs uppercase tracking-wider">🌿 100% Organic & Fresh</span>
+                </div>
+                <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-blue-600 leading-[1.1] mb-6">
+                  Grocery delivery <br/>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">in minutes.</span>
+                </h1>
+                <p className="text-lg md:text-xl text-slate-600 font-medium max-w-lg mx-auto md:mx-0 leading-relaxed">
+                  Experience the freshest produce delivered straight from local farms to your doorstep. No chemicals, just nature.
+                </p>
+              </FadeIn>
+
+              <FadeIn delay={0.2}>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                  <Link to="/user/fruits" className="px-8 py-4 bg-blue-600 text-white font-bold text-lg rounded-2xl shadow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 active:scale-95">
+                    Start Shopping <ArrowRight size={20} />
+                  </Link>
+                  <Link to="/user/about" className="px-8 py-4 bg-white text-slate-700 font-bold text-lg rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-2 active:scale-95">
+                    Our Story
+                  </Link>
+                </div>
+              </FadeIn>
+
+              <FadeIn delay={0.4}>
+                <div className="flex items-center justify-center md:justify-start gap-8 pt-4">
+                  <div>
+                    <p className="text-3xl font-black text-blue-600">10k+</p>
+                    <p className="text-sm font-bold text-slate-500">Happy Customers</p>
+                  </div>
+                  <div className="w-px h-10 bg-slate-200"></div>
+                  <div>
+                    <p className="text-3xl font-black text-blue-600">100%</p>
+                    <p className="text-sm font-bold text-slate-500">Organic Certified</p>
+                  </div>
+                </div>
+              </FadeIn>
+            </div>
+
+            {/* Hero Image / Illustration Placeholder */}
             <motion.div 
-              initial={{ scale: 0.8, opacity: 0, y: 50 }} 
-              animate={{ scale: 1, opacity: 1, y: 0 }} 
-              transition={{ duration: 1, ease: "easeOut" }} 
-              className="text-center relative z-10"
+              initial={{ opacity: 0, scale: 0.9, x: 50 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="relative hidden md:block"
             >
+               <div className="relative z-10 bg-white p-6 rounded-[2.5rem] shadow-2xl border border-slate-100 rotate-3 hover:rotate-0 transition-transform duration-500">
+                  <div className="bg-[#E7F6E7] rounded-[2rem] h-[400px] flex items-center justify-center relative overflow-hidden">
+                     {/* Placeholder for a hero image */}
+                     <span className="text-[120px]">🥑</span>
+                     <div className="absolute bottom-6 left-6 right-6 bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-white/50 shadow-sm flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-black text-blue-600">Fresh Avocado</p>
+                          <p className="text-xs font-bold text-green-600">₹80 / kg</p>
+                        </div>
+                        <button className="w-8 h-8 bg-blue-600 rounded-full text-white flex items-center justify-center hover:bg-green-600 transition-colors">
+                          <ShoppingBag size={14} />
+                        </button>
+                     </div>
+                  </div>
+               </div>
+               
+               {/* Floating elements */}
                <motion.div 
-                 animate={{ y: [0, -20, 0] }}
-                 transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-                 className="inline-block bg-white/40 backdrop-blur-xl p-16 md:p-20 rounded-[3.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.1)] border border-white/60 relative overflow-hidden group hover:shadow-[0_40px_100px_rgba(0,0,0,0.15)] transition-shadow duration-500"
+                 animate={{ y: [0, -10, 0] }} 
+                 transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                 className="absolute -top-6 -right-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 z-20"
                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent opacity-60 pointer-events-none"></div>
-                  <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }} className="text-8xl md:text-9xl mb-6 drop-shadow-md inline-block relative z-10">🌿</motion.div>
-                  <h1 className="text-8xl md:text-[10rem] font-black text-transparent bg-clip-text bg-gradient-to-br from-slate-900 via-green-900 to-slate-800 italic tracking-tighter drop-shadow-sm mb-6 leading-tight relative z-10">Zesty</h1>
-                  <p className="text-2xl md:text-3xl text-slate-600 font-extrabold tracking-tight relative z-10">Freshness Delivered to Your Doorstep.</p>
+                 <div className="flex items-center gap-2">
+                   <div className="bg-yellow-100 p-2 rounded-full"><Star size={16} className="text-yellow-600 fill-yellow-600"/></div>
+                   <div>
+                     <p className="text-xs font-bold text-blue-600">4.9 Rating</p>
+                     <p className="text-[10px] font-medium text-slate-500">Top Quality</p>
+                   </div>
+                 </div>
                </motion.div>
             </motion.div>
           </div>
+        </section>
 
-          {/* NEW SECTIONS */}
-          <div className="w-full max-w-5xl mx-auto px-10 pb-20 space-y-24 relative z-10">
-            <ScrollAnimatedSection>
-              <h2 className="text-5xl font-black text-slate-800 text-center mb-12">Why Choose Zesty?</h2>
-              <div className="grid md:grid-cols-3 gap-8 text-left">
-                <div className="bg-white/70 backdrop-blur-lg p-8 rounded-[2rem] border border-white shadow-lg"><h3 className="text-xl font-black text-green-800 mb-3">🌱 100% Organic</h3><p className="text-slate-600 font-medium">Certified produce grown without synthetic pesticides or harmful fertilizers.</p></div>
-                <div className="bg-white/70 backdrop-blur-lg p-8 rounded-[2rem] border border-white shadow-lg"><h3 className="text-xl font-black text-blue-800 mb-3">⚡ Fast Delivery</h3><p className="text-slate-600 font-medium">Our lightning-fast delivery partners ensure your food arrives fresh and crisp.</p></div>
-                <div className="bg-white/70 backdrop-blur-lg p-8 rounded-[2rem] border border-white shadow-lg"><h3 className="text-xl font-black text-purple-800 mb-3">🤝 Fair Trade</h3><p className="text-slate-600 font-medium">We ensure farmers get a fair price for their hard work and dedication.</p></div>
+        {/* FEATURES SECTION - Cleaner Look */}
+        <section className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-6">
+            <FadeIn>
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-4xl font-black text-blue-600 mb-4">Why Shop With Zesty?</h2>
+                <p className="text-slate-500 max-w-2xl mx-auto text-lg">We bring the season's best produce from the farm directly to your table, ensuring maximum freshness and nutrition.</p>
               </div>
-            </ScrollAnimatedSection>
+            </FadeIn>
 
-            <ScrollAnimatedSection>
-              <h2 className="text-5xl font-black text-slate-800 text-center mb-12">Our Promise & Policies</h2>
-              <div className="grid md:grid-cols-3 gap-8 text-left">
-                <div className="bg-white/70 backdrop-blur-lg p-8 rounded-[2rem] border border-white shadow-lg"><ShieldCheck className="w-10 h-10 text-blue-500 mb-4" /><h3 className="text-xl font-black text-slate-800 mb-3">Return Policy</h3><p className="text-slate-600 font-medium">Not happy? Return it at the time of delivery, no questions asked.</p></div>
-                <div className="bg-white/70 backdrop-blur-lg p-8 rounded-[2rem] border border-white shadow-lg"><BookOpen className="w-10 h-10 text-blue-500 mb-4" /><h3 className="text-xl font-black text-slate-800 mb-3">Terms of Service</h3><p className="text-slate-600 font-medium">Read our terms to understand the conditions of our service.</p></div>
-                <div className="bg-white/70 backdrop-blur-lg p-8 rounded-[2rem] border border-white shadow-lg"><ShieldCheck className="w-10 h-10 text-blue-500 mb-4" /><h3 className="text-xl font-black text-slate-800 mb-3">Privacy Policy</h3><p className="text-slate-600 font-medium">Your data is safe with us. We prioritize your privacy.</p></div>
-              </div>
-            </ScrollAnimatedSection>
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                { icon: <ShieldCheck className="w-10 h-10 text-green-600" />, title: "Certified Organic", desc: "100% chemical-free produce grown with love and care.", color: "bg-green-50" },
+                { icon: <ShoppingBag className="w-10 h-10 text-blue-600" />, title: "Superfast Delivery", desc: "Get your groceries delivered in 10 minutes or less.", color: "bg-blue-50" },
+                { icon: <LifeBuoy className="w-10 h-10 text-purple-600" />, title: "Fair Prices", desc: "Direct from farmers means better prices for you and them.", color: "bg-purple-50" }
+              ].map((feature, i) => (
+                <FadeIn delay={i * 0.1} key={i}>
+                  <div className="p-8 rounded-3xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
+                    <div className={`w-16 h-16 ${feature.color} rounded-2xl flex items-center justify-center mb-6`}>
+                      {feature.icon}
+                    </div>
+                    <h3 className="text-xl font-black text-blue-600 mb-3">{feature.title}</h3>
+                    <p className="text-slate-500 font-medium leading-relaxed">{feature.desc}</p>
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
+          </div>
+        </section>
 
-            <ScrollAnimatedSection>
-              <h2 className="text-5xl font-black text-slate-800 text-center mb-12">We're Here to Help</h2>
-              <div className="bg-white/70 backdrop-blur-lg p-12 rounded-[2rem] border border-white shadow-lg text-center">
-                <LifeBuoy className="w-16 h-16 text-indigo-500 mb-6 mx-auto" />
-                <h3 className="text-3xl font-black text-slate-800 mb-4">Have Questions?</h3>
-                <p className="text-slate-600 font-medium mb-6 max-w-lg mx-auto">Our support team is available 24/7 to help you with any issues or queries you might have.</p>
-                <div className="flex justify-center gap-4">
-                  <button className="px-8 py-4 bg-indigo-500 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-600 transition">Email Us</button>
-                  <button className="px-8 py-4 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl shadow-sm hover:bg-slate-50 transition">Call Us</button>
+        {/* CTA BANNER */}
+        <section className="py-12 px-6">
+          <FadeIn>
+            <div className="max-w-7xl mx-auto bg-blue-600 rounded-[3rem] p-12 md:p-20 relative overflow-hidden text-center md:text-left">
+              <div className="absolute top-0 right-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+              
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+                <div className="max-w-2xl">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6">Get 20% off your first order!</h2>
+                  <p className="text-slate-400 text-lg mb-8 font-medium">Use code <span className="text-white bg-white/10 px-2 py-1 rounded font-mono border border-white/20">ZESTYNEW</span> at checkout and taste the difference.</p>
+                  <Link to="/user/fruits" className="inline-block px-10 py-4 bg-green-500 text-white font-black text-lg rounded-2xl hover:bg-green-600 transition-transform active:scale-95 shadow-lg shadow-green-900/20">
+                    Order Now
+                  </Link>
+                </div>
+                <div className="hidden md:block text-9xl animate-bounce-slow">
+                  🍋
                 </div>
               </div>
-            </ScrollAnimatedSection>
-          </div>
-        </div>
+            </div>
+          </FadeIn>
+        </section>
 
+        <section className="pb-20">
+           <Footer />
+        </section>
       </main>
     </div>
   )

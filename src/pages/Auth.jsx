@@ -13,7 +13,7 @@ export default function Auth() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const res = loginUser(email, password, role);
-    if (res?.success) navigate(role === 'admin' ? '/admin' : '/user/home');
+    if (res?.success) navigate(role === 'admin' ? '/admin' : '/user/home', { replace: true });
     else showToast(res?.msg || "Login failed");
   };
 
@@ -21,7 +21,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 font-sans">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md bg-white p-10 md:p-12 rounded-[3rem] shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-slate-100">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md bg-white p-6 sm:p-10 md:p-12 rounded-[2rem] sm:rounded-[3rem] shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-slate-100 mt-16 md:mt-0">
         
         <div className="text-center mb-10">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 40" width="120" height="35" className="mx-auto mb-6">
@@ -29,7 +29,7 @@ export default function Auth() {
             <path d="M102,14 C102,8 110,8 110,8 C110,14 102,14 102,14 Z" fill="#10b981" />
             <text x="0" y="32" fontFamily="system-ui, sans-serif" fontSize="32" fontWeight="900" fill="url(#z)" letterSpacing="-1.5">zesty</text>
           </svg>
-          <h2 className="text-3xl font-black text-slate-900 mb-1 tracking-tight">Welcome Back</h2>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-1 tracking-tight">Welcome Back</h2>
           <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{role} Login</p>
         </div>
 
@@ -45,7 +45,7 @@ export default function Auth() {
           <p className="text-xs font-black text-slate-400 mb-4 uppercase tracking-widest">Or login as</p>
           <div className="flex justify-center gap-3">
              {['user', 'admin', 'delivery'].filter(r => r !== role).map(r => (
-               <button key={r} type="button" onClick={() => navigate(`/login/${r}`)} className="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs hover:bg-slate-200 capitalize transition-colors">{r}</button>
+               <button key={r} type="button" onClick={() => navigate(`/login/${r}`, { replace: true })} className="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs hover:bg-slate-200 capitalize transition-colors">{r}</button>
              ))}
           </div>
         </div>

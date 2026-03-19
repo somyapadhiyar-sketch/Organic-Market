@@ -4,13 +4,15 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --open",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "axios": "^1.13.5",
+    "country-state-city": "^3.2.1",
+    "firebase": "^12.10.0",
     "formik": "^2.4.9",
     "framer-motion": "^12.35.0",
     "gsap": "^3.14.2",

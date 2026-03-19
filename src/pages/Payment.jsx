@@ -1,11 +1,19 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Footer from '../components/Footer'
 
 export default function Payment() {
-  const { cart, getCartTotal, clearCart, placeOrder, showToast } = useStore()
+  const { cart, getCartTotal, clearCart, placeOrder, showToast, currentUser } = useStore()
+  const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [tip, setTip] = useState(0)
+
+  useEffect(() => {
+    if (currentUser?.role === 'admin') navigate('/admin', { replace: true });
+    else if (currentUser?.role === 'delivery') navigate('/delivery', { replace: true });
+  }, [currentUser, navigate]);
+
   const [paymentMethod, setPaymentMethod] = useState('upi')
   const [orderPlaced, setOrderPlaced] = useState(false)
   const [userDetails, setUserDetails] = useState({ name: '', phone: '', address: '', type: 'Home' })
@@ -34,13 +42,13 @@ export default function Payment() {
         <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"><span className="text-5xl">🎉</span></div>
         <h2 className="text-3xl font-black text-slate-800 mb-2">Order Confirmed!</h2>
         <p className="text-slate-500 mb-8">Your organic order is on the way to <b>{userDetails.type}</b>.</p>
-        <Link to="/user/home" className="block w-full py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-200">Shop More</Link>
+        <Link to="/home" className="block w-full py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-200">Shop More</Link>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col">
       <header className="bg-white sticky top-0 z-50 px-4 py-4 shadow-sm border-b border-slate-100">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -95,6 +103,7 @@ export default function Payment() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

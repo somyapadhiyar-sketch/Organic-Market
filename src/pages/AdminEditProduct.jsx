@@ -21,15 +21,6 @@ export default function AdminEditProduct() {
     }
   }, [id, products])
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setProduct({ ...product, image: reader.result });
-      reader.readAsDataURL(file);
-    }
-  }
-
   const handleEditProduct = (e) => {
     e.preventDefault()
     if (parseFloat(product.price) < 0) return showToast("Price cannot be negative!");
@@ -50,7 +41,7 @@ export default function AdminEditProduct() {
     <div className="min-h-screen bg-slate-50 p-6 flex items-center justify-center font-sans text-slate-800">
       <motion.div 
         initial={{ opacity: 0, y: 40, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.5, ease: "easeOut" }}
-        className="max-w-3xl w-full bg-white p-8 md:p-12 rounded-[3rem] shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-slate-100"
+        className="max-w-3xl w-full bg-white p-6 sm:p-8 md:p-12 rounded-[2rem] sm:rounded-[3rem] shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-slate-100 mt-16 md:mt-0"
       >
         <div className="flex justify-between items-center mb-10 pb-6 border-b border-slate-100">
            <h2 className="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-3"><span className="text-4xl">✏️</span> Edit Product</h2>
@@ -85,9 +76,14 @@ export default function AdminEditProduct() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-blue-600 uppercase ml-2 mb-2 block tracking-wider">Update Image (Optional)</label>
-              <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full text-sm file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 text-slate-500 cursor-pointer border border-slate-200 p-2 rounded-2xl bg-slate-50" />
+              <label className="text-xs font-bold text-blue-600 uppercase ml-2 mb-2 block tracking-wider">Image URL</label>
+              <input required type="url" placeholder="https://res.cloudinary.com/..." value={product.image} onChange={e => setProduct({...product, image: e.target.value})} className={inputStyle} />
             </div>
+            {product.image && (
+              <div className="mt-4 p-3 bg-white border border-slate-200 rounded-2xl inline-block shadow-sm">
+                <img src={product.image} alt="Preview" className="w-24 h-24 object-contain rounded-xl" />
+              </div>
+            )}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="bg-blue-50/50 p-6 rounded-[2rem] space-y-5 border border-blue-100">

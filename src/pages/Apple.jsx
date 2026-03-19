@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore } from '../context/StoreContext'
-import { ShoppingBag, User } from 'lucide-react'
+import Navbar from '../components/Navbar'
 
 const quantityOptions = [
   { value: 0.1, label: '100g' },
@@ -13,10 +13,18 @@ const quantityOptions = [
 ]
 
 export default function Apple() {
-  const { addToCart, showToast, currentUser, cart, logout } = useStore()
-  const [quantity, setQuantity] = useState(1)
+  const { addToCart, showToast, products, currentUser } = useStore()
   const navigate = useNavigate()
-  const handleLogout = () => { logout(); navigate('/login'); };
+  
+  useEffect(() => {
+    if (currentUser?.role === 'admin') navigate('/admin', { replace: true });
+    else if (currentUser?.role === 'delivery') navigate('/delivery', { replace: true });
+  }, [currentUser, navigate]);
+
+  const product = products.find(p => p.id === 'f1') || { stock: 150, disabled: false };
+  const isOutOfStock = product.disabled || product.stock <= 0;
+  const availableQuantityOptions = quantityOptions.filter(o => o.value <= (product.stock || 0));
+  const [quantity, setQuantity] = useState(availableQuantityOptions.length > 0 ? availableQuantityOptions[0].value : 1);
 
   const handleAddToCart = () => {
     const pricePerKg = 160
@@ -29,36 +37,9 @@ export default function Apple() {
 
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-green-100">
 
-      <header className="hidden md:flex fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-8 py-4 justify-between items-center shadow-sm">
-        <div className="flex items-center gap-12">
-          <Link to="/user/home" className="flex items-center gap-2 group">
-            <span className="text-3xl">🌿</span>
-            <h1 className="text-3xl font-black text-slate-900 italic tracking-tighter group-hover:text-violet-700 transition-colors">Zesty</h1>
-          </Link>
-          <nav className="flex gap-6">
-            {['Fruits', 'Vegetables', 'Pulses'].map(item => (
-              <Link key={item} to={`/user/${item.toLowerCase()}`} className="font-bold text-slate-500 hover:text-violet-700 transition-colors text-sm uppercase tracking-wide">{item}</Link>
-            ))}
-          </nav>
-        </div>
-        <div className="flex items-center gap-6">
-          <Link to="/user/cart" className="relative p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <ShoppingBag size={24} className="text-slate-700" />
-            {cart.length > 0 && <span className="absolute top-0 right-0 w-5 h-5 bg-violet-600 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">{cart.length}</span>}
-          </Link>
-          <div className="flex items-center gap-3 pl-6 border-l border-slate-200">
-            <div className="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm">
-              {currentUser?.name?.charAt(0) || <User size={20} />}
-            </div>
-            <div className="text-right hidden lg:block">
-              <p className="text-sm font-black text-slate-900 leading-none">{currentUser?.name || 'Guest'}</p>
-              <button onClick={handleLogout} className="text-xs font-bold text-red-500 hover:text-red-600">Logout</button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
-      <main className="max-w-6xl mx-auto px-6 py-12 pt-32">
+      <main className="max-w-6xl mx-auto px-6 py-12 pt-[140px]">
 
         <section className="flex flex-col lg:flex-row gap-12 items-start">
           
@@ -84,17 +65,27 @@ export default function Apple() {
                 id="apple-quantity"
                 value={quantity}
                 onChange={(e) => setQuantity(parseFloat(e.target.value))}
-                className="px-6 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none appearance-none cursor-pointer shadow-sm hover:border-slate-300 transition-all"
+                disabled={isOutOfStock || availableQuantityOptions.length === 0}
+                className="w-48 sm:w-auto text-base px-6 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none appearance-none cursor-pointer shadow-sm hover:border-slate-300 transition-all disabled:opacity-50"
               >
-                {quantityOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
+                {availableQuantityOptions.length > 0 ? (
+                  availableQuantityOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))
+                ) : (
+                  <option value={0}>N/A</option>
+                )}
               </select>
               <button 
                 onClick={handleAddToCart}
-                className="flex-grow px-8 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-green-600 transform transition-all active:scale-95 shadow-lg shadow-slate-200"
+                disabled={isOutOfStock || availableQuantityOptions.length === 0}
+                className={`flex-grow px-8 py-4 font-bold rounded-2xl transform transition-all shadow-lg ${
+                  (isOutOfStock || availableQuantityOptions.length === 0) 
+                  ? 'bg-slate-200 text-slate-500 cursor-not-allowed shadow-none' 
+                  : 'bg-slate-900 text-white hover:bg-green-600 active:scale-95 shadow-slate-200'
+                }`}
               >
-                Add to Cart
+                {(isOutOfStock || availableQuantityOptions.length === 0) ? 'Out of Stock' : 'Add to Cart'}
               </button>
             </div>
 
