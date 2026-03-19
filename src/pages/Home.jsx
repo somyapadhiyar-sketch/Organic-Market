@@ -97,16 +97,17 @@ export default function Home() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="relative hidden md:block"
             >
-               <div className="relative z-10 bg-white p-6 rounded-[2.5rem] shadow-2xl border border-slate-100 rotate-3 hover:rotate-0 transition-transform duration-500">
-                  <div className="bg-[#E7F6E7] rounded-[2rem] h-[400px] flex items-center justify-center relative overflow-hidden">
-                     {/* Placeholder for a hero image */}
-                     <span className="text-[120px]">🥑</span>
-                     <div className="absolute bottom-6 left-6 right-6 bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-white/50 shadow-sm flex items-center justify-between">
+               <div className="relative z-10 bg-white p-4 rounded-[2.5rem] shadow-2xl border border-slate-100 rotate-3 hover:rotate-0 transition-transform duration-500">
+                  <div className="bg-slate-50 rounded-[2rem] h-[400px] flex items-center justify-center relative overflow-hidden">
+                     
+                     <span className="text-[12rem] drop-shadow-2xl">🥑</span>
+                     
+                     <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-sm p-4 rounded-2xl border border-white/50 shadow-sm flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-black text-blue-600">Fresh Avocado</p>
-                          <p className="text-xs font-bold text-green-600">₹80 / kg</p>
+                          <p className="text-sm font-black text-blue-600">Fresh Delivery</p>
+                          <p className="text-xs font-bold text-green-600">From Farm to Home</p>
                         </div>
-                        <button className="w-8 h-8 bg-blue-600 rounded-full text-white flex items-center justify-center hover:bg-green-600 transition-colors">
+                        <button onClick={() => navigate(currentUser ? '/user/fruits' : '/login/user')} className="w-8 h-8 bg-blue-600 rounded-full text-white flex items-center justify-center hover:bg-green-600 transition-colors">
                           <ShoppingBag size={14} />
                         </button>
                      </div>
@@ -143,12 +144,12 @@ export default function Home() {
 
             <div className="grid md:grid-cols-3 gap-8">
               {[
-                { icon: <ShieldCheck className="w-10 h-10 text-green-600" />, title: "Certified Organic", desc: "100% chemical-free produce grown with love and care.", color: "bg-green-50" },
-                { icon: <ShoppingBag className="w-10 h-10 text-blue-600" />, title: "Superfast Delivery", desc: "Get your groceries delivered in 10 minutes or less.", color: "bg-blue-50" },
-                { icon: <LifeBuoy className="w-10 h-10 text-purple-600" />, title: "Fair Prices", desc: "Direct from farmers means better prices for you and them.", color: "bg-purple-50" }
+                { icon: <ShieldCheck size={32} className="text-green-600" />, title: "Certified Organic", desc: "100% chemical-free produce grown with love and care.", color: "bg-green-50" },
+                { icon: <ShoppingBag size={32} className="text-blue-600" />, title: "Superfast Delivery", desc: "Get your groceries delivered in 10 minutes or less.", color: "bg-blue-50" },
+                { icon: <LifeBuoy size={32} className="text-purple-600" />, title: "Direct from Farmers", desc: "Direct from farmers means better prices for you and them.", color: "bg-purple-50" }
               ].map((feature, i) => (
                 <FadeIn delay={i * 0.1} key={i}>
-                  <div className="p-8 rounded-3xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
+                  <div className="p-6 rounded-3xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
                     <div className={`w-16 h-16 ${feature.color} rounded-2xl flex items-center justify-center mb-6`}>
                       {feature.icon}
                     </div>
