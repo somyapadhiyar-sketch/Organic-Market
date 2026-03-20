@@ -5,6 +5,7 @@ import { LifeBuoy, ShieldCheck, ShoppingBag, ArrowRight, Star } from 'lucide-rea
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
 import { useStore } from '../context/StoreContext'
+import WaveBanner from '../components/WaveBanner'
 
 const FadeIn = ({ children, delay = 0 }) => (
   <motion.div
@@ -12,6 +13,7 @@ const FadeIn = ({ children, delay = 0 }) => (
     whileInView={{ opacity: 1, y: 0, scale: 1 }}
     viewport={{ once: true, margin: "-50px" }}
     transition={{ duration: 0.6, delay, ease: "easeOut" }}
+    className="w-full block"
   >
     {children}
   </motion.div>
@@ -132,6 +134,13 @@ export default function Home() {
           </div>
         </section>
 
+        {/* EXTRA PROMO BANNER */}
+        <section className="w-full m-0 p-0 flex">
+          <FadeIn>
+            <WaveBanner theme="orange" title="Summer Fruit Sale!" subtitle="Juicy mangoes and citrus are here." />
+          </FadeIn>
+        </section>
+
         {/* FEATURES SECTION - Cleaner Look */}
         <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-6">
@@ -163,24 +172,9 @@ export default function Home() {
         </section>
 
         {/* CTA BANNER */}
-        <section className="py-12 px-6">
+        <section className="w-full m-0 p-0 flex">
           <FadeIn>
-            <div className="max-w-7xl mx-auto bg-blue-600 rounded-[3rem] p-12 md:p-20 relative overflow-hidden text-center md:text-left">
-              <div className="absolute top-0 right-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-              
-              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-                <div className="max-w-2xl">
-                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6">Get 20% off your first order!</h2>
-                  <p className="text-slate-400 text-lg mb-8 font-medium">Use code <span className="text-white bg-white/10 px-2 py-1 rounded font-mono border border-white/20">ZESTYNEW</span> at checkout and taste the difference.</p>
-                  <Link to="/user/fruits" className="inline-block px-10 py-4 bg-green-500 text-white font-black text-lg rounded-2xl hover:bg-green-600 transition-transform active:scale-95 shadow-lg shadow-green-900/20">
-                    Order Now
-                  </Link>
-                </div>
-                <div className="hidden md:block text-9xl animate-bounce-slow">
-                  🍋
-                </div>
-              </div>
-            </div>
+            <WaveBanner theme="green" title="Fresh Deals Every Day!" subtitle="Get up to 50% off on organic fruits and vegetables." />
           </FadeIn>
         </section>
 
