@@ -2,18 +2,21 @@ import { useState, useEffect } from 'react'
 import { useStore } from '../context/StoreContext'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Plus, LogOut, Search, Mic, Edit, Trash2, PackagePlus, PowerOff, MapPin } from 'lucide-react'
+import PartnerDetailsModal from '../components/PartnerDetailsModal'
+import AdminSales from '../components/AdminSales'
 
 export default function Admin() {
   const { products, toggleProductStatus, deleteProduct, editProduct, deliveryPartners, approveDelivery, orders, logout, updateOrderStatus, showToast } = useStore()
   const navigate = useNavigate();
   const location = useLocation();
-  const initialTab = location.pathname.includes('vegetables') ? 'vegetables' : location.pathname.includes('pulses') ? 'pulses' : location.pathname.includes('orders') ? 'orders' : location.pathname.includes('delivery') ? 'delivery' : 'fruits';
+  const initialTab = location.pathname.includes('sales') ? 'sales' : location.pathname.includes('vegetables') ? 'vegetables' : location.pathname.includes('pulses') ? 'pulses' : location.pathname.includes('orders') ? 'orders' : location.pathname.includes('delivery') ? 'delivery' : 'fruits';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [isRefilling, setIsRefilling] = useState(false);
   const [refillAmount, setRefillAmount] = useState('');
+  const [selectedPartner, setSelectedPartner] = useState(null);
 
   const selectedProduct = products.find(p => p.id === selectedProductId);
   const handleTabSwitch = (tab) => { 
@@ -21,7 +24,7 @@ export default function Admin() {
   };
 
   useEffect(() => {
-    const currentTab = location.pathname.includes('vegetables') ? 'vegetables' : location.pathname.includes('pulses') ? 'pulses' : location.pathname.includes('orders') ? 'orders' : location.pathname.includes('delivery') ? 'delivery' : 'fruits';
+    const currentTab = location.pathname.includes('sales') ? 'sales' : location.pathname.includes('vegetables') ? 'vegetables' : location.pathname.includes('pulses') ? 'pulses' : location.pathname.includes('orders') ? 'orders' : location.pathname.includes('delivery') ? 'delivery' : 'fruits';
     setActiveTab(currentTab);
     setSelectedProductId(null);
     setIsRefilling(false);
@@ -120,6 +123,9 @@ export default function Admin() {
           </button>
           <button onClick={() => handleTabSwitch('delivery')} className={`py-3.5 text-[14px] font-bold whitespace-nowrap flex items-center gap-2 transition-colors ${activeTab === 'delivery' ? 'text-[#3B0060] border-b-[3px] border-[#3B0060]' : 'text-gray-500 hover:text-gray-900'}`}>
             🚚 Delivery Partners
+          </button>
+          <button onClick={() => handleTabSwitch('sales')} className={`py-3.5 text-[14px] font-bold whitespace-nowrap flex items-center gap-2 transition-colors ${activeTab === 'sales' ? 'text-[#3B0060] border-b-[3px] border-[#3B0060]' : 'text-gray-500 hover:text-gray-900'}`}>
+            📈 Sales Analytics
           </button>
         </div>
       </header>
@@ -297,7 +303,7 @@ export default function Admin() {
             ) : (
               <div className="p-6 grid gap-4">
                 {filteredPartners.map(partner => (
-                  <div key={partner.email} className="flex flex-col md:flex-row justify-between md:items-center bg-gray-50 border border-gray-200 p-5 rounded-xl gap-4">
+                  <div key={partner.email} onClick={() => setSelectedPartner(partner)} className="flex flex-col md:flex-row justify-between md:items-center bg-gray-50 border border-gray-200 p-5 rounded-xl gap-4 cursor-pointer hover:bg-gray-100 transition-colors">
                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-white shadow-sm overflow-hidden shrink-0 flex items-center justify-center bg-slate-200 text-2xl font-black text-slate-500">
                       {partner.photoURL ? <img src={partner.photoURL} alt={partner.name} className="w-full h-full object-cover" /> : partner.name.charAt(0)}
                     </div>
@@ -312,7 +318,7 @@ export default function Admin() {
                           {partner.status}
                         </span>
                         {partner.status === 'Pending' && (
-                          <button onClick={() => approveDelivery(partner.email)} className="px-5 py-2.5 bg-slate-900 text-white font-bold text-[12px] rounded-xl hover:bg-slate-800 transition-colors shadow-sm">
+                          <button onClick={(e) => { e.stopPropagation(); approveDelivery(partner.email); }} className="px-5 py-2.5 bg-slate-900 text-white font-bold text-[12px] rounded-xl hover:bg-slate-800 transition-colors shadow-sm">
                             Approve Partner
                           </button>
                         )}
@@ -325,7 +331,18 @@ export default function Admin() {
           </div>
         )}
 
+        {activeTab === 'sales' && (
+          <AdminSales />
+        )}
+
       </main>
+
+      {selectedPartner && (
+        <PartnerDetailsModal 
+          partner={selectedPartner} 
+          onClose={() => setSelectedPartner(null)} 
+        />
+      )}
     </div>
   )
 }

@@ -126,15 +126,41 @@ export default function Orders() {
                           </div>
                           <span className="font-bold text-slate-700">{item.name}</span>
                         </div>
-                        <span className="font-bold text-slate-900 bg-white px-3 py-1 rounded-lg border border-slate-200">Qty: {item.quantity}</span>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="font-bold text-slate-900 bg-white px-3 py-1 rounded-lg border border-slate-200">Qty: {item.quantity}</span>
+                          <span className="text-xs font-bold text-slate-500">₹{Math.round(item.price * item.quantity)}</span>
+                        </div>
                       </div>
                     ))}
                     {order.items.length > 3 && <p className="text-xs font-bold text-slate-500 text-center bg-slate-200/50 py-2 rounded-lg">+{order.items.length - 3} more items</p>}
                   </div>
 
-                  <div className="flex justify-between items-center border-t border-slate-200 mt-4 pt-4">
-                    <span className="font-bold text-slate-500">Total Amount</span>
-                    <span className="font-black text-slate-900 text-xl">{formatPrice(order.total)}</span>
+                  <div className="space-y-2 border-t border-slate-200 mt-4 pt-4">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="font-medium text-slate-500">Item Total</span>
+                      <span className="font-bold text-slate-700">₹{order.items.reduce((total, item) => total + (item.price * item.quantity), 0)}</span>
+                    </div>
+                    {order.couponCode ? (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="font-bold text-green-600 flex items-center gap-1">🏷️ Offer Applied ({order.couponCode})</span>
+                        <span className="font-bold text-green-600">-₹{order.discountAmount}</span>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between items-center text-sm text-slate-500">
+                        <span className="font-medium flex items-center gap-1">🏷️ Offer Applied</span>
+                        <span className="font-medium italic">No code used</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-sm border-b border-slate-100 pb-2">
+                      <span className="font-bold text-slate-500 flex items-center gap-1">💳 Payment Method</span>
+                      <span className="font-bold text-slate-700">
+                        {order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod === 'NetBanking' ? 'Net Banking' : order.paymentMethod}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="font-bold text-slate-500">Grand Total</span>
+                      <span className="font-black text-slate-900 text-xl">{formatPrice(order.total)}</span>
+                    </div>
                   </div>
 
                   {/* Delivery Partner Tracking Widget */}

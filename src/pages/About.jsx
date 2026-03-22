@@ -58,11 +58,11 @@ export default function About() {
           className="mb-24 w-full rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100 bg-black"
         >
           <video ref={videoRef} controls playsInline loop className="w-full aspect-video object-cover">
-            <source src="https://res.cloudinary.com/dbnuemnv5/video/upload/v1773909547/organic_store_project_gcgmvr.mp4" type="video/mp4" />
+            <source src="https://res.cloudinary.com/dbnuemnv5/video/upload/v1774002834/organic_store_wjdjxe.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </motion.div>
-
+ 
         {/* Animated Story Sections */}
         <div className="space-y-24 md:space-y-32 mb-20">
           

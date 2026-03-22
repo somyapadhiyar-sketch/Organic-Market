@@ -12,6 +12,10 @@ export default function Auth() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.endsWith('.om')) {
+      showToast("Please enter a valid email address (e.g., name@domain.com).");
+      return;
+    }
     const res = loginUser(email, password, role);
     if (res?.success) navigate(role === 'admin' ? '/admin' : '/user/home', { replace: true });
     else showToast(res?.msg || "Login failed");

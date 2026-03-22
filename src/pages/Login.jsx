@@ -3,7 +3,7 @@ import { useNavigate, Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth } from '../firebase';
 
@@ -33,6 +33,20 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+ 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.endsWith('.om')) {
+      if (showToast) showToast("Please enter a valid email address (e.g., name@domain.com).");
+      return;
+    }
+
+    // Strict check for Admin credentials
+    if (activeRole === 'admin') {
+      if (email !== 'somyapadhiyar@gmail.com' || password !== 'somya24092007') {
+        if (showToast) showToast("Access denied. Invalid Admin Credentials.");
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -42,11 +56,16 @@ export default function Login() {
         user = userCredential.user;
       } catch (err) {
         // Auto-create admin if it doesn't exist in Firebase Auth yet
-        if ((err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') && email === 'somyapadhiyar@gmail.com' && password === 'somya24092007') {
-           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-           user = userCredential.user;
-           const db = getFirestore(auth.app);
-           await setDoc(doc(db, "users", user.uid), { name: 'Admin', email, role: 'admin' });
+        if (activeRole === 'admin' && email === 'somyapadhiyar@gmail.com' && password === 'somya24092007') {
+           try {
+             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+             user = userCredential.user;
+             const db = getFirestore(auth.app);
+             await setDoc(doc(db, "users", user.uid), { name: 'Admin', email, role: 'admin' });
+           } catch (createErr) {
+             if (createErr.code === 'auth/email-already-in-use') throw { custom: "Admin account exists with different credentials. Please click 'Continue with Google' to log in." };
+             throw createErr;
+           }
         } else {
            throw err;
         }
@@ -95,14 +114,96 @@ export default function Login() {
       navigate(paths[activeRole] || '/home', { replace: true });
     } catch (error) {
       console.error("Login Error:", error);
+      
+      if (error.custom) {
+        if (showToast) showToast(error.custom);
+        return;
+      }
+      
       let message = "Invalid email or password.";
       
       if (error.code === 'auth/user-not-found') message = "No account found with this email.";
       if (error.code === 'auth/wrong-password') message = "Incorrect password.";
       if (error.code === 'auth/invalid-credential') message = "Invalid login credentials.";
       if (error.code === 'auth/too-many-requests') message = "Too many attempts. Try again later.";
+      if (error.code === 'auth/operation-not-allowed') message = "Email/Password sign-in is not enabled in Firebase Authentication.";
       
       if (showToast) showToast(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Strict check for Admin Google Login
+      if (activeRole === 'admin' && user.email !== 'somyapadhiyar@gmail.com') {
+        await auth.signOut();
+        if (showToast) showToast("Access denied. You are not authorized as Admin.");
+        setLoading(false);
+        return;
+      }
+
+      const db = getFirestore(auth.app);
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+      
+      let userData = {
+        uid: user.uid,
+        name: user.displayName || user.email.split('@')[0],
+        email: user.email,
+        role: activeRole,
+        photoURL: user.photoURL || null
+      };
+      
+      if (!userDoc.exists()) {
+        if (activeRole === 'delivery') {
+          userData.status = 'Pending';
+        }
+        await setDoc(userRef, userData);
+      } else {
+        userData = userDoc.data();
+      }
+
+      const actualRole = userData.role || 'user';
+
+      // 1. Role verification
+      if (actualRole !== activeRole) {
+        await auth.signOut();
+        if (showToast) showToast(`Access denied. You are registered as ${actualRole}, not ${activeRole}.`);
+        setLoading(false);
+        return;
+      }
+
+      // 2. Delivery partner approval check
+      if (actualRole === 'delivery' && userData.status !== 'Approved') {
+        await auth.signOut();
+        if (showToast) showToast("Your delivery account is pending admin approval.");
+        setLoading(false);
+        return;
+      }
+
+      // 3. Proceed with Login
+      setCurrentUser(userData);
+      if (showToast) showToast(`Welcome back, ${userData.name || activeRole}!`);
+      
+      const paths = {
+        admin: '/admin',
+        delivery: '/delivery',
+        user: '/home'
+      };
+      
+      navigate(paths[activeRole] || '/home', { replace: true });
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      if (error.code !== 'auth/popup-closed-by-user' && showToast) {
+        showToast("Google login failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -119,6 +220,11 @@ export default function Login() {
         if (showToast) showToast("Admin password cannot be reset online. Contact Super Admin.");
         return;
       }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(resetEmail) || resetEmail.endsWith('.om')) {
+        if (showToast) showToast("Please enter a valid email address.");
+        return;
+      }
+
       const exists = checkEmailExists(resetEmail, activeRole);
       if (exists) {
         if (showToast) showToast("OTP sent to your email! (Use 123456)");
@@ -352,31 +458,33 @@ export default function Login() {
                </form>
 
                {activeRole === 'user' && (
-                 <>
-                   <div className="mt-8 text-center">
-                     <p className="text-slate-500 font-medium">
-                       New to Zesty? <Link to="/signup" className="text-green-600 font-bold hover:underline">Create an Account</Link>
-                     </p>
-                   </div>
-               
-                   <div className="mt-10 pt-6 border-t border-slate-100">
-                     <p className="text-xs text-center text-slate-400 font-bold uppercase tracking-widest mb-4">Or continue with</p>
-                     <div className="grid grid-cols-2 gap-4">
-                       <button className="flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition font-bold text-slate-700">
-                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" /> Google
-                       </button>
-                       <button className="flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition font-bold text-slate-700">
-                         <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" className="w-5 h-5" alt="Facebook" /> Facebook
-                       </button>
-                     </div>
-                   </div>
-                 </>
+                 <div className="mt-8 text-center">
+                   <p className="text-slate-500 font-medium">
+                     New to Zesty? <Link to="/signup" className="text-green-600 font-bold hover:underline">Create an Account</Link>
+                   </p>
+                 </div>
                )}
                {activeRole === 'delivery' && (
                  <div className="mt-8 text-center">
                    <p className="text-slate-500 font-medium">
                      Want to deliver for Zesty? <Link to="/signup/delivery" className="text-green-600 font-bold hover:underline">Create a Partner Account</Link>
                    </p>
+                 </div>
+               )}
+
+               {(activeRole === 'user' || activeRole === 'delivery') && (
+                 <div className="mt-10 pt-6 border-t border-slate-100">
+                   <p className="text-xs text-center text-slate-400 font-bold uppercase tracking-widest mb-4">Or continue with</p>
+                   <div className="flex justify-center">
+                     <button 
+                       type="button" 
+                       onClick={handleGoogleLogin} 
+                       disabled={loading}
+                       className="w-full max-w-xs flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition font-bold text-slate-700 disabled:opacity-70 disabled:cursor-not-allowed"
+                     >
+                       <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" /> Google
+                     </button>
+                   </div>
                  </div>
                )}
              </>

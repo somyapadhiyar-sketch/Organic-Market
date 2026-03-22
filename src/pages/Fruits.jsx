@@ -27,7 +27,7 @@ export default function Fruits() {
       
       {/* 130px pt to clear the Zepto double-header */}
       <main className="pt-[140px] pb-12 flex-1">
-        <WaveBanner theme="orange" title="Juicy & Fresh Fruits" subtitle="Picked right from the orchards, delivered in 30 mins." />
+        <WaveBanner theme="orange" title="Juicy & Fresh Fruits" subtitle="Picked right from the orchards, delivered in 10 mins." />
         
         <div className="px-4 sm:px-6 lg:px-10 mt-8 mb-6 flex justify-between items-end">
           <div>

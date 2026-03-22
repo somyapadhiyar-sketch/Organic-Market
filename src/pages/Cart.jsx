@@ -5,6 +5,8 @@ import { Plus, Minus, MapPin, CreditCard, Banknote, Building, CheckCircle2, Load
 import { Country, State, City } from 'country-state-city'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { getFirestore, doc, updateDoc, collection, addDoc } from "firebase/firestore";
+import { auth } from "../firebase";
 
 // Mock Pincode data for validation
 const MOCK_PINCODE_DATA = {
@@ -24,7 +26,7 @@ const MOCK_PINCODE_DATA = {
 };
 
 export default function Cart() {
-  const { cart, addToCart, decreaseCartQuantity, getCartTotal, placeOrder, currentUser, showToast, updateUser, setUserLocation } = useStore()
+  const { cart, addToCart, decreaseCartQuantity, getCartTotal, placeOrder, clearCart, currentUser, showToast, updateUser, setUserLocation } = useStore()
   const total = getCartTotal()
   const navigate = useNavigate();
   
@@ -75,6 +77,7 @@ export default function Cart() {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
+  const [generatedOtp, setGeneratedOtp] = useState("");
 
   useEffect(() => {
     let interval;
@@ -98,7 +101,7 @@ export default function Cart() {
     const code = couponCode.trim().toUpperCase();
     if (code === "ZESTY20") { setDiscountPercent(0.2); setCouponMessage({ type: "success", text: "Coupon applied! 20% OFF" }); }
     else if (code === "WELCOME50") { setDiscountPercent(0.5); setCouponMessage({ type: "success", text: "Coupon applied! 50% OFF" }); }
-    else if (code === "") { setCouponMessage({ type: "error", text: "Please enter a code." }); }
+    else if (code === "") { setDiscountPercent(0); setCouponMessage({ type: "error", text: "Please enter a code." }); }
     else { setDiscountPercent(0); setCouponMessage({ type: "error", text: "Invalid or expired coupon." }); }
   };
 
@@ -156,6 +159,11 @@ export default function Cart() {
           if (updateUser) updateUser(updatedUser);
           else currentUser.savedAddresses = updatedSavedAddresses;
           
+          if (currentUser?.uid) {
+            const db = getFirestore(auth.app);
+            updateDoc(doc(db, "users", currentUser.uid), { savedAddresses: updatedSavedAddresses }).catch(console.error);
+          }
+          
           try {
             localStorage.setItem('user', JSON.stringify(updatedUser));
           } catch (e) {
@@ -167,32 +175,53 @@ export default function Cart() {
     setStep(s => s + 1);
   };
 
-  const handlePayment = (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
     
-    if (paymentMethod !== 'COD' && otp !== '123456') {
-      return showToast("Invalid OTP. Please enter 123456 to verify.");
+    if (paymentMethod !== 'COD' && otp !== generatedOtp) {
+      return showToast("Invalid OTP. Please check the code and try again.");
     }
 
     setIsProcessing(true);
     
-    // Simulate real payment gateway delay
-    setTimeout(() => {
-      placeOrder({ 
-        items: cart, 
-        customer: address, 
-        total: grandTotal, 
+    try {
+      const orderData = {
+        items: cart,
+        customer: address,
+        total: grandTotal,
         paymentMethod,
-        date: new Date().toLocaleString()
-      });
+        date: new Date().toLocaleString(),
+        createdAt: new Date().toISOString(),
+        status: 'Pending',
+        couponCode: discountPercent > 0 ? couponCode : null,
+        discountAmount: discountAmount || 0,
+        userId: currentUser?.uid || null,
+        userEmail: currentUser?.email || null,
+        paymentDetails: paymentMethod === 'UPI' ? { upiId: paymentDetails.upiId } : paymentMethod === 'Card' ? { cardName: paymentDetails.cardName, cardNumber: paymentDetails.cardNumber.slice(-4) } : paymentMethod === 'NetBanking' ? { bankName: paymentDetails.bankName } : null
+      };
+
+      const db = getFirestore(auth.app);
+      // Save order directly to Firestore "orders" collection
+      const docRef = await addDoc(collection(db, "orders"), orderData);
+      
+      // Pass the generated ID to local context to update UI immediately
+      placeOrder({ id: docRef.id, ...orderData });
+      
+      // Clear the user's cart automatically after successful checkout
+      if (clearCart) clearCart();
+
       setIsProcessing(false);
       setOrderSuccess(true);
       
-      // Redirect to home after 3 seconds
+      // Redirect to orders page after 3 seconds
       setTimeout(() => {
-        navigate('/home');
+        navigate('/user/orders');
       }, 3000);
-    }, 2000);
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      showToast("Payment failed. Please try again.");
+      setIsProcessing(false);
+    }
   };
 
   if (orderSuccess) {
@@ -201,7 +230,7 @@ export default function Cart() {
         <CheckCircle2 size={80} className="text-green-600 mb-6" />
         <h1 className="text-4xl font-black text-slate-800 mb-3">Order Placed Successfully!</h1>
         <p className="text-slate-600 font-medium text-lg max-w-md">Your fresh, organic groceries are being packed and will be with you in minutes.</p>
-        <p className="text-slate-400 mt-6 font-bold text-sm">Redirecting to home...</p>
+        <p className="text-slate-400 mt-6 font-bold text-sm">Redirecting to your orders...</p>
       </div>
     );
   }
@@ -399,7 +428,7 @@ export default function Cart() {
                       {/* UPI ACCORDION */}
                       <div className={`border-2 rounded-xl transition-all overflow-hidden ${paymentMethod === 'UPI' ? 'border-green-600 bg-green-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
                         <label className="flex items-center p-4 cursor-pointer">
-                          <input type="radio" name="payment" value="UPI" checked={paymentMethod === 'UPI'} onChange={() => { setPaymentMethod('UPI'); setOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
+                          <input type="radio" name="payment" value="UPI" checked={paymentMethod === 'UPI'} onChange={() => { setPaymentMethod('UPI'); setOtp(''); setGeneratedOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
                           <div className="ml-3 flex-1">
                             <span className="block text-base font-bold text-slate-800">Google Pay / PhonePe / UPI</span>
                             <span className="block text-sm text-slate-500">Pay instantly via any UPI app</span>
@@ -416,7 +445,7 @@ export default function Cart() {
                       {/* CARD ACCORDION */}
                       <div className={`border-2 rounded-xl transition-all overflow-hidden ${paymentMethod === 'Card' ? 'border-green-600 bg-green-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
                         <label className="flex items-center p-4 cursor-pointer">
-                          <input type="radio" name="payment" value="Card" checked={paymentMethod === 'Card'} onChange={() => { setPaymentMethod('Card'); setOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
+                          <input type="radio" name="payment" value="Card" checked={paymentMethod === 'Card'} onChange={() => { setPaymentMethod('Card'); setOtp(''); setGeneratedOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
                           <div className="ml-3 flex-1">
                             <span className="block text-base font-bold text-slate-800">Credit / Debit Card</span>
                             <span className="block text-sm text-slate-500">Visa, MasterCard, RuPay</span>
@@ -439,7 +468,7 @@ export default function Cart() {
                       {/* NET BANKING ACCORDION */}
                       <div className={`border-2 rounded-xl transition-all overflow-hidden ${paymentMethod === 'NetBanking' ? 'border-green-600 bg-green-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
                         <label className="flex items-center p-4 cursor-pointer">
-                          <input type="radio" name="payment" value="NetBanking" checked={paymentMethod === 'NetBanking'} onChange={() => { setPaymentMethod('NetBanking'); setOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
+                          <input type="radio" name="payment" value="NetBanking" checked={paymentMethod === 'NetBanking'} onChange={() => { setPaymentMethod('NetBanking'); setOtp(''); setGeneratedOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
                           <div className="ml-3 flex-1">
                             <span className="block text-base font-bold text-slate-800">Net Banking</span>
                             <span className="block text-sm text-slate-500">All major banks supported</span>
@@ -464,7 +493,7 @@ export default function Cart() {
                       {/* COD ACCORDION */}
                       <div className={`border-2 rounded-xl transition-all overflow-hidden ${paymentMethod === 'COD' ? 'border-green-600 bg-green-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
                         <label className="flex items-center p-4 cursor-pointer">
-                          <input type="radio" name="payment" value="COD" checked={paymentMethod === 'COD'} onChange={() => { setPaymentMethod('COD'); setOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
+                          <input type="radio" name="payment" value="COD" checked={paymentMethod === 'COD'} onChange={() => { setPaymentMethod('COD'); setOtp(''); setGeneratedOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
                           <div className="ml-3 flex-1">
                             <span className="block text-base font-bold text-slate-800">Cash on Delivery</span>
                             <span className="block text-sm text-slate-500">Pay at your doorstep</span>
@@ -482,7 +511,7 @@ export default function Cart() {
                           <input
                             required
                             type="password"
-                            placeholder="Enter 6-digit OTP (123456)"
+                            placeholder="Enter 6-digit OTP"
                             maxLength="6"
                             value={otp}
                             onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
@@ -493,7 +522,9 @@ export default function Cart() {
                             type="button"
                             onClick={(e) => {
                               e.preventDefault();
-                              showToast("OTP sent to your registered device! (Use 123456)");
+                              const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+                              setGeneratedOtp(newOtp);
+                              showToast(`OTP sent! (Use ${newOtp} to verify)`);
                               setOtpSent(true);
                               setOtpTimer(30);
                             }}
@@ -575,7 +606,13 @@ export default function Cart() {
                     </button>
                   </div>
                   <div className="flex gap-2">
-                    <input type="text" placeholder="ZESTY20" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 font-medium text-sm uppercase"/>
+                  <input type="text" placeholder="ZESTY20" value={couponCode} onChange={(e) => {
+                    setCouponCode(e.target.value);
+                    if (e.target.value.trim() === "") {
+                      setDiscountPercent(0);
+                      setCouponMessage({ type: "", text: "" });
+                    }
+                  }} className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 font-medium text-sm uppercase"/>
                     <button onClick={handleApplyCoupon} className="px-4 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors text-xs">APPLY</button>
                   </div>
                   {showOffers && (

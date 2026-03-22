@@ -2,6 +2,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { useState, useEffect } from 'react'
 import Footer from '../components/Footer'
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { auth } from "../firebase";
 
 export default function Payment() {
   const { cart, getCartTotal, clearCart, placeOrder, showToast, currentUser } = useStore()
@@ -30,10 +32,29 @@ export default function Payment() {
     setStep(2)
   }
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (cart.length === 0) return showToast("Your cart is empty")
-    placeOrder({ items: cart, customer: userDetails, total: grandTotal, paymentMethod })
-    setTimeout(() => setOrderPlaced(true), 1000)
+    
+    try {
+      const orderData = { 
+        items: cart, 
+        customer: userDetails, 
+        total: grandTotal, 
+        paymentMethod,
+        date: new Date().toLocaleString(),
+        createdAt: new Date().toISOString(),
+        status: 'Pending',
+        userId: currentUser?.uid || null,
+        userEmail: currentUser?.email || null
+      };
+      const db = getFirestore(auth.app);
+      const docRef = await addDoc(collection(db, "orders"), orderData);
+      placeOrder({ id: docRef.id, ...orderData });
+      setTimeout(() => setOrderPlaced(true), 1000);
+    } catch (e) {
+      console.error("Error placing order", e);
+      showToast("Failed to place order");
+    }
   }
 
   if (orderPlaced) return (

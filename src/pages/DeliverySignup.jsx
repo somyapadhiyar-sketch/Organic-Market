@@ -51,6 +51,12 @@ export default function DeliverySignup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.endsWith('.om')) {
+      if (showToast) showToast("Please enter a valid email address (e.g., name@domain.com).");
+      return;
+    }
+
     if (!country || !stateRegion || !city) {
       if (showToast) showToast("Please complete your location details.");
       return;

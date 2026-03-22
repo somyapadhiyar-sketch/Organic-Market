@@ -162,7 +162,7 @@ export default function Navbar() {
             </button>
             <input 
               type="text" 
-              placeholder='Search for "Apples" or "Dal"' 
+              placeholder='Search for "Apples" or "Dal"'
               value={localQuery}
               onChange={(e) => setLocalQuery(e.target.value)}
               className="w-full bg-transparent outline-none text-[15px] font-medium text-gray-900 placeholder:text-gray-500" 

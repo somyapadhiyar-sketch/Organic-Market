@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, where, updateDoc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, where, updateDoc, onSnapshot } from "firebase/firestore";
 import { auth } from '../firebase';
 
 let hasAlertedQuota = false;
@@ -91,6 +91,24 @@ export function StoreProvider({ children }) {
           }
         };
         fetchPartners();
+  }, []);
+
+  // Fetch Orders from Firebase in Real-time
+  useEffect(() => {
+    const db = getFirestore(auth.app);
+    const unsubscribe = onSnapshot(collection(db, "orders"), (snapshot) => {
+      if (!snapshot.empty) {
+        const fbOrders = snapshot.docs.map(doc => doc.data());
+        // Sort orders so newest are first (using the timestamp embedded in ID)
+        fbOrders.sort((a, b) => {
+          const timeA = parseInt(a.id.replace('ORD', '')) || 0;
+          const timeB = parseInt(b.id.replace('ORD', '')) || 0;
+          return timeB - timeA;
+        });
+        setOrders(fbOrders);
+      }
+    }, (error) => console.error("Error fetching orders:", error));
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -208,7 +226,7 @@ export function StoreProvider({ children }) {
       });
     } catch(e) { console.error("Error updating approval in Firestore:", e); }
   };
-  
+
   const toggleProductStatus = async (id) => {
     setProducts(prev => prev.map(p => p.id === id ? { ...p, disabled: !p.disabled } : p));
     const product = products.find(p => p.id === id);
@@ -272,8 +290,11 @@ export function StoreProvider({ children }) {
       await setDoc(doc(db, "products", id), updatedData, { merge: true });
     } catch(e) { console.error(e); }
   };
-  
-  const placeOrder = (details) => {
+
+  const placeOrder = async (details) => {
+    const orderId = 'ORD' + Date.now();
+    const newOrder = { id: orderId, date: new Date().toLocaleString(), status: 'Pending', ...details };
+
     setProducts(prev => prev.map(p => {
       const cartItem = details.items.find(i => i.id === p.id);
       if (cartItem) {
@@ -286,24 +307,36 @@ export function StoreProvider({ children }) {
       }
       return p;
     }));
-    setOrders([{ id: 'ORD' + Date.now(), date: new Date().toLocaleString(), status: 'Pending', ...details }, ...orders]);
+    setOrders(prev => [newOrder, ...prev]);
     setCart([]);
+    try {
+      const db = getFirestore(auth.app);
+      await setDoc(doc(db, "orders", orderId), newOrder);
+    } catch(e) { console.error("Error saving order to Firestore:", e); }
   };
-  const updateOrderStatus = (id, status, partnerEmail = null) => {
+  const updateOrderStatus = async (id, status, partnerEmail = null) => {
+    let updatedFields = { status };
+    if (partnerEmail) {
+      updatedFields.deliveryPartnerEmail = partnerEmail;
+      const partner = deliveryPartners.find(d => d.email === partnerEmail);
+      if (partner) {
+        updatedFields.deliveryPartner = { name: partner.name, phone: partner.phone };
+      }
+    }
+
     setOrders(prev => prev.map(o => {
       if (o.id === id) {
-        const updated = { ...o, status };
-        if (partnerEmail) {
-          updated.deliveryPartnerEmail = partnerEmail;
-          const partner = deliveryPartners.find(d => d.email === partnerEmail);
-          if (partner) {
-            updated.deliveryPartner = { name: partner.name, phone: partner.phone };
-          }
-        }
-        return updated;
+        return { ...o, ...updatedFields };
       }
       return o;
     }));
+
+    try {
+      const db = getFirestore(auth.app);
+      await updateDoc(doc(db, "orders", id), updatedFields);
+    } catch (error) {
+      console.error("Error updating order status in Firestore:", error);
+    }
   };
 
   // --- ZEPTO STYLE CART LOGIC ---

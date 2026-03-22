@@ -3,6 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useStore } from "../context/StoreContext";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { Country, State, City } from "country-state-city";
+import { getFirestore, doc, updateDoc } from "firebase/firestore";
+import { auth } from "../firebase";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -21,8 +24,12 @@ export default function Profile() {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddressIndex, setEditingAddressIndex] = useState(null);
   const [addressFormData, setAddressFormData] = useState({
-    name: "", phone: "", street: "", city: "", state: "", pincode: "", type: "Home"
+    name: "", phone: "", street: "", country: "", state: "", city: "", pincode: "", type: "Home"
   });
+
+  const countries = Country.getAllCountries();
+  const states = addressFormData.country ? State.getStatesOfCountry(addressFormData.country) : [];
+  const cities = addressFormData.country && addressFormData.state ? City.getCitiesOfState(addressFormData.country, addressFormData.state) : [];
 
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
@@ -33,14 +40,6 @@ export default function Profile() {
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "", newPassword: "", confirmPassword: "",
-  });
-
-  // Payment methods state
-  const [showPaymentMethods, setShowPaymentMethods] = useState(false);
-  const [paymentMethods, setPaymentMethods] = useState([]);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [paymentFormData, setPaymentFormData] = useState({
-    type: "CARD", cardNumber: "", cardHolder: "", expiryMonth: "", expiryYear: "", cvv: "", upiId: "", bankName: "", accountNumber: "",
   });
 
   // Account info
@@ -65,7 +64,6 @@ export default function Profile() {
 
     // Load addresses from currentUser object
     setAddresses(currentUser.savedAddresses || []);
-    setPaymentMethods(currentUser.savedPayments || []);
 
     // Load mock dates
     const savedMemberSince = localStorage.getItem("memberSince_" + currentUser.email);
@@ -104,10 +102,20 @@ export default function Profile() {
     setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
   };
 
+  // --- Sync to Firebase helper ---
+  const syncUserToFirestore = async (updates) => {
+    if (currentUser?.uid) {
+      try {
+        const db = getFirestore(auth.app);
+        await updateDoc(doc(db, "users", currentUser.uid), updates);
+      } catch (error) { console.error("Firestore sync error:", error); }
+    }
+  };
+
   // --- Address Management ---
   const openAddAddressForm = () => {
     setEditingAddressIndex(null);
-    setAddressFormData({ name: currentUser.name || "", phone: currentUser.phone || "", street: "", city: "", state: "", pincode: "", type: "Home" });
+    setAddressFormData({ name: currentUser.name || "", phone: currentUser.phone || "", street: "", country: "", state: "", city: "", pincode: "", type: "Home" });
     setShowAddressForm(true);
   };
 
@@ -118,7 +126,7 @@ export default function Profile() {
   };
 
   const saveAddress = () => {
-    if (!addressFormData.name || !addressFormData.phone || !addressFormData.street || !addressFormData.pincode) {
+    if (!addressFormData.name || !addressFormData.phone || !addressFormData.street || !addressFormData.country || !addressFormData.state || !addressFormData.city || !addressFormData.pincode) {
       return showToast("Please fill all required fields");
     }
 
@@ -131,6 +139,7 @@ export default function Profile() {
 
     setAddresses(updatedAddresses);
     updateUser({ ...currentUser, savedAddresses: updatedAddresses });
+    syncUserToFirestore({ savedAddresses: updatedAddresses });
     showToast("Address saved successfully!");
     setShowAddressForm(false);
   };
@@ -140,6 +149,7 @@ export default function Profile() {
     const updatedAddresses = addresses.filter((_, i) => i !== index);
     setAddresses(updatedAddresses);
     updateUser({ ...currentUser, savedAddresses: updatedAddresses });
+    syncUserToFirestore({ savedAddresses: updatedAddresses });
     showToast("Address deleted");
   };
 
@@ -149,12 +159,14 @@ export default function Profile() {
     const reordered = [selected, ...others];
     setAddresses(reordered);
     updateUser({ ...currentUser, savedAddresses: reordered });
+    syncUserToFirestore({ savedAddresses: reordered });
     showToast("Default address updated");
   };
 
   const handleSaveProfile = () => {
     if (!editName.trim()) return;
     updateUser({ ...currentUser, name: editName });
+    syncUserToFirestore({ name: editName });
     setShowEditProfile(false);
     showToast("Profile updated successfully!");
   };
@@ -165,31 +177,6 @@ export default function Profile() {
       showToast("Your account has been successfully deleted.");
       navigate("/signup");
     }
-  };
-
-  // --- Payment Methods ---
-  const savePaymentMethod = () => {
-    if (paymentFormData.type === "CARD" && (!paymentFormData.cardNumber || !paymentFormData.cvv)) return showToast("Fill all card details");
-    
-    const newPayment = {
-      id: Date.now(),
-      ...paymentFormData,
-      lastFour: paymentFormData.type === "CARD" ? paymentFormData.cardNumber.replace(/\s/g, "").slice(-4) : null,
-    };
-
-    const updatedPayments = [...paymentMethods, newPayment];
-    setPaymentMethods(updatedPayments);
-    updateUser({ ...currentUser, savedPayments: updatedPayments });
-    setShowPaymentForm(false);
-    showToast("Payment method added!");
-  };
-
-  const handleDeletePayment = (id) => {
-    if (!window.confirm("Remove this payment method?")) return;
-    const updatedPayments = paymentMethods.filter((p) => p.id !== id);
-    setPaymentMethods(updatedPayments);
-    updateUser({ ...currentUser, savedPayments: updatedPayments });
-    showToast("Payment method removed");
   };
 
   if (!currentUser) return null;
@@ -302,9 +289,28 @@ export default function Profile() {
                               <input type="tel" maxLength="10" value={addressFormData.phone} onChange={e => setAddressFormData({...addressFormData, phone: e.target.value.replace(/\D/g, '')})} placeholder="Phone Number" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 transition-all text-slate-800" />
                             </div>
                             <input type="text" value={addressFormData.street} onChange={e => setAddressFormData({...addressFormData, street: e.target.value})} placeholder="Flat / House / Office No, Street Name" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 transition-all text-slate-800" />
-                            <div className="grid grid-cols-3 gap-4">
-                              <input type="text" value={addressFormData.city} onChange={e => setAddressFormData({...addressFormData, city: e.target.value})} placeholder="City" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 transition-all text-slate-800" />
-                              <input type="text" value={addressFormData.state} onChange={e => setAddressFormData({...addressFormData, state: e.target.value})} placeholder="State" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 transition-all text-slate-800" />
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="relative">
+                                <select value={addressFormData.country} onChange={(e) => setAddressFormData({...addressFormData, country: e.target.value, state: '', city: ''})} className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 transition-all text-slate-800 appearance-none">
+                                  <option value="">Select Country</option>
+                                  {countries.map(c => <option key={c.isoCode} value={c.isoCode}>{c.name}</option>)}
+                                </select>
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">▼</div>
+                              </div>
+                              <div className="relative">
+                                <select disabled={!addressFormData.country} value={addressFormData.state} onChange={(e) => setAddressFormData({...addressFormData, state: e.target.value, city: ''})} className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 transition-all text-slate-800 appearance-none disabled:opacity-50 disabled:bg-slate-50">
+                                  <option value="">Select State</option>
+                                  {states.map(s => <option key={s.isoCode} value={s.isoCode}>{s.name}</option>)}
+                                </select>
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">▼</div>
+                              </div>
+                              <div className="relative">
+                                <select disabled={!addressFormData.state} value={addressFormData.city} onChange={(e) => setAddressFormData({...addressFormData, city: e.target.value})} className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 transition-all text-slate-800 appearance-none disabled:opacity-50 disabled:bg-slate-50">
+                                  <option value="">Select City</option>
+                                  {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                                </select>
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">▼</div>
+                              </div>
                               <input type="text" maxLength="6" value={addressFormData.pincode} onChange={e => setAddressFormData({...addressFormData, pincode: e.target.value.replace(/\D/g, '')})} placeholder="Pincode" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 transition-all text-slate-800" />
                             </div>
                             <div className="flex gap-2 mb-2">
@@ -324,7 +330,10 @@ export default function Profile() {
                         <p className="text-sm font-bold text-slate-400 text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">No saved addresses.</p>
                       ) : (
                         <div className="space-y-4 mt-2">
-                          {addresses.map((addr, index) => (
+                          {addresses.map((addr, index) => {
+                            const displayState = addr.country ? State.getStateByCodeAndCountry(addr.state, addr.country)?.name || addr.state : addr.state;
+                            const displayCountry = addr.country ? Country.getCountryByCode(addr.country)?.name || addr.country : addr.country;
+                            return (
                             <div key={index} className={`p-5 rounded-2xl border-2 transition-all ${index === 0 ? "border-green-500 bg-green-50/30" : "border-slate-100 bg-white"}`}>
                               <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
                                 <div>
@@ -333,7 +342,7 @@ export default function Profile() {
                                     <span className="bg-slate-200 text-slate-700 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">{addr.type}</span>
                                     {index === 0 && <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border border-green-200">Default</span>}
                                   </div>
-                                  <p className="text-slate-600 text-sm font-medium mb-1">{addr.street}, {addr.city}, {addr.state} - {addr.pincode}</p>
+                                    <p className="text-slate-600 text-sm font-medium mb-1">{addr.street}, {addr.city}, {displayState}{displayCountry ? `, ${displayCountry}` : ''} - {addr.pincode}</p>
                                   <p className="text-slate-500 text-xs font-bold mt-2">📞 {addr.phone}</p>
                                 </div>
                                 <div className="flex flex-wrap gap-2 sm:shrink-0 w-full sm:w-auto">
@@ -343,93 +352,15 @@ export default function Profile() {
                                 </div>
                               </div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </div>
                   )}
                 </div>
 
-                {/* 4. Payment Methods */}
-                <div className="border-b border-slate-100 pb-6">
-                  <div className="flex justify-between items-center cursor-pointer group" onClick={() => setShowPaymentMethods(!showPaymentMethods)}>
-                    <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Payment Methods</span>
-                    <span className="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1.5 rounded-lg">{showPaymentMethods ? "Close ↑" : "Manage →"}</span>
-                  </div>
-
-                  {showPaymentMethods && (
-                    <div className="mt-5 space-y-4 animate-in fade-in slide-in-from-top-2">
-                      {paymentMethods.map(method => (
-                        <div key={method.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 p-5 border border-slate-200 rounded-2xl bg-white shadow-sm">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-xl shrink-0">💳</div>
-                            <div className="overflow-hidden">
-                              <p className="text-sm font-black text-slate-900 truncate">
-                                {method.type === "CARD" && `•••• ${method.lastFour}`}
-                                {method.type === "UPI" && method.upiId}
-                                {method.type === "NET_BANKING" && method.bankName}
-                              </p>
-                              <p className="text-xs font-bold text-slate-400 mt-0.5 truncate">
-                                {method.type === "CARD" && `Expires ${method.expiryMonth}/${method.expiryYear}`}
-                                {method.type === "UPI" && "UPI Linked"}
-                                {method.type === "NET_BANKING" && `Acc: •••• ${method.accountNumber.slice(-4)}`}
-                              </p>
-                            </div>
-                          </div>
-                          <button onClick={() => handleDeletePayment(method.id)} className="w-full sm:w-auto text-red-500 hover:bg-red-50 py-2.5 px-4 rounded-xl transition-colors font-bold text-xs bg-white border border-red-100 text-center shrink-0">Remove</button>
-                        </div>
-                      ))}
-
-                      {!showPaymentForm ? (
-                        <button onClick={() => setShowPaymentForm(true)} className="w-full py-4 border-2 border-dashed border-blue-200 rounded-2xl text-blue-600 font-bold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
-                          + Add Payment Method
-                        </button>
-                      ) : (
-                        <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                          <h4 className="font-black text-slate-900 mb-5">Add New Payment Method</h4>
-                          <div className="flex gap-2 mb-5 bg-white p-1 rounded-xl border border-slate-200">
-                            {["CARD", "UPI", "NET_BANKING"].map(type => (
-                              <button key={type} onClick={() => setPaymentFormData({...paymentFormData, type})} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${paymentFormData.type === type ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100"}`}>
-                                {type === "CARD" ? "Card" : type === "UPI" ? "UPI" : "Net Banking"}
-                              </button>
-                            ))}
-                          </div>
-
-                          <div className="space-y-4">
-                            {paymentFormData.type === "CARD" && (
-                              <>
-                                <input type="text" maxLength="19" value={paymentFormData.cardNumber} onChange={e => setPaymentFormData({...paymentFormData, cardNumber: e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim()})} placeholder="Card Number" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 text-slate-800" />
-                                <input type="text" value={paymentFormData.cardHolder} onChange={e => setPaymentFormData({...paymentFormData, cardHolder: e.target.value})} placeholder="Card Holder Name" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 text-slate-800" />
-                                <div className="grid grid-cols-3 gap-3">
-                                  <input type="text" placeholder="MM" maxLength="2" value={paymentFormData.expiryMonth} onChange={e => setPaymentFormData({...paymentFormData, expiryMonth: e.target.value.replace(/\D/g, '')})} className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 text-slate-800 text-center" />
-                                  <input type="text" placeholder="YY" maxLength="2" value={paymentFormData.expiryYear} onChange={e => setPaymentFormData({...paymentFormData, expiryYear: e.target.value.replace(/\D/g, '')})} className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 text-slate-800 text-center" />
-                                  <input type="password" placeholder="CVV" maxLength="3" value={paymentFormData.cvv} onChange={e => setPaymentFormData({...paymentFormData, cvv: e.target.value.replace(/\D/g, '')})} className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 text-slate-800 text-center" />
-                                </div>
-                              </>
-                            )}
-                            {paymentFormData.type === "UPI" && (
-                              <input type="text" value={paymentFormData.upiId} onChange={e => setPaymentFormData({...paymentFormData, upiId: e.target.value})} placeholder="username@bank" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 text-slate-800" />
-                            )}
-                            {paymentFormData.type === "NET_BANKING" && (
-                              <>
-                                <select value={paymentFormData.bankName} onChange={e => setPaymentFormData({...paymentFormData, bankName: e.target.value})} className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 text-slate-800">
-                                  <option value="">Select Bank</option><option value="HDFC">HDFC Bank</option><option value="SBI">State Bank of India</option><option value="ICICI">ICICI Bank</option>
-                                </select>
-                                <input type="text" value={paymentFormData.accountNumber} onChange={e => setPaymentFormData({...paymentFormData, accountNumber: e.target.value})} placeholder="Account Number" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 text-slate-800" />
-                              </>
-                            )}
-                            <div className="flex gap-3 pt-2">
-                              <button onClick={savePaymentMethod} className="flex-1 bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-bold text-sm shadow-sm transition-colors">Save Method</button>
-                              <button onClick={() => setShowPaymentForm(false)} className="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-3.5 rounded-xl font-bold text-sm transition-colors">Cancel</button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* 5. Help & Support */}
+                {/* 4. Help & Support */}
                 <div className="border-b border-slate-100 pb-6">
                   <div className="flex justify-between items-center cursor-pointer group" onClick={() => setShowSupport(!showSupport)}>
                     <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Help & Support</span>
@@ -462,7 +393,7 @@ export default function Profile() {
                   )}
                 </div>
 
-                {/* 6. Delete Account */}
+                {/* 5. Delete Account */}
                 <div className="pt-2">
                   <div className="flex justify-between items-center cursor-pointer group bg-red-50 p-4 rounded-xl border border-red-100 hover:bg-red-100 transition-colors" onClick={handleDeleteAccount}>
                     <span className="text-sm font-black text-red-600">Delete Account</span>
