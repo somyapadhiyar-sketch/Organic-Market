@@ -7,11 +7,42 @@ export default function AdminAddProduct() {
   const { addNewProduct, showToast } = useStore()
   const navigate = useNavigate()
   const [newProduct, setNewProduct] = useState({ name: '', price: '', category: 'Fruits', desc: '', about: '', image: '', whyYouWillLoveThis: '100% Organic, Farm Fresh', shelfLife: '3-4 Days', storage: 'Keep cool.' })
+  const [file, setFile] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
 
-  const handleAddProduct = (e) => {
-    e.preventDefault(); if(!newProduct.image) return showToast("Please select an image!");
-    const formattedProduct = { ...newProduct, whyYouWillLoveThis: newProduct.whyYouWillLoveThis.split(',').map(i => i.trim()) };
-    addNewProduct(formattedProduct); showToast("Product Added!"); navigate('/admin'); 
+  // 🔴 IMPORTANT: Replace this with your actual unsigned preset name
+  const uploadPreset = "zesty store"; 
+  const cloudName = "dbnuemnv5";
+
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (data.error) {
+        console.error("Cloudinary error detail:", data.error.message);
+        return null;
+      }
+      return data.secure_url;
+    } catch (error) {
+      console.error("Cloudinary upload failed:", error);
+      return null;
+    }
+  };
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault(); if(!file) return showToast("Please select an image!");
+    setIsUploading(true);
+    const fileUrl = await uploadToCloudinary(file);
+    if(!fileUrl) { setIsUploading(false); return showToast("Image upload failed!"); }
+    
+    const formattedProduct = { ...newProduct, image: fileUrl, whyYouWillLoveThis: newProduct.whyYouWillLoveThis.split(',').map(i => i.trim()) };
+    addNewProduct(formattedProduct); showToast("Product Added!"); navigate('/admin');
   }
 
   const inputStyle = "w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-colors font-bold text-slate-900 text-base shadow-inner";
@@ -34,10 +65,10 @@ export default function AdminAddProduct() {
             </div>
             <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Short Desc</label><textarea required rows="2" value={newProduct.desc} onChange={e => setNewProduct({...newProduct, desc: e.target.value})} className={inputStyle} /></div>
             <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">About</label><textarea required rows="3" value={newProduct.about} onChange={e => setNewProduct({...newProduct, about: e.target.value})} className={inputStyle} /></div>
-            <div><label className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2 block">Image URL</label><input required type="url" placeholder="https://res.cloudinary.com/..." value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} className={inputStyle} /></div>
-            {newProduct.image && (
+            <div><label className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2 block">Product Image</label><input required type="file" accept="image/*,.pdf" onChange={e => { setFile(e.target.files[0]); setNewProduct({...newProduct, image: URL.createObjectURL(e.target.files[0])}); }} className="w-full border border-slate-200 p-2 rounded-xl bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />{isUploading && <p className="text-sm font-bold text-blue-500 mt-2 animate-pulse">Uploading...</p>}</div>
+            {newProduct.image && !isUploading && (
               <div className="mt-4 p-3 bg-white border border-slate-200 rounded-2xl inline-block shadow-sm">
-                <img src={newProduct.image} alt="Preview" className="w-24 h-24 object-contain rounded-xl" />
+                <img src={newProduct.image} alt="Preview" className="w-24 h-24 object-contain rounded-xl mix-blend-multiply" />
               </div>
             )}
           </div>
@@ -47,7 +78,7 @@ export default function AdminAddProduct() {
             <div><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Shelf Life</label><input value={newProduct.shelfLife} onChange={e => setNewProduct({...newProduct, shelfLife: e.target.value})} className={inputStyle} /></div>
             <div><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Storage</label><input value={newProduct.storage} onChange={e => setNewProduct({...newProduct, storage: e.target.value})} className={inputStyle} /></div>
           </div>
-          <div className="md:col-span-2 mt-6"><motion.button whileTap={{ scale: 0.95 }} type="submit" className="w-full py-5 bg-slate-900 text-white text-xl font-black rounded-2xl shadow-xl hover:bg-blue-600 transition-colors">Publish Product</motion.button></div>
+          <div className="md:col-span-2 mt-6"><motion.button disabled={isUploading} whileTap={{ scale: 0.95 }} type="submit" className="w-full py-5 bg-slate-900 text-white text-xl font-black rounded-2xl shadow-xl hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{isUploading ? 'Processing...' : 'Publish Product'}</motion.button></div>
         </form>
       </motion.div>
     </div>

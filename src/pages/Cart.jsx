@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { getFirestore, doc, updateDoc, collection, addDoc } from "firebase/firestore";
 import { auth } from "../firebase";
+import ProductCard from '../components/ProductCard';
 
 // Mock Pincode data for validation
 const MOCK_PINCODE_DATA = {
@@ -26,7 +27,7 @@ const MOCK_PINCODE_DATA = {
 };
 
 export default function Cart() {
-  const { cart, addToCart, decreaseCartQuantity, getCartTotal, placeOrder, clearCart, currentUser, showToast, updateUser, setUserLocation } = useStore()
+  const { cart, addToCart, decreaseCartQuantity, getCartTotal, placeOrder, clearCart, currentUser, showToast, updateUser, setUserLocation, products } = useStore()
   const total = getCartTotal()
   const navigate = useNavigate();
   
@@ -78,6 +79,107 @@ export default function Cart() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
   const [generatedOtp, setGeneratedOtp] = useState("");
+
+  // AI Recommendations State
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+
+    const fetchRecommendations = async () => {
+      console.table(cart.length)
+      if (cart.length === 0) {
+        setRecommendedProducts([]);
+        return;
+      }
+      
+      setLoadingRecommendations(true);
+      try {
+        const response = await fetch('http://localhost:5678/webhook/recommendation_system', {
+          method: 'POST',
+          mode: 'cors',
+          signal: abortController.signal, // Prevents double-fetching in React StrictMode
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ 
+            productId: cart[0].id
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
+
+        const textResponse = await response.text();
+        const data = textResponse ? JSON.parse(textResponse) : [];
+        console.log("🤖 n8n API Raw Response:", data); // Helpful for debugging
+
+        let matchedProducts = [];
+
+        // Safely extract recommendations no matter how n8n wraps the JSON response
+        let recommendations = [];
+        if (Array.isArray(data) && data[0]?.output?.recommendations) recommendations = data[0].output.recommendations;
+        else if (Array.isArray(data) && data[0]?.recommendations) recommendations = data[0].recommendations;
+        else if (data?.output?.recommendations) recommendations = data.output.recommendations;
+        else if (data?.recommendations) recommendations = data.recommendations;
+        else if (Array.isArray(data)) recommendations = data;
+        console.log({products})
+        // 1. Match the AI recommendations against your Firebase products list using the exact productId
+        for (const rec of recommendations) {
+          if (!rec || !rec.productId) continue;
+          
+          const product = products?.find(p => String(p.id).toLowerCase() === String(rec.productId).toLowerCase());
+          
+          // Skip if product not found, already in the cart, or already pushed to the matched list
+          if (product && !cart.find(c => c.id === product.id) && !matchedProducts.some(mp => mp.id === product.id)) {
+            // Add reason and score from the API directly to the product so it displays!
+            matchedProducts.push({ 
+              ...product, 
+              aiReason: rec.reason, 
+              aiScore: rec.score 
+            });
+          }
+        }
+
+        // 4. Display exactly what the API returned!
+        if (!abortController.signal.aborted) {
+          // If the API didn't return valid matches, throw error to trigger fallback
+          if (matchedProducts.length === 0) throw new Error("No valid products matched from API JSON");
+          setRecommendedProducts(matchedProducts.slice(0, 4));
+        }
+
+      } catch (error) {
+        if (error.name === 'AbortError') return; // Ignore abort errors from StrictMode cleanup
+        console.error("Error fetching AI recommendations, using local fallback:", error);
+        
+        // 🚨 Fallback: Smart Local Recommendations if API fails (CORS, offline, bad response)
+        if (!abortController.signal.aborted) {
+          const firstItem = products?.find(p => p.id === cart[0]?.id) || cart[0];
+          let fallback = products?.filter(p => p.category === firstItem?.category && !cart.find(c => c.id === p.id)) || [];
+          
+          if (fallback.length < 4) {
+            const others = products?.filter(p => p.category !== firstItem?.category && !cart.find(c => c.id === p.id)) || [];
+            fallback = [...fallback, ...others];
+          }
+          
+          setRecommendedProducts(fallback.slice(0, 4));
+        }
+      } finally {
+        if (!abortController.signal.aborted) {
+          setLoadingRecommendations(false);
+        }
+      }
+    };
+
+    fetchRecommendations();
+
+    return () => {
+      abortController.abort(); // Cleanup: Cancels any ongoing fetch if component unmounts
+    };
+  }, [cart]);
 
   useEffect(() => {
     let interval;
@@ -292,35 +394,61 @@ export default function Cart() {
               
               {/* STEP 1: CART REVIEW */}
               {step === 1 && (
-                <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-lg">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 border-b border-slate-100 pb-6">
-                    <h2 className="text-xl sm:text-2xl font-extrabold text-slate-800">Your Cart ({cart.length} items)</h2>
-                    <span className="bg-green-100 text-green-700 text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-full w-max">⚡ 10 MINS DELIVERY</span>
+                <div className="space-y-8">
+                  <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-lg">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 border-b border-slate-100 pb-6">
+                      <h2 className="text-xl sm:text-2xl font-extrabold text-slate-800">Your Cart ({cart.length} items)</h2>
+                      <span className="bg-green-100 text-green-700 text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-full w-max">⚡ 10 MINS DELIVERY</span>
+                    </div>
+
+                    <div className="space-y-6">
+                      {cart.map((item, idx) => (
+                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 border-b border-slate-100 pb-6 last:border-0 last:pb-0">
+                          <div className="flex items-center gap-4 flex-1">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-50 border border-slate-100 rounded-2xl p-2 flex-shrink-0 flex items-center justify-center">
+                              <img src={item.image} className="w-full h-full object-contain mix-blend-multiply" onError={(e) => { e.target.src = `https://placehold.co/100x100/F8F8F8/767676?text=Img` }} />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-lg text-slate-800 leading-tight">{item.name}</h4>
+                              <p className="text-sm font-medium text-slate-500 mt-1">1 kg</p>
+                              <p className="font-bold text-lg text-slate-900 mt-2">₹{item.price}</p>
+                            </div>
+                          </div>
+                          <div className="flex justify-end w-full sm:w-auto mt-2 sm:mt-0">
+                            <div className="flex items-center bg-slate-100 text-slate-800 rounded-xl h-11 shadow-sm border border-slate-200">
+                              <button onClick={() => decreaseCartQuantity(item.id, 1)} className="px-3 h-full flex items-center justify-center rounded-l-xl hover:bg-slate-200 transition-colors"><Minus size={16} strokeWidth={3}/></button>
+                              <span className="font-bold text-base w-8 text-center">{item.quantity}</span>
+                              <button onClick={() => addToCart(item.name, item.price, 1, item.image, item.id)} className="px-3 h-full flex items-center justify-center rounded-r-xl hover:bg-slate-200 transition-colors"><Plus size={16} strokeWidth={3}/></button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="space-y-6">
-                    {cart.map((item, idx) => (
-                      <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 border-b border-slate-100 pb-6 last:border-0 last:pb-0">
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-50 border border-slate-100 rounded-2xl p-2 flex-shrink-0 flex items-center justify-center">
-                            <img src={item.image} className="w-full h-full object-contain mix-blend-multiply" onError={(e) => { e.target.src = `https://placehold.co/100x100/F8F8F8/767676?text=Img` }} />
+                  {/* ✨ AI Recommendations */}
+                  {recommendedProducts.length > 0 && (
+                    <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-lg">
+                      <h3 className="font-extrabold text-xl mb-6 text-slate-800 flex items-center gap-2">✨ Recommended for You</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {recommendedProducts.map((product, idx) => (
+                      <div key={product.id || idx} className="flex flex-col">
+                        <ProductCard product={product} />
+                        {/* Only display this block if the data successfully came from the AI! */}
+                        {product.aiReason && (
+                          <div className="mt-2 text-[11px] bg-green-50 p-3 rounded-xl border border-green-200 text-green-800 font-medium shadow-sm">
+                            <span className="font-black text-green-900 block mb-0.5">⭐ AI Score: {product.aiScore}%</span> 
+                            {product.aiReason}
                           </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-lg text-slate-800 leading-tight">{item.name}</h4>
-                            <p className="text-sm font-medium text-slate-500 mt-1">1 kg</p>
-                            <p className="font-bold text-lg text-slate-900 mt-2">₹{item.price}</p>
-                          </div>
-                        </div>
-                        <div className="flex justify-end w-full sm:w-auto mt-2 sm:mt-0">
-                          <div className="flex items-center bg-slate-100 text-slate-800 rounded-xl h-11 shadow-sm border border-slate-200">
-                            <button onClick={() => decreaseCartQuantity(item.id, 1)} className="px-3 h-full flex items-center justify-center rounded-l-xl hover:bg-slate-200 transition-colors"><Minus size={16} strokeWidth={3}/></button>
-                            <span className="font-bold text-base w-8 text-center">{item.quantity}</span>
-                            <button onClick={() => addToCart(item.name, item.price, 1, item.image, item.id)} className="px-3 h-full flex items-center justify-center rounded-r-xl hover:bg-slate-200 transition-colors"><Plus size={16} strokeWidth={3}/></button>
-                          </div>
-                        </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {loadingRecommendations && recommendedProducts.length === 0 && (
+                    <div className="text-center p-6 text-slate-400 font-bold animate-pulse">Loading AI Recommendations... 🤖</div>
+                  )}
                 </div>
               )}
 

@@ -8,6 +8,8 @@ export default function AdminEditProduct() {
   const { products, editProduct, showToast } = useStore()
   const navigate = useNavigate()
   const [product, setProduct] = useState(null)
+  const [file, setFile] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   useEffect(() => {
     const foundProduct = products.find(p => p.id == id)
@@ -21,16 +23,49 @@ export default function AdminEditProduct() {
     }
   }, [id, products])
 
-  const handleEditProduct = (e) => {
+  // 🔴 IMPORTANT: Replace this with your actual unsigned preset name
+  const uploadPreset = "zesty store"; 
+  const cloudName = "dbnuemnv5";
+
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (data.error) {
+        console.error("Cloudinary error detail:", data.error.message);
+        return null;
+      }
+      return data.secure_url;
+    } catch (error) {
+      console.error("Cloudinary upload failed:", error);
+      return null;
+    }
+  };
+
+  const handleEditProduct = async (e) => {
     e.preventDefault()
     if (parseFloat(product.price) < 0) return showToast("Price cannot be negative!");
+    
+    setIsUploading(true);
+    let finalImageUrl = product.image;
+    if (file) {
+      finalImageUrl = await uploadToCloudinary(file) || product.image;
+    }
+
     const formattedProduct = { 
       ...product, 
-      whyYouWillLoveThis: product.whyYouWillLoveThis.split(',').map(i => i.trim()) 
+      image: finalImageUrl,
+      whyYouWillLoveThis: typeof product.whyYouWillLoveThis === 'string' ? product.whyYouWillLoveThis.split(',').map(i => i.trim()) : product.whyYouWillLoveThis
     };
     editProduct(product.id, formattedProduct)
     showToast("Product Updated Successfully!")
-    navigate('/admin/fruits') 
+    navigate('/admin') 
   }
 
   if (!product) return <div className="min-h-screen bg-slate-50 text-slate-800 flex justify-center items-center font-black text-2xl">Loading Editor...</div>
@@ -45,7 +80,7 @@ export default function AdminEditProduct() {
       >
         <div className="flex justify-between items-center mb-10 pb-6 border-b border-slate-100">
            <h2 className="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-3"><span className="text-4xl">✏️</span> Edit Product</h2>
-           <Link to="/admin/fruits">
+           <Link to="/admin">
              <motion.div whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }} className="p-3 bg-slate-100 hover:bg-red-100 hover:text-red-600 rounded-full transition-colors text-slate-500 font-black flex items-center justify-center w-10 h-10">✕</motion.div>
            </Link>
         </div>
@@ -76,12 +111,13 @@ export default function AdminEditProduct() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-blue-600 uppercase ml-2 mb-2 block tracking-wider">Image URL</label>
-              <input required type="url" placeholder="https://res.cloudinary.com/..." value={product.image} onChange={e => setProduct({...product, image: e.target.value})} className={inputStyle} />
+              <label className="text-xs font-bold text-blue-600 uppercase ml-2 mb-2 block tracking-wider">Product Image (Upload new to replace)</label>
+              <input type="file" accept="image/*,.pdf" onChange={e => { setFile(e.target.files[0]); setProduct({...product, image: URL.createObjectURL(e.target.files[0])}); }} className="w-full border border-slate-200 p-2 rounded-xl bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+              {isUploading && <p className="text-sm font-bold text-blue-500 mt-2 animate-pulse ml-2">Uploading...</p>}
             </div>
-            {product.image && (
+            {product.image && !isUploading && (
               <div className="mt-4 p-3 bg-white border border-slate-200 rounded-2xl inline-block shadow-sm">
-                <img src={product.image} alt="Preview" className="w-24 h-24 object-contain rounded-xl" />
+                <img src={product.image} alt="Preview" className="w-24 h-24 object-contain rounded-xl mix-blend-multiply" />
               </div>
             )}
           </motion.div>
@@ -103,8 +139,8 @@ export default function AdminEditProduct() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="md:col-span-2 mt-6">
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="w-full py-5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-lg font-black rounded-2xl shadow-[0_10px_25px_rgba(59,130,246,0.3)] hover:shadow-[0_15px_35px_rgba(59,130,246,0.4)] transition-all">
-              Save Changes ➔
+            <motion.button disabled={isUploading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="w-full py-5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-lg font-black rounded-2xl shadow-[0_10px_25px_rgba(59,130,246,0.3)] hover:shadow-[0_15px_35px_rgba(59,130,246,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              {isUploading ? 'Processing...' : 'Save Changes ➔'}
             </motion.button>
           </motion.div>
         </form>

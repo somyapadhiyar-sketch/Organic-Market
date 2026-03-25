@@ -43,12 +43,12 @@ export default function Login() {
     if (activeRole === 'admin') {
       if (email !== 'somyapadhiyar@gmail.com' || password !== 'somya24092007') {
         if (showToast) showToast("Access denied. Invalid Admin Credentials.");
-        return;
-      }
+        return; 
+      } 
     }
 
-    setLoading(true);
-
+    setLoading(true);      
+             
     try {
       let user;
       try {

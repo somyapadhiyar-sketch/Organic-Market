@@ -101,8 +101,8 @@ export function StoreProvider({ children }) {
         const fbOrders = snapshot.docs.map(doc => doc.data());
         // Sort orders so newest are first (using the timestamp embedded in ID)
         fbOrders.sort((a, b) => {
-          const timeA = parseInt(a.id.replace('ORD', '')) || 0;
-          const timeB = parseInt(b.id.replace('ORD', '')) || 0;
+          const timeA = parseInt((a.id || '').replace('ORD', '')) || 0;
+          const timeB = parseInt((b.id || '').replace('ORD', '')) || 0;
           return timeB - timeA;
         });
         setOrders(fbOrders);

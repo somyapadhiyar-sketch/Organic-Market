@@ -1,0 +1,380 @@
+[
+  {
+    "_id": "65be7e5abf83ea1dd26398a1",
+    "name": "Apple",
+    "category": "Fruits",
+    "price": 160,
+    "rating": 4.8,
+    "purchase_frequency": 85,
+    "productId": "f1"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398a2",
+    "name": "Banana",
+    "category": "Fruits",
+    "price": 60,
+    "rating": 4.6,
+    "purchase_frequency": 92,
+    "productId": "f2"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398a4",
+    "name": "Orange",
+    "category": "Fruits",
+    "price": 120,
+    "rating": 4.5,
+    "purchase_frequency": 65,
+    "productId": "f3"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398a3",
+    "name": "Mango",
+    "category": "Fruits",
+    "price": 250,
+    "rating": 4.9,
+    "purchase_frequency": 78,
+    "productId": "f4"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398a7",
+    "name": "Grapes",
+    "category": "Fruits",
+    "price": 90,
+    "rating": 4.7,
+    "purchase_frequency": 82,
+    "productId": "f5"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398a6",
+    "name": "Watermelon",
+    "category": "Fruits",
+    "price": 150,
+    "rating": 4.4,
+    "purchase_frequency": 60,
+    "productId": "f6"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398a5",
+    "name": "Papaya",
+    "category": "Fruits",
+    "price": 80,
+    "rating": 4.3,
+    "purchase_frequency": 45,
+    "productId": "f7"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398ab",
+    "name": "Kiwi",
+    "category": "Fruits",
+    "price": 200,
+    "rating": 4.6,
+    "purchase_frequency": 35,
+    "productId": "f8"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398ac",
+    "name": "Strawberry",
+    "category": "Fruits",
+    "price": 300,
+    "rating": 4.7,
+    "purchase_frequency": 42,
+    "productId": "f9"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398a9",
+    "name": "Pineapple",
+    "category": "Fruits",
+    "price": 110,
+    "rating": 4.5,
+    "purchase_frequency": 55,
+    "productId": "f10"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398a8",
+    "name": "Pomegranate",
+    "category": "Fruits",
+    "price": 180,
+    "rating": 4.8,
+    "purchase_frequency": 70,
+    "productId": "f11"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398aa",
+    "name": "Guava",
+    "category": "Fruits",
+    "price": 90,
+    "rating": 4.2,
+    "purchase_frequency": 48,
+    "productId": "f12"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398ae",
+    "name": "Cherry",
+    "category": "Fruits",
+    "price": 140,
+    "rating": 4.8,
+    "purchase_frequency": 55,
+    "productId": "f13"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398ad",
+    "name": "Peach",
+    "category": "Fruits",
+    "price": 220,
+    "rating": 4.5,
+    "purchase_frequency": 60,
+    "productId": "f14"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398c8",
+    "name": "Black Gram",
+    "category": "Pulses",
+    "price": 90,
+    "rating": 4.6,
+    "purchase_frequency": 65,
+    "productId": "p1"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398c3",
+    "name": "Chana Dal",
+    "category": "Pulses",
+    "price": 120,
+    "rating": 4.5,
+    "purchase_frequency": 60,
+    "productId": "p2"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398c7",
+    "name": "Chickpea",
+    "category": "Pulses",
+    "price": 180,
+    "rating": 4.7,
+    "purchase_frequency": 78,
+    "productId": "p3"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398cb",
+    "name": "Cowpea",
+    "category": "Pulses",
+    "price": 110,
+    "rating": 4.4,
+    "purchase_frequency": 45,
+    "productId": "p4"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398c9",
+    "name": "Green Gram",
+    "category": "Pulses",
+    "price": 125,
+    "rating": 4.5,
+    "purchase_frequency": 55,
+    "productId": "p5"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398cc",
+    "name": "Horse Gram",
+    "category": "Pulses",
+    "price": 85,
+    "rating": 4.2,
+    "purchase_frequency": 40,
+    "productId": "p6"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398cd",
+    "name": "Kidney Beans",
+    "category": "Pulses",
+    "price": 90,
+    "rating": 4.6,
+    "purchase_frequency": 38,
+    "productId": "p7"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398ce",
+    "name": "Lentils",
+    "category": "Pulses",
+    "price": 95,
+    "rating": 4.7,
+    "purchase_frequency": 52,
+    "productId": "p8"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398c4",
+    "name": "Masoor Dal",
+    "category": "Pulses",
+    "price": 100,
+    "rating": 4.6,
+    "purchase_frequency": 42,
+    "productId": "p9"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398c2",
+    "name": "Moong Dal",
+    "category": "Pulses",
+    "price": 110,
+    "rating": 4.7,
+    "purchase_frequency": 68,
+    "productId": "p10"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398ca",
+    "name": "Moth Beans",
+    "category": "Pulses",
+    "price": 110,
+    "rating": 4.3,
+    "purchase_frequency": 35,
+    "productId": "p11"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398c6",
+    "name": "Rajma",
+    "category": "Pulses",
+    "price": 160,
+    "rating": 4.8,
+    "purchase_frequency": 82,
+    "productId": "p12"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398c1",
+    "name": "Toor Dal",
+    "category": "Pulses",
+    "price": 140,
+    "rating": 4.8,
+    "purchase_frequency": 75,
+    "productId": "p13"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398c5",
+    "name": "Urad Dal",
+    "category": "Pulses",
+    "price": 130,
+    "rating": 4.4,
+    "purchase_frequency": 50,
+    "productId": "p14"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398bb",
+    "name": "Broccoli",
+    "category": "Vegetables",
+    "price": 80,
+    "rating": 4.7,
+    "purchase_frequency": 85,
+    "productId": "v1"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398b1",
+    "name": "Tomato",
+    "category": "Vegetables",
+    "price": 40,
+    "rating": 4.7,
+    "purchase_frequency": 95,
+    "productId": "v2"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398b5",
+    "name": "Carrot",
+    "category": "Vegetables",
+    "price": 60,
+    "rating": 4.5,
+    "purchase_frequency": 72,
+    "productId": "v3"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398b2",
+    "name": "Onion",
+    "category": "Vegetables",
+    "price": 45,
+    "rating": 4.8,
+    "purchase_frequency": 98,
+    "productId": "v4"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398b3",
+    "name": "Potato",
+    "category": "Vegetables",
+    "price": 35,
+    "rating": 4.6,
+    "purchase_frequency": 88,
+    "productId": "v5"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398b6",
+    "name": "Cabbage",
+    "category": "Vegetables",
+    "price": 50,
+    "rating": 4.2,
+    "purchase_frequency": 60,
+    "productId": "v6"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398b7",
+    "name": "Cauliflower",
+    "category": "Vegetables",
+    "price": 65,
+    "rating": 4.3,
+    "purchase_frequency": 65,
+    "productId": "v7"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398b8",
+    "name": "Capsicum",
+    "category": "Vegetables",
+    "price": 70,
+    "rating": 4.5,
+    "purchase_frequency": 75,
+    "productId": "v8"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398bf",
+    "name": "Cucumber",
+    "category": "Vegetables",
+    "price": 40,
+    "rating": 4.6,
+    "purchase_frequency": 85,
+    "productId": "v9"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398ba",
+    "name": "Brinjal",
+    "category": "Vegetables",
+    "price": 50,
+    "rating": 4.4,
+    "purchase_frequency": 62,
+    "productId": "v10"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398bc",
+    "name": "Coriander Leaves",
+    "category": "Vegetables",
+    "price": 35,
+    "rating": 4.5,
+    "purchase_frequency": 92,
+    "productId": "v11"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398bd",
+    "name": "Lettuce",
+    "category": "Vegetables",
+    "price": 60,
+    "rating": 4.6,
+    "purchase_frequency": 75,
+    "productId": "v12"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398b9",
+    "name": "Lady Finger",
+    "category": "Vegetables",
+    "price": 55,
+    "rating": 4.6,
+    "purchase_frequency": 78,
+    "productId": "v13"
+  },
+  {
+    "_id": "65be7e5abf83ea1dd26398b4",
+    "name": "Beetroot",
+    "category": "Vegetables",
+    "price": 45,
+    "rating": 4.4,
+    "purchase_frequency": 55,
+    "productId": "v14"
+  }
+]
