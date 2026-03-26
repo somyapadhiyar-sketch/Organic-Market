@@ -2,11 +2,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { useState, useEffect } from 'react'
 import Footer from '../components/Footer'
-import { getFirestore, collection, addDoc } from "firebase/firestore";
-import { auth } from "../firebase";
 
 export default function Payment() {
-  const { cart, getCartTotal, clearCart, placeOrder, showToast, currentUser } = useStore()
+  const { cart, getCartTotal, clearCart, placeOrder, showToast, currentUser, pendingOrderId } = useStore()
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [tip, setTip] = useState(0)
@@ -47,9 +45,10 @@ export default function Payment() {
         userId: currentUser?.uid || null,
         userEmail: currentUser?.email || null
       };
-      const db = getFirestore(auth.app);
-      const docRef = await addDoc(collection(db, "orders"), orderData);
-      placeOrder({ id: docRef.id, ...orderData });
+      const result = await placeOrder(orderData);
+      if (result && !result.success) {
+        return showToast(result.msg || "Failed to place order");
+      }
       setTimeout(() => setOrderPlaced(true), 1000);
     } catch (e) {
       console.error("Error placing order", e);
@@ -120,7 +119,7 @@ export default function Payment() {
             <div className="my-4 p-3 bg-green-50 rounded-lg border border-green-100 flex justify-between items-center">
                <span className="text-green-700 font-bold text-sm">Grand Total</span><span className="text-green-700 font-black text-xl">₹{grandTotal}</span>
             </div>
-            {step === 2 && (<button onClick={handlePlaceOrder} className="w-full py-4 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-all flex justify-between px-6"><span>PAY NOW</span><span>₹{grandTotal}</span></button>)}
+            {step === 2 && (<button onClick={handlePlaceOrder} disabled={!!pendingOrderId || cart.length === 0} className="w-full py-4 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-all flex justify-between px-6 disabled:bg-slate-400 disabled:cursor-wait disabled:shadow-none"><span>{pendingOrderId ? 'Processing...' : 'PAY NOW'}</span><span>₹{grandTotal}</span></button>)}
           </div>
         </div>
       </main>

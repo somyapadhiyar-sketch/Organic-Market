@@ -1,9 +1,10 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, where, updateDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, where, updateDoc, onSnapshot, increment, runTransaction } from "firebase/firestore";
 import { auth } from '../firebase';
 
 let hasAlertedQuota = false;
+
 const safeJSONParse = (key, fallback) => {
   try {
     const item = localStorage.getItem(key);
@@ -40,6 +41,7 @@ export function StoreProvider({ children }) {
   const [wishlist, setWishlist] = useState(() => safeJSONParse('wishlist', []));
   const [salesHistory, setSalesHistory] = useState(() => safeJSONParse('salesHistory', []));
   const [toasts, setToasts] = useState([]);
+  const [pendingOrderId, setPendingOrderId] = useState(null);
 
   // Fetch Products from Firebase on App Load
   useEffect(() => {
@@ -106,8 +108,53 @@ export function StoreProvider({ children }) {
           return timeB - timeA;
         });
         setOrders(fbOrders);
+
+      } else {
+        setOrders([]);
       }
     }, (error) => console.error("Error fetching orders:", error));
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch Sales History from Firebase in Real-time for the last 30 days
+  useEffect(() => {
+    const db = getFirestore(auth.app);
+    const salesCollection = collection(db, 'sales');
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+    const q = query(salesCollection, where("timestamp", ">=", thirtyDaysAgo));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      // Each time we get an update, we'll rebuild the history from scratch
+      const newHistoryMap = new Map();
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        d.setHours(0, 0, 0, 0);
+        const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        newHistoryMap.set(dateStr, { name: dateStr, date: dateStr, sales: 0, revenue: 0, orders: 0 });
+      }
+
+      snapshot.forEach(doc => {
+        const sale = doc.data();
+        // Ensure timestamp exists and is valid before proceeding
+        if (sale.timestamp && sale.timestamp.toDate) {
+            const saleDate = sale.timestamp.toDate();
+            const dateStr = saleDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            if (newHistoryMap.has(dateStr)) {
+                // Overwrite the zeroed-out day with the actual sales data from Firestore
+                newHistoryMap.set(dateStr, { ...sale, name: dateStr, date: dateStr });
+            }
+        }
+      });
+      setSalesHistory(Array.from(newHistoryMap.values()));
+    }, (error) => {
+      console.error("Error fetching sales history:", error);
+    });
+
     return () => unsubscribe();
   }, []);
 
@@ -144,38 +191,6 @@ export function StoreProvider({ children }) {
   const removeToast = (id) => setToasts(prev => prev.filter(t => t.id !== id));
 
   // Password Reset Methods
-  const checkEmailExists = (email, role) => {
-    if (role === 'admin') return email === 'somyapadhiyar@gmail.com';
-    if (role === 'delivery') return deliveryPartners.some(d => d.email === email);
-    return usersDB.some(u => u.email === email);
-  };
-
-  const resetPassword = (email, role, newPassword) => {
-    if (role === 'admin') return { success: false, msg: 'Admin password cannot be reset.' };
-    if (role === 'delivery') {
-      const idx = deliveryPartners.findIndex(d => d.email === email);
-      if (idx === -1) return { success: false, msg: 'Account not found.' };
-      const updated = [...deliveryPartners];
-      updated[idx].password = newPassword;
-      setDeliveryPartners(updated);
-      return { success: true };
-    }
-    const idx = usersDB.findIndex(u => u.email === email);
-    if (idx === -1) return { success: false, msg: 'Account not found.' };
-    const updated = [...usersDB];
-    updated[idx].password = newPassword;
-    setUsersDB(updated);
-    return { success: true };
-  };
-
-  // Auth Methods
-  const registerUser = (name, email, phone, address, password) => {
-    if (usersDB.find(u => u.email === email)) return { success: false, msg: 'Email already exists!' };
-    const newUser = { name, email, phone, address, password, role: 'user' };
-    setUsersDB([...usersDB, newUser]);
-    setCurrentUser(newUser);
-    return { success: true };
-  };
   const updateUser = (updatedUser) => {
     setCurrentUser(updatedUser);
     setUsersDB(prev => prev.map(u => u.email === updatedUser.email ? updatedUser : u));
@@ -184,35 +199,11 @@ export function StoreProvider({ children }) {
     setUsersDB(prev => prev.filter(u => u.email !== email));
     logout();
   };
-  const registerDelivery = (name, email, phone, address, password, photoURL) => {
-    if (deliveryPartners.find(d => d.email === email)) return { success: false, msg: 'Email already exists!' };
-    const newPartner = { name, email, phone, address, password, role: 'delivery', status: 'Pending', photoURL };
-    setDeliveryPartners([...deliveryPartners, newPartner]);
-    return { success: true, msg: 'Request sent to Admin for approval!' };
+  
+  const logout = () => {
+    auth.signOut();
+    setCurrentUser(null)
   };
-  const loginUser = (email, password, role) => {
-    if (role === 'admin') {
-      if (email === 'somyapadhiyar@gmail.com' && password === 'somya24092007') {
-        setCurrentUser({ name: 'Admin', email, role: 'admin' });
-        return { success: true };
-      }
-      return { success: false, msg: 'Invalid Admin Credentials' };
-    }
-    if (role === 'delivery') {
-      const partner = deliveryPartners.find(d => d.email === email && d.password === password);
-      if (!partner) return { success: false, msg: 'Invalid Credentials' };
-      if (partner.status !== 'Approved') return { success: false, msg: 'Your account is pending admin approval.' };
-      setCurrentUser(partner);
-      return { success: true };
-    }
-    const user = usersDB.find(u => u.email === email && u.password === password);
-    if (user) { 
-      setCurrentUser(user); 
-      return { success: true }; 
-    }
-    return { success: false, msg: 'Invalid Email or Password' };
-  };
-  const logout = () => setCurrentUser(null);
 
   // Admin Methods
   const approveDelivery = async (email) => {
@@ -291,30 +282,78 @@ export function StoreProvider({ children }) {
     } catch(e) { console.error(e); }
   };
 
-  const placeOrder = async (details) => {
-    const orderId = 'ORD' + Date.now();
-    const newOrder = { id: orderId, date: new Date().toLocaleString(), status: 'Pending', ...details };
+  const isPlacingOrder = useRef(false);
 
-    setProducts(prev => prev.map(p => {
-      const cartItem = details.items.find(i => i.id === p.id);
-      if (cartItem) {
-        const newStock = Math.max(0, p.stock - cartItem.quantity);
-        try {
-          const db = getFirestore(auth.app);
-          setDoc(doc(db, "products", p.id), { stock: newStock }, { merge: true });
-        } catch(e) { console.error(e); }
-        return { ...p, stock: newStock };
-      }
-      return p;
-    }));
-    setOrders(prev => [newOrder, ...prev]);
-    setCart([]);
+  const placeOrder = async (details) => {
+    // 1. Aggressive Anti-Duplicate Protection using a ref-based lock
+    if (isPlacingOrder.current) return { success: false, msg: 'An order is already being processed.' };
+    if (!details || !details.items || details.items.length === 0) return { success: false, msg: 'Cart is empty' };
+
+    isPlacingOrder.current = true; // Set the lock
+    const orderId = 'ORD' + Date.now();
+    setPendingOrderId(orderId); // For UI feedback
+
     try {
       const db = getFirestore(auth.app);
+      const now = new Date();
+
+      const newOrder = { 
+        ...details, 
+        id: orderId, 
+        createdAt: now.toISOString(), 
+        date: now.toLocaleString(), 
+        status: 'Pending' 
+      };
+      
+      // 2. Create the order document in Firebase
       await setDoc(doc(db, "orders", orderId), newOrder);
-    } catch(e) { console.error("Error saving order to Firestore:", e); }
+
+      // 3. Clear the cart AFTER the order is confirmed
+      setCart([]);
+
+      // 4. Update Stock in Local State & Firebase
+      setProducts(prev => prev.map(p => {
+        const cartItem = details.items.find(i => i.id === p.id);
+        if (cartItem) {
+          return { ...p, stock: Math.max(0, (p.stock || 0) - cartItem.quantity) };
+        }
+        return p;
+      }));
+
+      details.items.forEach(cartItem => {
+        const product = products.find(p => p.id === cartItem.id);
+        if (product) {
+          const newStock = Math.max(0, (product.stock || 0) - cartItem.quantity);
+          setDoc(doc(db, "products", product.id), { stock: newStock }, { merge: true }).catch(console.error);
+        }
+      });
+
+      // 5. Update the sales figures (non-blocking)
+      const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const salesDocRef = doc(db, "sales", dateStr);
+      setDoc(salesDocRef, {
+        sales: increment(details.total || 0),
+        revenue: increment(details.total || 0),
+        orders: increment(1),
+        name: dateStr, date: dateStr, timestamp: now
+      }, { merge: true }).catch(console.error);
+
+      return { success: true, orderId };
+    } catch (e) {
+      console.error("Error placing order:", e);
+      return { success: false, msg: 'Database error' };
+    } finally {
+      isPlacingOrder.current = false; // Release the lock
+      setPendingOrderId(null);
+    }
   };
   const updateOrderStatus = async (id, status, partnerEmail = null) => {
+    const orderToUpdate = orders.find(o => o.id === id);
+    if (!orderToUpdate) {
+      console.error("Order not found for status update:", id);
+      return;
+    }
+
     let updatedFields = { status };
     if (partnerEmail) {
       updatedFields.deliveryPartnerEmail = partnerEmail;
@@ -324,16 +363,32 @@ export function StoreProvider({ children }) {
       }
     }
 
-    setOrders(prev => prev.map(o => {
-      if (o.id === id) {
-        return { ...o, ...updatedFields };
-      }
-      return o;
-    }));
-
     try {
       const db = getFirestore(auth.app);
       await updateDoc(doc(db, "orders", id), updatedFields);
+
+      // If order is cancelled, and it was not cancelled before, decrement sales
+      if (status === 'Cancelled' && orderToUpdate.status !== 'Cancelled') {
+        let orderDate = new Date(orderToUpdate.createdAt || orderToUpdate.date);
+        if (isNaN(orderDate) && orderToUpdate.date) {
+            const datePart = String(orderToUpdate.date).split(',')[0].trim();
+            const parts = datePart.split(/[\/\-]/);
+            if (parts.length === 3) {
+                orderDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
+            }
+        }
+
+        if (!isNaN(orderDate)) {
+            const dateStr = orderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const salesDocRef = doc(db, "sales", dateStr);
+            const saleUpdate = {
+                sales: increment(-orderToUpdate.total),
+                revenue: increment(-orderToUpdate.total),
+                orders: increment(-1)
+            };
+            await setDoc(salesDocRef, saleUpdate, { merge: true });
+        }
+      }
     } catch (error) {
       console.error("Error updating order status in Firestore:", error);
     }
@@ -383,12 +438,11 @@ export function StoreProvider({ children }) {
 
   return (
     <StoreContext.Provider value={{ 
-      currentUser, setCurrentUser, updateUser, deleteUser, registerUser, registerDelivery, loginUser, logout, deliveryPartners, approveDelivery,
+      currentUser, setCurrentUser, updateUser, deleteUser, logout, deliveryPartners, approveDelivery,
       userLocation, setUserLocation, searchQuery, setSearchQuery,
       products, toggleProductStatus, addNewProduct, deleteProduct, editProduct,
-      orders, placeOrder, updateOrderStatus, salesHistory, showToast,
+      orders, pendingOrderId, placeOrder, updateOrderStatus, salesHistory, showToast,
       cart, addToCart, removeFromCart, getCartTotal, decreaseCartQuantity, wishlist, toggleWishlist,
-      checkEmailExists, resetPassword
     }}>
       {children}
       <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none">

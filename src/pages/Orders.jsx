@@ -42,7 +42,7 @@ export default function Orders() {
   };
 
   const handleBuyAgain = (order) => {
-    order.items.forEach((item) => {
+    (order.items || []).forEach((item) => {
       addToCart(item.name, item.price, item.quantity || 1, item.image, item.id);
     });
     showToast("Items from order added to cart!");
@@ -118,7 +118,7 @@ export default function Orders() {
                   </div>
 
                   <div className="space-y-3 border-t border-slate-200 pt-4">
-                    {order.items.slice(0, 3).map((item, idx) => (
+                    {(order.items || []).slice(0, 3).map((item, idx) => (
                       <div key={idx} className="flex justify-between items-center text-sm">
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 p-1 flex-shrink-0">
@@ -132,13 +132,13 @@ export default function Orders() {
                         </div>
                       </div>
                     ))}
-                    {order.items.length > 3 && <p className="text-xs font-bold text-slate-500 text-center bg-slate-200/50 py-2 rounded-lg">+{order.items.length - 3} more items</p>}
+                    {(order.items || []).length > 3 && <p className="text-xs font-bold text-slate-500 text-center bg-slate-200/50 py-2 rounded-lg">+{(order.items || []).length - 3} more items</p>}
                   </div>
 
                   <div className="space-y-2 border-t border-slate-200 mt-4 pt-4">
                     <div className="flex justify-between items-center text-sm">
                       <span className="font-medium text-slate-500">Item Total</span>
-                      <span className="font-bold text-slate-700">₹{order.items.reduce((total, item) => total + (item.price * item.quantity), 0)}</span>
+                      <span className="font-bold text-slate-700">₹{(order.items || []).reduce((total, item) => total + ((item.price || 0) * (item.quantity || 1)), 0)}</span>
                     </div>
                     {order.couponCode ? (
                       <div className="flex justify-between items-center text-sm">

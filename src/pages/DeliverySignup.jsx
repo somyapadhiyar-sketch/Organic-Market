@@ -23,7 +23,7 @@ export default function DeliverySignup() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { registerDelivery, showToast } = useStore();
+  const { showToast } = useStore();
   const navigate = useNavigate();
 
   // Derived state for dropdowns
@@ -93,9 +93,7 @@ export default function DeliverySignup() {
         createdAt: new Date().toISOString()
       });
 
-      // 4. Update Local State (so Admin sees it immediately without refresh if on same device)
-      registerDelivery(name, email, phone, address, password, photoURL);
-
+      // 4. Show success message and redirect
       if (showToast) showToast("Registration request sent! You can login once approved by admin.");
       navigate('/login/delivery');
     } catch (error) {

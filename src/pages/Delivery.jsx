@@ -99,7 +99,7 @@ export default function Delivery() {
     o.status === 'Pending' || o.deliveryPartnerEmail === currentUser?.email
   );
 
-  const filteredOrders = visibleOrders.filter(o => o.id.toLowerCase().includes(searchQuery.toLowerCase()) || o.customer.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredOrders = visibleOrders.filter(o => (o.id || '').toLowerCase().includes(searchQuery.toLowerCase()) || (o.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
@@ -201,8 +201,10 @@ export default function Delivery() {
             <div key={order.id} className="bg-white p-6 rounded-[2rem] shadow-lg border border-orange-100 flex flex-col md:flex-row justify-between gap-6">
               <div className="flex-1">
                 <div className="flex flex-wrap gap-3 mb-4"><span className="bg-orange-100 text-orange-700 font-black px-3 py-1 rounded-lg text-xs">{order.id}</span><span className={`text-xs font-bold px-3 py-1 rounded-lg ${order.status === 'Delivered' ? 'bg-green-100 text-green-700' : order.status === 'Out for Delivery' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>{order.status}</span><span className="text-xs text-slate-400 font-medium py-1">{order.date}</span></div>
-                <h3 className="font-bold text-xl mb-1 text-slate-900">{order.customer.name}</h3><p className="text-sm text-slate-600 mb-1">📞 {order.customer.phone}</p><p className="text-sm text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2">📍 {order.customer.address} ({order.customer.type})</p>
-                <div className="mt-4"><p className="text-xs font-bold text-slate-400 uppercase mb-2">Order Items:</p><div className="flex flex-wrap gap-2">{order.items.map((item, i) => (<div key={i} className="bg-orange-50 border border-orange-100 px-3 py-1 rounded-lg text-xs font-bold text-orange-800">{item.quantity}x {item.name}</div>))}</div></div>
+                <h3 className="font-bold text-xl mb-1 text-slate-900">{order.customer?.name || 'Unknown Customer'}</h3>
+                <a href={`tel:${order.customer?.phone}`} className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-bold mb-1 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors w-max">📞 Call {order.customer?.phone}</a>
+                <p className="text-sm text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2">📍 {order.customer?.address} ({order.customer?.type || 'Home'})</p>
+                <div className="mt-4"><p className="text-xs font-bold text-slate-400 uppercase mb-2">Order Items:</p><div className="flex flex-wrap gap-2">{(order.items || []).map((item, i) => (<div key={i} className="bg-orange-50 border border-orange-100 px-3 py-1 rounded-lg text-xs font-bold text-orange-800">{item.quantity}x {item.name}</div>))}</div></div>
               </div>
               <div className="md:w-64 bg-slate-50 p-6 rounded-3xl border border-slate-100 flex flex-col justify-center text-center">
                 <p className="text-slate-500 font-medium mb-1">To Collect</p><p className="text-4xl font-black text-slate-900 mb-6">₹{order.total}</p>

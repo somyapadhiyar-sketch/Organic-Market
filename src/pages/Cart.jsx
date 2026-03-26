@@ -27,7 +27,7 @@ const MOCK_PINCODE_DATA = {
 };
 
 export default function Cart() {
-  const { cart, addToCart, decreaseCartQuantity, getCartTotal, placeOrder, clearCart, currentUser, showToast, updateUser, setUserLocation, products } = useStore()
+  const { cart, addToCart, decreaseCartQuantity, getCartTotal, placeOrder, clearCart, currentUser, showToast, updateUser, setUserLocation, products, pendingOrderId } = useStore()
   const total = getCartTotal()
   const navigate = useNavigate();
   
@@ -89,12 +89,17 @@ export default function Cart() {
 
     const fetchRecommendations = async () => {
       console.table(cart.length)
-      if (cart.length === 0) {
-        setRecommendedProducts([]);
+      
+      // Wait until products are loaded from Firebase before trying to match
+      if (cart.length === 0 || !products || products.length === 0) {
+        if (cart.length === 0) setRecommendedProducts([]);
         return;
       }
       
+      const targetProductId = cart[cart.length - 1].id;
+
       setLoadingRecommendations(true);
+      setRecommendedProducts([]); // Clear UI immediately so the loading pulse is visible!
       try {
         const response = await fetch('http://localhost:5678/webhook/recommendation_system', {
           method: 'POST',
@@ -105,7 +110,7 @@ export default function Cart() {
             'Accept': 'application/json'
           },
           body: JSON.stringify({ 
-            productId: cart[0].id
+            productId: targetProductId
           })
         });
 
@@ -157,11 +162,11 @@ export default function Cart() {
         
         // 🚨 Fallback: Smart Local Recommendations if API fails (CORS, offline, bad response)
         if (!abortController.signal.aborted) {
-          const firstItem = products?.find(p => p.id === cart[0]?.id) || cart[0];
-          let fallback = products?.filter(p => p.category === firstItem?.category && !cart.find(c => c.id === p.id)) || [];
+          const lastItem = products?.find(p => p.id === targetProductId) || cart[cart.length - 1];
+          let fallback = products?.filter(p => p.category === lastItem?.category && !cart.find(c => c.id === p.id)) || [];
           
           if (fallback.length < 4) {
-            const others = products?.filter(p => p.category !== firstItem?.category && !cart.find(c => c.id === p.id)) || [];
+            const others = products?.filter(p => p.category !== lastItem?.category && !cart.find(c => c.id === p.id)) || [];
             fallback = [...fallback, ...others];
           }
           
@@ -179,7 +184,7 @@ export default function Cart() {
     return () => {
       abortController.abort(); // Cleanup: Cancels any ongoing fetch if component unmounts
     };
-  }, [cart]);
+  }, [cart, products]);
 
   useEffect(() => {
     let interval;
@@ -280,6 +285,11 @@ export default function Cart() {
   const handlePayment = async (e) => {
     e.preventDefault();
     
+    if (pendingOrderId) {
+      showToast("Order already processing...");
+      return;
+    }
+    
     if (paymentMethod !== 'COD' && otp !== generatedOtp) {
       return showToast("Invalid OTP. Please check the code and try again.");
     }
@@ -302,16 +312,13 @@ export default function Cart() {
         paymentDetails: paymentMethod === 'UPI' ? { upiId: paymentDetails.upiId } : paymentMethod === 'Card' ? { cardName: paymentDetails.cardName, cardNumber: paymentDetails.cardNumber.slice(-4) } : paymentMethod === 'NetBanking' ? { bankName: paymentDetails.bankName } : null
       };
 
-      const db = getFirestore(auth.app);
-      // Save order directly to Firestore "orders" collection
-      const docRef = await addDoc(collection(db, "orders"), orderData);
+      const result = await placeOrder(orderData);
       
-      // Pass the generated ID to local context to update UI immediately
-      placeOrder({ id: docRef.id, ...orderData });
+      if (result && !result.success) {
+        setIsProcessing(false);
+        return showToast(result.msg || "Payment failed. Please try again.");
+      }
       
-      // Clear the user's cart automatically after successful checkout
-      if (clearCart) clearCart();
-
       setIsProcessing(false);
       setOrderSuccess(true);
       
@@ -344,17 +351,17 @@ export default function Cart() {
   ];
 
   const StepIndicator = () => (
-    <div className="max-w-2xl mx-auto w-full mb-12 px-4">
-      <div className="flex items-center">
+    <div className="max-w-2xl mx-auto w-full mb-8 sm:mb-12 px-1 sm:px-4">
+      <div className="flex items-start">
         {checkoutSteps.map((stepInfo, index) => (
-          <div key={index} className="flex items-center w-full">
-            <div className={`flex flex-col items-center ${step > index ? 'text-green-600' : 'text-slate-400'}`}>
-              <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${step > index ? 'bg-green-100 border-green-600' : 'bg-slate-100 border-slate-300'}`}>
-                {step > index + 1 ? <CheckCircle2 size={20}/> : stepInfo.icon}
+          <div key={index} className={`flex ${index < checkoutSteps.length - 1 ? 'flex-1' : ''}`}>
+            <div className={`flex flex-col items-center w-20 sm:w-24 shrink-0 relative z-10 ${step > index ? 'text-green-600' : 'text-slate-400'}`}>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-white ${step > index ? 'bg-green-100 border-green-600' : 'bg-slate-100 border-slate-300'}`}>
+                {step > index + 1 ? <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5"/> : <span className="scale-[0.8] sm:scale-100">{stepInfo.icon}</span>}
               </div>
-              <p className={`text-xs font-bold mt-2 text-center ${step > index ? 'text-slate-700' : 'text-slate-400'}`}>{stepInfo.name}</p>
+              <p className={`text-[10px] sm:text-xs font-bold mt-1.5 sm:mt-2 text-center leading-tight ${step > index ? 'text-slate-700' : 'text-slate-400'}`}>{stepInfo.name}</p>
             </div>
-            {index < checkoutSteps.length - 1 && <div className={`flex-1 h-1 mx-4 rounded-full ${step > index + 1 ? 'bg-green-600' : 'bg-slate-200'}`}></div>}
+            {index < checkoutSteps.length - 1 && <div className={`flex-1 h-1 -ml-6 -mr-6 sm:mx-0 rounded-full mt-4 sm:mt-5 ${step > index + 1 ? 'bg-green-600' : 'bg-slate-200'}`}></div>}
           </div>
         ))}
       </div>
@@ -376,9 +383,9 @@ export default function Cart() {
       <main className="max-w-6xl mx-auto px-4 md:px-6 pt-[140px] pb-20 w-full">
         
         {cart.length === 0 ? (
-          <div className="bg-white rounded-3xl p-8 sm:p-12 md:p-20 text-center border border-slate-100 shadow-xl mt-8 max-w-2xl mx-auto">
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-12 md:p-20 text-center border border-slate-100 shadow-xl mt-8 max-w-2xl mx-auto">
             <div className="text-8xl mb-6">🛒</div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-800 mb-3">Your Cart is Empty</h2>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-800 mb-3">Your Cart is Empty</h2>
             <p className="text-slate-500 font-medium text-lg mb-8">Looks like you haven't added anything to your cart yet.</p>
             <Link to="/user/fruits">
               <button className="px-8 py-4 bg-slate-800 text-white font-bold rounded-2xl hover:bg-slate-700 transition-colors shadow-lg">Start Shopping</button>
@@ -395,23 +402,23 @@ export default function Cart() {
               {/* STEP 1: CART REVIEW */}
               {step === 1 && (
                 <div className="space-y-8">
-                  <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-lg">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 border-b border-slate-100 pb-6">
-                      <h2 className="text-xl sm:text-2xl font-extrabold text-slate-800">Your Cart ({cart.length} items)</h2>
+                  <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-lg">
+                    <div className="flex items-center justify-between gap-3 mb-6 border-b border-slate-100 pb-6">
+                      <h2 className="text-lg sm:text-2xl font-extrabold text-slate-800">Your Cart ({cart.length} items)</h2>
                       <span className="bg-green-100 text-green-700 text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-full w-max">⚡ 10 MINS DELIVERY</span>
                     </div>
 
                     <div className="space-y-6">
                       {cart.map((item, idx) => (
-                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 border-b border-slate-100 pb-6 last:border-0 last:pb-0">
+                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 border-b border-slate-100 pb-6 last:border-0 last:pb-0">
                           <div className="flex items-center gap-4 flex-1">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-50 border border-slate-100 rounded-2xl p-2 flex-shrink-0 flex items-center justify-center">
+                            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-slate-50 border border-slate-100 rounded-2xl p-2 flex-shrink-0 flex items-center justify-center">
                               <img src={item.image} className="w-full h-full object-contain mix-blend-multiply" onError={(e) => { e.target.src = `https://placehold.co/100x100/F8F8F8/767676?text=Img` }} />
                             </div>
                             <div className="flex-1">
-                              <h4 className="font-semibold text-lg text-slate-800 leading-tight">{item.name}</h4>
-                              <p className="text-sm font-medium text-slate-500 mt-1">1 kg</p>
-                              <p className="font-bold text-lg text-slate-900 mt-2">₹{item.price}</p>
+                              <h4 className="font-semibold text-base sm:text-lg text-slate-800 leading-tight line-clamp-2">{item.name}</h4>
+                              <p className="text-xs sm:text-sm font-medium text-slate-500 mt-0.5 sm:mt-1">1 kg</p>
+                              <p className="font-bold text-base sm:text-lg text-slate-900 mt-1 sm:mt-2">₹{item.price}</p>
                             </div>
                           </div>
                           <div className="flex justify-end w-full sm:w-auto mt-2 sm:mt-0">
@@ -428,11 +435,11 @@ export default function Cart() {
 
                   {/* ✨ AI Recommendations */}
                   {recommendedProducts.length > 0 && (
-                    <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-lg">
-                      <h3 className="font-extrabold text-xl mb-6 text-slate-800 flex items-center gap-2">✨ Recommended for You</h3>
+                    <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-lg">
+                      <h3 className="font-extrabold text-lg sm:text-xl mb-6 text-slate-800 flex items-center gap-2">✨ Recommended for You</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {recommendedProducts.map((product, idx) => (
-                      <div key={product.id || idx} className="flex flex-col">
+                      <div key={product.id || idx} className="flex flex-col h-full">
                         <ProductCard product={product} />
                         {/* Only display this block if the data successfully came from the AI! */}
                         {product.aiReason && (
@@ -454,8 +461,8 @@ export default function Cart() {
 
               {/* STEP 2: ADDRESS */}
               {step === 2 && (
-                <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-lg">
-                  <h3 className="font-extrabold text-2xl mb-6 text-slate-800 flex items-center gap-3"><MapPin size={24} className="text-green-600" /> Delivery Details</h3>
+                <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-lg">
+                  <h3 className="font-extrabold text-xl sm:text-2xl mb-6 text-slate-800 flex items-center gap-2 sm:gap-3"><MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" /> Delivery Details</h3>
                   
                   {/* Saved Address Selector */}
                   {currentUser?.savedAddresses?.length > 0 && (
@@ -492,7 +499,7 @@ export default function Cart() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                     <input required type="text" placeholder="Full Name" value={address.name} onChange={e => setAddress({...address, name: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 font-medium text-sm" />
                     <input required type="tel" maxLength="10" placeholder="10-digit Mobile Number" value={address.phone} onChange={e => setAddress({...address, phone: e.target.value.replace(/\D/g, '')})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 font-medium text-sm" />
                     
@@ -529,16 +536,16 @@ export default function Cart() {
 
                   <div className="mt-6 flex flex-wrap gap-3">
                     {['Home', 'Work', 'Other'].map(type => (
-                      <button key={type} onClick={() => setAddress({...address, type})} className={`px-5 py-2.5 rounded-full text-sm font-bold border transition-all flex items-center gap-2 ${address.type === type ? 'bg-green-100 border-green-500 text-green-700 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>
-                        {type === 'Home' && <Home size={16} />} {type === 'Work' && <Briefcase size={16} />} {type === 'Other' && <MapPin size={16} />} {type}
+                      <button key={type} onClick={() => setAddress({...address, type})} className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold border transition-all flex items-center gap-1.5 sm:gap-2 ${address.type === type ? 'bg-green-100 border-green-500 text-green-700 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>
+                        {type === 'Home' && <Home className="w-4 h-4 sm:w-auto" />} {type === 'Work' && <Briefcase className="w-4 h-4 sm:w-auto" />} {type === 'Other' && <MapPin className="w-4 h-4 sm:w-auto" />} {type}
                       </button>
                     ))}
                   </div>
 
                   <div className="mt-6">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-600" />
-                      <span className="font-bold text-sm text-slate-600">Save this address for future use</span>
+                    <label className="flex items-start sm:items-center gap-3 cursor-pointer mt-2 sm:mt-0">
+                      <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="w-4 h-4 mt-0.5 sm:mt-0 rounded border-slate-300 text-green-600 focus:ring-green-600 shrink-0" />
+                      <span className="font-bold text-sm text-slate-600 leading-tight">Save this address for future use</span>
                     </label>
                   </div>
                 </div>
@@ -549,8 +556,8 @@ export default function Cart() {
                 <form onSubmit={handlePayment} className="space-y-6">
 
                   {/* Payment Methods Section */}
-                  <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-lg">
-                    <h3 className="font-extrabold text-2xl mb-6 text-slate-800 flex items-center gap-3"><CreditCard size={24} className="text-green-600" /> Payment Method</h3>
+                  <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-lg">
+                    <h3 className="font-extrabold text-xl sm:text-2xl mb-6 text-slate-800 flex items-center gap-2 sm:gap-3"><CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" /> Payment Method</h3>
                     <div className="space-y-3">
                       
                       {/* UPI ACCORDION */}
@@ -558,10 +565,10 @@ export default function Cart() {
                         <label className="flex items-center p-4 cursor-pointer">
                           <input type="radio" name="payment" value="UPI" checked={paymentMethod === 'UPI'} onChange={() => { setPaymentMethod('UPI'); setOtp(''); setGeneratedOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
                           <div className="ml-3 flex-1">
-                            <span className="block text-base font-bold text-slate-800">Google Pay / PhonePe / UPI</span>
-                            <span className="block text-sm text-slate-500">Pay instantly via any UPI app</span>
+                            <span className="block text-sm sm:text-base font-bold text-slate-800">Google Pay / PhonePe / UPI</span>
+                            <span className="block text-[11px] sm:text-sm text-slate-500">Pay instantly via any UPI app</span>
                           </div>
-                          <img src="https://cdn-icons-png.flaticon.com/512/12140/12140590.png" className="w-8 h-8 opacity-80" alt="UPI" />
+                          <img src="https://cdn-icons-png.flaticon.com/512/12140/12140590.png" className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" alt="UPI" />
                         </label>
                         {paymentMethod === 'UPI' && (
                           <div className="px-4 pb-4 pt-1 ml-7 animate-in fade-in slide-in-from-top-2">
@@ -575,10 +582,10 @@ export default function Cart() {
                         <label className="flex items-center p-4 cursor-pointer">
                           <input type="radio" name="payment" value="Card" checked={paymentMethod === 'Card'} onChange={() => { setPaymentMethod('Card'); setOtp(''); setGeneratedOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
                           <div className="ml-3 flex-1">
-                            <span className="block text-base font-bold text-slate-800">Credit / Debit Card</span>
-                            <span className="block text-sm text-slate-500">Visa, MasterCard, RuPay</span>
+                            <span className="block text-sm sm:text-base font-bold text-slate-800">Credit / Debit Card</span>
+                            <span className="block text-[11px] sm:text-sm text-slate-500">Visa, MasterCard, RuPay</span>
                           </div>
-                          <CreditCard className="w-6 h-6 text-slate-400" />
+                          <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />
                         </label>
                         {paymentMethod === 'Card' && (
                           <div className="px-4 pb-4 pt-1 ml-7 space-y-3 animate-in fade-in slide-in-from-top-2">
@@ -598,10 +605,10 @@ export default function Cart() {
                         <label className="flex items-center p-4 cursor-pointer">
                           <input type="radio" name="payment" value="NetBanking" checked={paymentMethod === 'NetBanking'} onChange={() => { setPaymentMethod('NetBanking'); setOtp(''); setGeneratedOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
                           <div className="ml-3 flex-1">
-                            <span className="block text-base font-bold text-slate-800">Net Banking</span>
-                            <span className="block text-sm text-slate-500">All major banks supported</span>
+                            <span className="block text-sm sm:text-base font-bold text-slate-800">Net Banking</span>
+                            <span className="block text-[11px] sm:text-sm text-slate-500">All major banks supported</span>
                           </div>
-                          <Building className="w-6 h-6 text-slate-400" />
+                          <Building className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />
                         </label>
                         {paymentMethod === 'NetBanking' && (
                           <div className="px-4 pb-4 pt-1 ml-7 animate-in fade-in slide-in-from-top-2 relative">
@@ -623,10 +630,10 @@ export default function Cart() {
                         <label className="flex items-center p-4 cursor-pointer">
                           <input type="radio" name="payment" value="COD" checked={paymentMethod === 'COD'} onChange={() => { setPaymentMethod('COD'); setOtp(''); setGeneratedOtp(''); setOtpSent(false); setOtpTimer(0); }} className="w-4 h-4 text-green-600 focus:ring-green-600 border-slate-300 accent-green-600" />
                           <div className="ml-3 flex-1">
-                            <span className="block text-base font-bold text-slate-800">Cash on Delivery</span>
-                            <span className="block text-sm text-slate-500">Pay at your doorstep</span>
+                            <span className="block text-sm sm:text-base font-bold text-slate-800">Cash on Delivery</span>
+                            <span className="block text-[11px] sm:text-sm text-slate-500">Pay at your doorstep</span>
                           </div>
-                          <Banknote className="w-6 h-6 text-slate-400" />
+                          <Banknote className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />
                         </label>
                       </div>
 
@@ -676,9 +683,9 @@ export default function Cart() {
 
             {/* RIGHT COLUMN: Bill Details */}
             <div className="w-full lg:w-[380px]">
-              <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-lg sticky top-[140px]">
-                <h3 className="font-extrabold text-xl mb-6 text-slate-800 border-b border-slate-100 pb-4">Bill Details</h3>
-                <div className="space-y-4 text-base text-slate-600 font-medium mb-6">
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-lg sticky top-[140px]">
+                <h3 className="font-extrabold text-lg sm:text-xl mb-5 sm:mb-6 text-slate-800 border-b border-slate-100 pb-3 sm:pb-4">Bill Details</h3>
+                <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-slate-600 font-medium mb-5 sm:mb-6">
                   <div className="flex justify-between"><span>Item Total</span><span className="font-bold text-slate-800">₹{total}</span></div>
                   {discountPercent > 0 && (
                     <div className="flex justify-between text-green-600">
@@ -693,30 +700,30 @@ export default function Cart() {
                   <div className="flex justify-between"><span>Handling Charge</span><span className="font-bold text-slate-800">₹{handlingCharge}</span></div>
                 </div>
                 
-                <div className="flex justify-between items-center border-t-2 border-dashed border-slate-200 pt-4 mb-6">
-                  <span className="font-bold text-lg text-slate-800">Grand Total</span>
-                  <span className="font-extrabold text-2xl text-slate-800">₹{grandTotal}</span>
+                <div className="flex justify-between items-center border-t-2 border-dashed border-slate-200 pt-4 mb-5 sm:mb-6">
+                  <span className="font-bold text-base sm:text-lg text-slate-800">Grand Total</span>
+                  <span className="font-extrabold text-xl sm:text-2xl text-slate-800">₹{grandTotal}</span>
                 </div>
 
                 {step === 1 && (
-                  <button onClick={handleProceed} className="w-full py-4 bg-slate-800 text-white font-bold text-base rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center gap-2">
+                  <button onClick={handleProceed} className="w-full py-3.5 sm:py-4 bg-slate-800 text-white font-bold text-sm sm:text-base rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center gap-2">
                     Proceed to Address <ArrowRight size={20} />
                   </button>
                 )}
 
                 {step === 2 && (
-                  <button onClick={handleProceed} className="w-full py-4 bg-slate-800 text-white font-bold text-base rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center gap-2">
+                  <button onClick={handleProceed} className="w-full py-3.5 sm:py-4 bg-slate-800 text-white font-bold text-sm sm:text-base rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center gap-2">
                     Proceed to Payment <ArrowRight size={20} />
                   </button>
                 )}
 
                 {step === 3 && (
-                  <button 
+                    <button 
                     onClick={() => document.getElementById('real-checkout-btn').click()} 
-                    disabled={isCheckoutDisabled()}
-                    className="w-full py-4 bg-green-600 text-white font-bold text-base rounded-2xl hover:bg-green-700 transition-colors flex justify-center items-center gap-2 disabled:bg-slate-400 disabled:cursor-wait shadow-lg shadow-green-200"
+                    disabled={isCheckoutDisabled() || pendingOrderId}
+                    className="w-full py-3.5 sm:py-4 bg-green-600 text-white font-bold text-sm sm:text-base rounded-2xl hover:bg-green-700 transition-colors flex justify-center items-center gap-2 disabled:bg-slate-400 disabled:cursor-wait shadow-lg shadow-green-200"
                   >
-                    {isProcessing ? <><Loader2 className="animate-spin" size={20} /> Processing...</> : `Pay ₹${grandTotal} Securely`}
+                    {pendingOrderId ? 'Processing...' : isProcessing ? <><Loader2 className="animate-spin w-4 h-4 sm:w-5 sm:h-5" /> Processing...</> : `Pay ₹${grandTotal} Securely`}
                   </button>
                 )}
                 

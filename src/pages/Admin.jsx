@@ -64,7 +64,7 @@ export default function Admin() {
     const matchesTab = activeTab === 'fruits' ? p.category === 'Fruits' : activeTab === 'vegetables' ? p.category === 'Vegetables' : activeTab === 'pulses' ? p.category === 'Pulses' : true;
     return matchesSearch && matchesTab;
   });
-  const filteredOrders = orders.filter(o => o.id.toLowerCase().includes(searchQuery.toLowerCase()) || o.customer.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredOrders = orders.filter(o => (o.id || '').toLowerCase().includes(searchQuery.toLowerCase()) || (o.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()));
   const filteredPartners = deliveryPartners.filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase()) || d.email.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
@@ -282,8 +282,8 @@ export default function Admin() {
                         </span>
                         <span className="text-gray-400 font-medium text-xs">{order.date}</span>
                       </div>
-                      <p className="text-sm font-bold text-gray-600">{order.customer.name} • {order.customer.phone}</p>
-                      <p className="text-sm text-gray-500 mt-1">{order.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}</p>
+                      <p className="text-sm font-bold text-gray-600">{order.customer?.name || 'Unknown'} • {order.customer?.phone || 'N/A'}</p>
+                      <p className="text-sm text-gray-500 mt-1">{(order.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ')}</p>
                     </div>
                     <div className="text-left md:text-right shrink-0 bg-gray-50 p-4 rounded-xl">
                       <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">{order.paymentMethod}</p>

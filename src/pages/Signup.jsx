@@ -45,7 +45,7 @@ export default function Signup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const [loading, setLoading] = useState(false);
-  const { registerUser, showToast } = useStore();
+  const { setCurrentUser, showToast } = useStore();
   const navigate = useNavigate();
 
   // Derived state for dropdowns
@@ -120,14 +120,20 @@ export default function Signup() {
         createdAt: new Date().toISOString()
       }).catch(err => console.error("Firestore Database Error:", err));
 
-      // 4. Local Context Registration
-      const result = registerUser(name, email, phone, address, password);
+      // 4. Set user in context
+      const userData = {
+        uid: user.uid,
+        name,
+        email,
+        role: 'user'
+      };
+      setCurrentUser(userData);
 
-      if (result?.success || user) {
+      if (user) {
         if (showToast) showToast("Account created successfully! Welcome " + name);
         navigate('/home', { replace: true });
       } else {
-        if (showToast) showToast(result?.msg || "Signup failed. Please try again.");
+        if (showToast) showToast("Signup failed. Please try again.");
       }
     } catch (error) {
       console.error("Signup Error:", error);

@@ -1,94 +1,80 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Minus, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
+import { Plus, Minus, Heart, ShoppingBag } from 'lucide-react';
 
 export default function ProductCard({ product }) {
-  const { cart, addToCart, decreaseCartQuantity, wishlist, toggleWishlist, showToast, currentUser } = useStore();
-  const cartItem = cart.find(item => item.id === product.id);
-  const currentQuantity = cartItem ? cartItem.quantity : 0;
-  const navigate = useNavigate();
-  const isInWishlist = wishlist.some(item => item.id === product.id);
+  const { cart, addToCart, decreaseCartQuantity, wishlist, toggleWishlist, showToast } = useStore();
 
-  const handleAuthAction = (action) => {
-    if (!currentUser) {
-      showToast("Please login to shop!");
-      navigate('/login');
-    } else {
-      action();
-    }
+  if (!product) return null;
+
+  const cartItem = cart.find(item => item.id === product.id);
+  const quantity = cartItem ? cartItem.quantity : 0;
+  const isInWishlist = wishlist.some(item => item.id === product.id);
+  const isOutOfStock = product.disabled || product.stock <= 0;
+
+  const handleWishlistToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product);
+    showToast(isInWishlist ? `${product.name} removed from wishlist` : `${product.name} added to wishlist`);
+  };
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product.name, product.price, 1, product.image, product.id);
+  };
+
+  const handleIncrease = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product.name, product.price, 1, product.image, product.id);
+  };
+
+  const handleDecrease = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    decreaseCartQuantity(product.id, 1);
   };
 
   return (
-    <div className="bg-white rounded-2xl p-4 border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300 flex flex-col h-full font-sans relative group">
-      
-      {/* Zepto Discount Tag */}
-      <div className="absolute top-0 left-4 bg-gradient-to-r from-green-600 to-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-b-lg shadow-sm z-10">
-        10% OFF
-      </div>
-
-      {/* Wishlist Button */}
-      <button 
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAuthAction(() => { toggleWishlist(product); showToast && showToast(isInWishlist ? `${product.name} removed from wishlist` : `${product.name} added to wishlist`); }); }}
-        className="absolute top-3 right-3 z-10 p-1.5 bg-white/70 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
-      >
-        <Heart size={18} className={`transition-all ${isInWishlist ? 'text-red-500 fill-red-500' : 'text-gray-500'}`} />
-      </button>
-      
-      {/* Zepto Gray Image Box */}
-      <Link to={`/user/product/${product.name}`} state={{ product }} className="block bg-[#F8F8F8] rounded-xl mb-4 p-4 h-48 flex items-center justify-center relative overflow-hidden mt-2">
-        {product.disabled && <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-20"><span className="bg-gray-800 text-white font-bold px-3 py-1 rounded text-[11px]">Out of Stock</span></div>}
-        
-        {/* Bulletproof Image Fallback */}
-        <img 
-          src={product.image} 
-          alt={product.name} 
-          className="h-full object-contain mix-blend-multiply hover:scale-105 transition-transform duration-200" 
-          onError={(e) => { 
-            // Smart fallback: If .png fails, automatically try .jpg
-            if (e.target.src.endsWith('.png')) {
-              e.target.src = product.image.replace('.png', '.jpg');
-            } else if (!e.target.src.includes('placehold.co')) {
-              e.target.src = `https://placehold.co/400x400/F8F8F8/767676?text=${product.name.replace(/ /g, '+')}`;
-            }
-          }}
-        />
-      </Link>
-      
-      <div className="flex-grow flex flex-col">
-        <Link to={`/user/product/${product.name}`} state={{ product }}>
-          <h3 className="text-sm font-bold text-slate-800 leading-snug mb-1 line-clamp-2">{product.name}</h3>
-          <p className="text-[12px] font-medium text-[#767676] mb-3">1 kg</p>
-        </Link>
-        
-        <div className="mt-auto pt-2 space-y-3">
-          <div className="flex flex-col">
-            <span className="text-[11px] text-[#767676] line-through font-medium">₹{Math.round(product.price * 1.1)}</span>
-            <span className="text-base font-bold text-slate-800">₹{product.price}</span>
-          </div>
-
-          {/* Zepto Add Button Logic */}
-          <div className="flex items-center">
-            {product.disabled ? (
-              <button disabled className="w-full px-4 py-2 bg-slate-100 text-slate-400 font-bold rounded-lg text-sm">Out of Stock</button>
-            ) : currentQuantity > 0 ? (
-              <div className="flex items-center bg-slate-100 text-slate-800 rounded-lg h-9 w-full justify-between shadow-sm border border-slate-200">
-                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); decreaseCartQuantity(product.id, 1); }} className="h-full px-2 flex items-center justify-center rounded-l-lg hover:bg-slate-200 transition-colors"><Minus size={16} strokeWidth={3} /></button>
-                <span className="font-bold text-sm">{currentQuantity}</span>
-                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(product.name, product.price, 1, product.image, product.id); }} className="h-full px-2 flex items-center justify-center rounded-r-lg hover:bg-slate-200 transition-colors"><Plus size={16} strokeWidth={3} /></button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-2 w-full">
-                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAuthAction(() => addToCart(product.name, product.price, 1, product.image, product.id)); }} className="px-3 py-2 border border-slate-300 text-slate-800 bg-white hover:bg-slate-50 font-bold rounded-lg text-sm transition-colors shadow-sm">
-                  Add
-                </button>
-                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAuthAction(() => { addToCart(product.name, product.price, 1, product.image, product.id); navigate('/user/cart'); }); }} className="px-3 py-2 bg-slate-800 text-white font-bold rounded-lg text-sm transition-colors shadow-sm hover:bg-slate-700">
-                  Buy Now
-                </button>
-              </div>
-            )}
-          </div>
+    <Link to={`/user/product/${product.name}`} state={{ product }} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 flex flex-col group hover:shadow-xl hover:-translate-y-1 transition-all h-full">
+      <div className="relative">
+        <div className="h-40 w-full bg-gray-50 rounded-xl flex items-center justify-center p-4 mb-4 overflow-hidden">
+          <img 
+            src={product.image} 
+            alt={product.name} 
+            className="max-w-full max-h-full object-contain mix-blend-multiply transition-transform group-hover:scale-105" 
+            onError={(e) => { e.target.src = `https://placehold.co/150x150/F8F8F8/767676?text=${product.name}` }}
+          />
         </div>
+        {isOutOfStock && (
+          <span className="absolute top-2 left-2 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide border border-red-200">Out of Stock</span>
+        )}
+        <button onClick={handleWishlistToggle} className="absolute top-2 right-2 p-2 bg-white/70 backdrop-blur-sm rounded-full text-slate-500 hover:text-red-500 transition-colors">
+          <Heart size={18} fill={isInWishlist ? '#ef4444' : 'none'} className={isInWishlist ? 'text-red-500' : ''} />
+        </button>
       </div>
-    </div>
-  )
+      <div className="flex-1 flex flex-col">
+        <h3 className="font-bold text-gray-800 text-base leading-tight line-clamp-2 flex-1">{product.name}</h3>
+        <p className="text-sm text-gray-500 mt-1">{product.quantityLabel || '1 kg'}</p>
+      </div>
+      <div className="flex justify-between items-center mt-4">
+        <p className="font-extrabold text-lg text-gray-900">₹{product.price}</p>
+        {isOutOfStock ? (
+          <button disabled className="px-4 py-2 bg-slate-200 text-slate-500 rounded-xl font-bold text-sm cursor-not-allowed">Out of Stock</button>
+        ) : quantity > 0 ? (
+          <div className="flex items-center bg-green-100 text-green-800 rounded-xl h-9 shadow-sm border border-green-200">
+            <button onClick={handleDecrease} className="px-2.5 h-full flex items-center justify-center rounded-l-xl hover:bg-green-200 transition-colors"><Minus size={14} strokeWidth={3}/></button>
+            <span className="font-bold text-sm w-7 text-center">{quantity}</span>
+            <button onClick={handleIncrease} className="px-2.5 h-full flex items-center justify-center rounded-r-xl hover:bg-green-200 transition-colors"><Plus size={14} strokeWidth={3}/></button>
+          </div>
+        ) : (
+          <button onClick={handleAddToCart} className="p-2.5 bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors">
+            <ShoppingBag size={18} />
+          </button>
+        )}
+      </div>
+    </Link>
+  );
 }
