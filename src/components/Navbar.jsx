@@ -38,7 +38,7 @@ export default function Navbar() {
       if (matchedProduct) {
         navigate(`/user/${matchedProduct.category.toLowerCase()}`);
       } else {
-        // If no match, navigate to a default page to show "no results".
+        // If no match, navigate to a default page to show"no results".
         navigate('/user/fruits');
       }
     }
@@ -71,7 +71,7 @@ export default function Navbar() {
     performSearchAndNavigate(localQuery); // Search and navigate on submit.
    };
 
-  // Implements "autosearch" by updating the search query as the user types (debounced).
+  // Implements"autosearch" by updating the search query as the user types (debounced).
   // This allows for live filtering on category pages without forced navigation.
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -162,7 +162,7 @@ export default function Navbar() {
             </button>
             <input 
               type="text" 
-              placeholder='Search for "Apples" or "Dal"'
+              placeholder='Search for"Apples" or"Dal"'
               value={localQuery}
               onChange={(e) => setLocalQuery(e.target.value)}
               className="w-full bg-transparent outline-none text-[15px] font-medium text-gray-900 placeholder:text-gray-500" 
@@ -264,7 +264,7 @@ export default function Navbar() {
             </Link>
           )}
 
-          <Link to="/user/cart" className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl font-bold transition-colors shadow-sm">
+          <Link to="/user/cart" className="btn-3d btn-lime flex items-center gap-2 px-4 py-2.5 font-bold">
             <div className="relative">
               <ShoppingCart size={20} />
               {cartCount > 0 && <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full border border-white">{cartCount}</span>}

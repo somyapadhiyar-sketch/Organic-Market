@@ -3,8 +3,8 @@ import { useNavigate, Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from"firebase/auth";
+import { getFirestore, doc, getDoc, setDoc } from"firebase/firestore";
 import { auth } from '../firebase';
 
 export default function Login() {
@@ -61,9 +61,9 @@ export default function Login() {
              const userCredential = await createUserWithEmailAndPassword(auth, email, password);
              user = userCredential.user;
              const db = getFirestore(auth.app);
-             await setDoc(doc(db, "users", user.uid), { name: 'Admin', email, role: 'admin' });
+             await setDoc(doc(db,"users", user.uid), { name: 'Admin', email, role: 'admin' });
            } catch (createErr) {
-             if (createErr.code === 'auth/email-already-in-use') throw { custom: "Admin account exists with different credentials. Please click 'Continue with Google' to log in." };
+             if (createErr.code === 'auth/email-already-in-use') throw { custom:"Admin account exists with different credentials. Please click 'Continue with Google' to log in." };
              throw createErr;
            }
         } else {
@@ -72,7 +72,7 @@ export default function Login() {
       }
 
       const db = getFirestore(auth.app);
-      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userDoc = await getDoc(doc(db,"users", user.uid));
       let userData = { name: email.split('@')[0], email, role: 'user' };
       
       if (userDoc.exists()) {
@@ -80,7 +80,7 @@ export default function Login() {
       } else if (email === 'somyapadhiyar@gmail.com') {
         // Fallback if doc was deleted but Auth exists
         userData = { name: 'Admin', email, role: 'admin' };
-        await setDoc(doc(db, "users", user.uid), userData);
+        await setDoc(doc(db,"users", user.uid), userData);
       }
 
       const actualRole = userData.role || 'user';
@@ -120,13 +120,13 @@ export default function Login() {
         return;
       }
       
-      let message = "Invalid email or password.";
+      let message ="Invalid email or password.";
       
-      if (error.code === 'auth/user-not-found') message = "No account found with this email.";
-      if (error.code === 'auth/wrong-password') message = "Incorrect password.";
-      if (error.code === 'auth/invalid-credential') message = "Invalid login credentials.";
-      if (error.code === 'auth/too-many-requests') message = "Too many attempts. Try again later.";
-      if (error.code === 'auth/operation-not-allowed') message = "Email/Password sign-in is not enabled in Firebase Authentication.";
+      if (error.code === 'auth/user-not-found') message ="No account found with this email.";
+      if (error.code === 'auth/wrong-password') message ="Incorrect password.";
+      if (error.code === 'auth/invalid-credential') message ="Invalid login credentials.";
+      if (error.code === 'auth/too-many-requests') message ="Too many attempts. Try again later.";
+      if (error.code === 'auth/operation-not-allowed') message ="Email/Password sign-in is not enabled in Firebase Authentication.";
       
       if (showToast) showToast(message);
     } finally {
@@ -150,7 +150,7 @@ export default function Login() {
       }
 
       const db = getFirestore(auth.app);
-      const userRef = doc(db, "users", user.uid);
+      const userRef = doc(db,"users", user.uid);
       const userDoc = await getDoc(userRef);
       
       let userData = {
@@ -301,9 +301,9 @@ export default function Login() {
                <div className="mb-10">
                  <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2">Reset Password 🔐</h2>
                  <p className="text-slate-500 font-medium">
-                   {resetStep === 1 && "Enter your email to receive an OTP."}
+                   {resetStep === 1 &&"Enter your email to receive an OTP."}
                    {resetStep === 2 && `Enter the OTP sent to ${resetEmail}.`}
-                   {resetStep === 3 && "Create a new secure password."}
+                   {resetStep === 3 &&"Create a new secure password."}
                  </p>
                </div>
 
@@ -350,7 +350,7 @@ export default function Login() {
                        <div className="relative">
                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                          <input 
-                           type={showPassword ? "text" : "password"} 
+                           type={showPassword ?"text" :"password"} 
                            required 
                            placeholder="••••••••" 
                            value={newPassword} 
@@ -367,7 +367,7 @@ export default function Login() {
                        <div className="relative">
                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                          <input 
-                           type={showPassword ? "text" : "password"} 
+                           type={showPassword ?"text" :"password"} 
                            required 
                            placeholder="••••••••" 
                            value={confirmNewPassword} 
@@ -383,9 +383,9 @@ export default function Login() {
                    whileTap={{ scale: 0.98 }}
                    type="submit" 
                    disabled={loading}
-                   className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                   className="btn-3d btn-blue w-full py-4 font-bold flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                  >
-                   {loading ? "Processing..." : resetStep === 1 ? "Send OTP" : resetStep === 2 ? "Verify OTP" : "Update Password"}
+                   {loading ?"Processing..." : resetStep === 1 ?"Send OTP" : resetStep === 2 ?"Verify OTP" :"Update Password"}
                    {!loading && <ArrowRight size={20} />}
                  </motion.button>
                </form>
@@ -413,7 +413,7 @@ export default function Login() {
                      <input 
                        type="email" 
                        required 
-                       placeholder={activeRole === 'admin' ? "admin@zesty.com" : "john@example.com"}
+                       placeholder={activeRole === 'admin' ?"admin@zesty.com" :"john@example.com"}
                        value={email} 
                        onChange={(e) => setEmail(e.target.value)}
                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium"
@@ -429,7 +429,7 @@ export default function Login() {
                    <div className="relative">
                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                      <input 
-                       type={showPassword ? "text" : "password"} 
+                       type={showPassword ?"text" :"password"} 
                        required 
                        placeholder="••••••••" 
                        value={password} 
@@ -450,9 +450,9 @@ export default function Login() {
                    whileTap={{ scale: 0.98 }}
                    type="submit" 
                    disabled={loading}
-                   className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                   className="btn-3d btn-blue w-full py-4 font-bold flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                  >
-                   {loading ? "Logging in..." : `Login as ${activeRole.charAt(0).toUpperCase() + activeRole.slice(1)}`}
+                   {loading ?"Logging in..." : `Login as ${activeRole.charAt(0).toUpperCase() + activeRole.slice(1)}`}
                    {!loading && <ArrowRight size={20} />}
                  </motion.button>
                </form>
@@ -480,7 +480,7 @@ export default function Login() {
                        type="button" 
                        onClick={handleGoogleLogin} 
                        disabled={loading}
-                       className="w-full max-w-xs flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition font-bold text-slate-700 disabled:opacity-70 disabled:cursor-not-allowed"
+                       className="btn-3d btn-lime border-none w-full max-w-xs flex items-center justify-center gap-2 py-3 border rounded-xl transition font-bold disabled:opacity-70 disabled:cursor-not-allowed"
                      >
                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" /> Google
                      </button>

@@ -25,7 +25,7 @@ export default function Delivery() {
         updateUser(updatedUser);
         if (currentUser?.uid) {
           const db = getFirestore(auth.app);
-          await updateDoc(doc(db, "users", currentUser.uid), { name: editData.name, phone: editData.phone });
+          await updateDoc(doc(db,"users", currentUser.uid), { name: editData.name, phone: editData.phone });
         }
         setIsEditing(false);
       } catch(e) { console.error(e); alert("Failed to update profile"); }
@@ -42,7 +42,7 @@ export default function Delivery() {
       updateUser(updatedUser);
       if (currentUser?.uid) {
         const db = getFirestore(auth.app);
-        await updateDoc(doc(db, "users", currentUser.uid), { photoURL: base64String });
+        await updateDoc(doc(db,"users", currentUser.uid), { photoURL: base64String });
       }
     } catch (error) {
       console.error("Error updating photo:", error);
@@ -65,7 +65,7 @@ export default function Delivery() {
   const openCamera = async () => {
     setShowCamera(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:"user" } });
       if (videoRef.current) videoRef.current.srcObject = stream;
     } catch (err) {
       console.error("Error accessing camera:", err);

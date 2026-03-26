@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useStore } from "../context/StoreContext";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import React, { useEffect, useState } from"react";
+import { Link, useNavigate } from"react-router-dom";
+import { useStore } from"../context/StoreContext";
+import Navbar from"../components/Navbar";
+import Footer from"../components/Footer";
 
 export default function Orders() {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ export default function Orders() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const filterOptions = ["All", "Out for Delivery", "Pending", "Delivered"];
+  const filterOptions = ["All","Out for Delivery","Pending","Delivered"];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -35,8 +35,8 @@ export default function Orders() {
 
   const formatPrice = (priceVal) => {
     return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
+      style:"currency",
+      currency:"INR",
       maximumFractionDigits: 0
     }).format(priceVal);
   };
@@ -52,14 +52,11 @@ export default function Orders() {
   if (!currentUser) return null;
 
   // Sorting logic to prioritize active deliveries
-  const statusWeight = {
-    "Out for Delivery": 1,
-    "Pending": 2,
-    "Delivered": 3
+  const statusWeight = {"Out for Delivery": 1,"Pending": 2,"Delivered": 3
   };
 
   const displayOrders = userOrders
-    .filter(o => statusFilter === "All" || o.status === statusFilter)
+    .filter(o => statusFilter ==="All" || o.status === statusFilter)
     .sort((a, b) => (statusWeight[a.status] || 99) - (statusWeight[b.status] || 99));
 
   return (
@@ -75,7 +72,7 @@ export default function Orders() {
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className="w-full flex items-center justify-between px-4 py-3 sm:py-2.5 bg-white border border-slate-200 rounded-xl text-base sm:text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-sm cursor-pointer"
               >
-                <span>{statusFilter === "All" ? "All Orders" : statusFilter}</span>
+                <span>{statusFilter ==="All" ?"All Orders" : statusFilter}</span>
                 <span className={`text-[10px] text-slate-400 transition-transform duration-200 ${isFilterOpen ? 'rotate-180' : ''}`}>▼</span>
               </button>
               
@@ -89,7 +86,7 @@ export default function Orders() {
                         onClick={() => { setStatusFilter(option); setIsFilterOpen(false); }}
                         className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors ${statusFilter === option ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'}`}
                       >
-                        {option === "All" ? "All Orders" : option}
+                        {option ==="All" ?"All Orders" : option}
                       </button>
                     ))}
                   </div>
@@ -204,13 +201,13 @@ export default function Orders() {
             <div className="flex flex-col items-center justify-center py-16 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
               <div className="text-5xl mb-4 opacity-50">🔍</div>
               <p className="text-slate-800 font-bold text-lg">No orders found</p>
-              <p className="text-slate-500 mt-1">You don't have any orders marked as "{statusFilter}".</p>
+              <p className="text-slate-500 mt-1">You don't have any orders marked as"{statusFilter}".</p>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
               <div className="text-6xl mb-4 opacity-70">🛍️</div>
               <p className="text-slate-800 font-bold text-lg">No orders yet</p>
-              <Link to="/user/fruits" className="mt-4 px-8 py-3.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors shadow-lg">Start Shopping</Link>
+              <Link to="/user/fruits" className="btn-3d btn-lime mt-4 px-8 py-3.5 font-bold text-sm">Start Shopping</Link>
             </div>
           )}
         </div>

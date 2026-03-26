@@ -1,64 +1,207 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Gradient Background for Login/Register */
-.gradient-bg {
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+@layer base {
+  :root {
+    --bg-start: #F4F7F5;
+    --text-main: #09090B;
+  }
+
+  body {
+    background-color: var(--bg-start);
+    background-image:
+      radial-gradient(circle at 15% 15%, rgba(163, 230, 53, 0.12) 0%, transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(52, 211, 153, 0.12) 0%, transparent 40%);
+    background-attachment: fixed;
+    color: var(--text-main);
+    font-family: 'Outfit', system-ui, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Arial', sans-serif;
-  overflow-x: hidden;
-  background-color: #f8fafc; /* Slate-50 */
-}
-
-/* --- CUSTOM ANIMATIONS --- */
 @layer utilities {
+  .card-3d {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 32px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow:
+      0 10px 40px -10px rgba(0, 0, 0, 0.05),
+      0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+    color: #09090B;
+  }
+
+  .card-3d:hover {
+    transform: translateY(-4px) scale(1.005);
+    box-shadow:
+      0 24px 48px -12px rgba(0, 0, 0, 0.08),
+      0 2px 6px rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+
+  /* 
+     DYNAMIC LIQUID FILL BUTTONS ("CHARGING" EFFECT)
+  */
+  .btn-3d {
+    --btn-bg: #09090B;         /* Default Jet Black */
+    --btn-text: #FFFFFF;       /* Default White Text */
+    --btn-fill: #EAB308;       /* Default Yellow Gold Fill */
+    --btn-hover-text: #09090B; /* Default Black text on hover */
+    --btn-shadow: rgba(234, 179, 8, 0.4);
+
+    background: var(--btn-bg);
+    color: var(--btn-text) !important;
+    border-radius: 9999px;
+    border: none;
+    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.25);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+    cursor: pointer;
+    -webkit-mask-image: -webkit-radial-gradient(white, black); /* Fix for iOS border-radius overflow */
+    mask-image: radial-gradient(white, black);
+    isolation: isolate;
+  }
+
+  .btn-3d::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--btn-fill);
+    z-index: -1;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-3d:hover {
+    color: var(--btn-hover-text) !important;
+    box-shadow: 0 12px 24px -6px var(--btn-shadow);
+    transform: translateY(-2px);
+  }
+
+  .btn-3d:hover::before {
+    transform: scaleX(1);
+  }
+
+  .btn-3d:active {
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 4px 10px -2px var(--btn-shadow);
+  }
+
+  /* --- PREMIUM LIGHT COLOR THEMES --- */
   
-  /* 1. BUTTONS: Rope Drop (Bouncy Entry) */
-  .animate-rope-drop {
-    animation: ropeDrop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    opacity: 0;
-    transform-origin: top center;
-  }
-  
-  /* 2. MIDDLE CONTENT: Fade In Up (Professional Slide) */
-  .animate-fade-in-up {
-    animation: fadeInUp 0.8s ease-out forwards;
-    opacity: 0;
-    transform: translateY(30px);
+  /* Primary Green Theme (Cart, Checkout, Pay) */
+  .btn-emerald {
+    --btn-bg: #F0FDF4; /* Light Green Base */
+    --btn-text: #16A34A; /* Dark Green Text */
+    --btn-fill: #10B981; /* Neon Emerald Fill */
+    --btn-hover-text: #FFFFFF; /* White Text on Hover */
+    --btn-shadow: rgba(16, 185, 129, 0.4);
+    border: 1px solid #DCFCE7;
   }
 
-  /* 3. Header Slide Down */
-  .animate-slide-down {
-    animation: slideDown 0.8s ease-out forwards;
+  /* Vibrant Blue Theme (Add Product, Primary Actions) */
+  .btn-blue {
+    --btn-bg: #EFF6FF; /* Light Blue Base */
+    --btn-text: #2563EB; /* Deep Blue Text */
+    --btn-fill: #3B82F6; /* Vivid Blue Fill */
+    --btn-hover-text: #FFFFFF; /* White Text on Hover */
+    --btn-shadow: rgba(59, 130, 246, 0.4);
+    border: 1px solid #DBEAFE;
   }
 
-  .animate-wave {
-    animation: wave 10s linear infinite;
+  /* Light Cyan Theme (Extra variation if needed) */
+  .btn-cyan {
+    --btn-bg: #ECFEFF; /* Light Cyan Base */
+    --btn-text: #0891B2; /* Deep Cyan Text */
+    --btn-fill: #06B6D4; /* Vivid Cyan Fill */
+    --btn-hover-text: #FFFFFF; 
+    --btn-shadow: rgba(6, 182, 212, 0.4);
+    border: 1px solid #CFFAFE;
+  }
+
+  /* Warm Orange Theme (Important Next Steps like Address) */
+  .btn-orange {
+    --btn-bg: #FFF7ED; /* Light Orange Base */
+    --btn-text: #EA580C; /* Deep Orange Text */
+    --btn-fill: #F97316; /* Bright Orange Fill */
+    --btn-hover-text: #FFFFFF;
+    --btn-shadow: rgba(249, 115, 22, 0.4);
+    border: 1px solid #FFEDD5;
+  }
+
+  /* Danger Red Theme (Delete, Remove, Errors) */
+  .btn-danger {
+    --btn-bg: #FEF2F2; /* Light Red Base */
+    --btn-text: #DC2626; /* Deep Red Text */
+    --btn-fill: #EF4444; /* Alert Red Fill */
+    --btn-hover-text: #FFFFFF; 
+    --btn-shadow: rgba(239, 68, 68, 0.4);
+    border: 1px solid #FEE2E2;
+  }
+
+  /* Secondary Neutral Theme (Cancel, Logout, Info) */
+  .btn-lime {
+    --btn-bg: #F8FAFC; /* Light Slate Base */
+    --btn-text: #475569; /* Slate Text */
+    --btn-fill: #475569; /* Slate Fill */
+    --btn-hover-text: #FFFFFF; /* White Text on Hover */
+    --btn-shadow: rgba(71, 85, 105, 0.3);
+    border: 1px solid #E2E8F0;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(163, 230, 53, 0.8);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #09090B, #3F3F46);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
   }
 }
 
-@keyframes ropeDrop {
-  0% { opacity: 0; transform: translateY(-50px); }
-  60% { opacity: 1; transform: translateY(10px); }
-  80% { transform: translateY(-5px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeInUp {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideDown {
-  from { transform: translateY(-100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
 }
 
 @keyframes wave {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+.animate-wave {
+  animation: wave linear infinite;
+}
+
+
+* { box-sizing: border-box; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #09090B; }

@@ -68,19 +68,19 @@ export default function Admin() {
   const filteredPartners = deliveryPartners.filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase()) || d.email.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] font-sans text-[#1C1C1C]">
+    <div className="min-h-screen w-full bg-[#F4F6F9] font-sans text-[#1C1C1C]">
       
       {/* Top Navbar */}
-      <header className="bg-white sticky top-0 z-50 shadow-sm border-b border-gray-200">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="px-4 md:px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
           
           <div className="flex items-center gap-3 w-full md:w-auto shrink-0 justify-between md:justify-start">
             <span className="text-[28px] sm:text-[32px] font-black italic tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 group-hover:from-green-500 group-hover:to-emerald-500 transition-all duration-500 cursor-default">Zesty</span>
             <div className="flex md:hidden gap-2">
-              <Link to="/admin/add-product" className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+              <Link to="/admin/add-product" className="p-2 px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors rounded-xl shadow-sm">
                 <Plus size={18} />
               </Link>
-              <button onClick={() => { logout(); navigate('/home', { replace: true }); }} className="p-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+              <button onClick={() => { logout(); navigate('/home', { replace: true }); }} className="p-2 px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors rounded-xl shadow-sm">
                 <LogOut size={18} />
               </button>
             </div>
@@ -104,10 +104,10 @@ export default function Admin() {
           </div>
 
           <div className="hidden md:flex gap-3 shrink-0">
-            <Link to="/admin/add-product" className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-[13px] hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap">
+            <Link to="/admin/add-product" className="btn-3d btn-emerald px-4 py-2 font-bold text-[13px] gap-2 whitespace-nowrap shadow-sm">
               <Plus size={16} /> Add Product
             </Link>
-            <button onClick={() => { logout(); navigate('/home', { replace: true }); }} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-xl font-bold text-[13px] hover:bg-gray-50 transition-colors whitespace-nowrap">
+            <button onClick={() => { logout(); navigate('/home', { replace: true }); }} className="btn-3d btn-danger px-4 py-2 font-bold text-[13px] gap-2 whitespace-nowrap shadow-sm">
               <LogOut size={16} /> Logout
             </button>
           </div>
@@ -130,7 +130,7 @@ export default function Admin() {
         </div>
       </header>
 
-      <main className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 md:py-8">
+      <main className="w-full py-6 px-4 md:px-6">
         
         {/* Quick Stats Grid */}
         {activeTab === 'orders' && (
@@ -172,7 +172,7 @@ export default function Admin() {
                      if (e.target.src.endsWith('.png')) {
                        e.target.src = selectedProduct.image.replace('.png', '.jpg');
                      } else if (!e.target.src.includes('placehold.co')) {
-                       e.target.src = "https://placehold.co/400x400/F8F8F8/767676?text=Img";
+                       e.target.src ="https://placehold.co/400x400/F8F8F8/767676?text=Img";
                      }
                    }}/>
                 </div>
@@ -197,7 +197,7 @@ export default function Admin() {
                    </div>
 
                    <div className="pt-6 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-3xl">
-                      <Link to={`/admin/edit-product/${selectedProduct.id}`} className="flex items-center justify-center gap-2 py-3.5 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-100 transition-colors shadow-sm">
+                      <Link to={`/admin/edit-product/${selectedProduct.id}`} className="btn-3d btn-blue py-3.5 font-bold gap-2 shadow-sm">
                         <Edit size={18} /> Edit
                       </Link>
                       
@@ -214,22 +214,22 @@ export default function Admin() {
                             }
                             setIsRefilling(false);
                             setRefillAmount('');
-                          }} className="px-4 bg-green-500 hover:bg-green-600 text-white font-black transition-colors">✓</button>
-                          <button onClick={() => setIsRefilling(false)} className="px-3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-black transition-colors">✕</button>
+                          }} className="btn-3d btn-emerald px-4 py-2 text-white font-black rounded-none shadow-none">✓</button>
+                          <button onClick={() => setIsRefilling(false)} className="btn-3d btn-lime px-3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-black rounded-none shadow-none">✕</button>
                         </div>
                       ) : (
-                        <button onClick={() => setIsRefilling(true)} className="flex items-center justify-center gap-2 py-3.5 bg-green-50 text-green-700 rounded-xl font-bold hover:bg-green-100 transition-colors shadow-sm">
+                        <button onClick={() => setIsRefilling(true)} className="btn-3d btn-emerald py-3.5 font-bold gap-2 shadow-sm">
                           <PackagePlus size={18} /> Refill
                         </button>
                       )}
 
-                      <button onClick={() => toggleProductStatus(selectedProduct.id)} className={`flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-colors shadow-sm ${selectedProduct.disabled ? 'bg-orange-50 text-orange-600 hover:bg-orange-100' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                      <button onClick={() => toggleProductStatus(selectedProduct.id)} className={`btn-3d ${selectedProduct.disabled ? 'btn-orange' : 'btn-lime'} py-3.5 font-bold gap-2 shadow-sm`}>
                         <PowerOff size={18} /> {selectedProduct.disabled ? 'Enable' : 'Disable'}
                       </button>
                       <button onClick={() => { 
                         deleteProduct(selectedProduct.id); 
                         setSelectedProductId(null); 
-                      }} className="flex items-center justify-center gap-2 py-3.5 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-colors shadow-sm">
+                      }} className="btn-3d btn-danger py-3.5 font-bold gap-2 shadow-sm">
                         <Trash2 size={18} /> Delete
                       </button>
                    </div>
@@ -250,7 +250,7 @@ export default function Admin() {
                       if (e.target.src.endsWith('.png')) {
                         e.target.src = p.image.replace('.png', '.jpg');
                       } else if (!e.target.src.includes('placehold.co')) {
-                        e.target.src = "https://placehold.co/100x100/F8F8F8/767676?text=Img";
+                        e.target.src ="https://placehold.co/100x100/F8F8F8/767676?text=Img";
                       }
                     }}/>
                   </div>
@@ -318,7 +318,7 @@ export default function Admin() {
                           {partner.status}
                         </span>
                         {partner.status === 'Pending' && (
-                          <button onClick={(e) => { e.stopPropagation(); approveDelivery(partner.email); }} className="px-5 py-2.5 bg-slate-900 text-white font-bold text-[12px] rounded-xl hover:bg-slate-800 transition-colors shadow-sm">
+                          <button onClick={(e) => { e.stopPropagation(); approveDelivery(partner.email); }} className="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors rounded-xl px-5 py-2.5 font-bold text-[12px] shadow-sm">
                             Approve Partner
                           </button>
                         )}

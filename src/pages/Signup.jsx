@@ -4,23 +4,13 @@ import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { ArrowRight, Mail, Lock, User, Eye, EyeOff, Phone, MapPin, Map } from 'lucide-react';
 import { Country, State, City }  from 'country-state-city';
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword, updateProfile } from"firebase/auth";
+import { getFirestore, doc, setDoc } from"firebase/firestore";
 import { auth } from '../firebase';
 
 // Mock Pincode data for validation
-const MOCK_PINCODE_DATA = {
-  "India": {
-    "Gujarat": {
-      "Ahmedabad": ["380001", "380006", "380009", "380015", "380052"],
-      "Surat": ["395003", "395004", "395007", "395010"],
-      "Vadodara": ["390001", "390002", "390007"],
-      "Rajkot": ["360001", "360002", "360004"],
-      "Gandhinagar": ["382010", "382016", "382021"]
-    },
-    "Maharashtra": {
-      "Mumbai": ["400001", "400002", "400011"],
-      "Pune": ["411001", "411002", "411005"]
+const MOCK_PINCODE_DATA = {"India": {"Gujarat": {"Ahmedabad": ["380001","380006","380009","380015","380052"],"Surat": ["395003","395004","395007","395010"],"Vadodara": ["390001","390002","390007"],"Rajkot": ["360001","360002","360004"],"Gandhinagar": ["382010","382016","382021"]
+    },"Maharashtra": {"Mumbai": ["400001","400002","400011"],"Pune": ["411001","411002","411005"]
     }
   }
 };
@@ -105,7 +95,7 @@ export default function Signup() {
 
       // 3. Save User Details to Firestore Backend (Run in background to prevent freezing)
       const db = getFirestore(auth.app);
-      setDoc(doc(db, "users", user.uid), {
+      setDoc(doc(db,"users", user.uid), {
         uid: user.uid,
         name,
         email,
@@ -130,17 +120,17 @@ export default function Signup() {
       setCurrentUser(userData);
 
       if (user) {
-        if (showToast) showToast("Account created successfully! Welcome " + name);
+        if (showToast) showToast("Account created successfully! Welcome" + name);
         navigate('/home', { replace: true });
       } else {
         if (showToast) showToast("Signup failed. Please try again.");
       }
     } catch (error) {
       console.error("Signup Error:", error);
-      let message = "Failed to create account.";
-      if (error.code === 'auth/email-already-in-use') message = "An account with this email already exists.";
-      else if (error.code === 'auth/invalid-email') message = "Invalid email address.";
-      else if (error.code === 'auth/weak-password') message = "Password should be at least 6 characters.";
+      let message ="Failed to create account.";
+      if (error.code === 'auth/email-already-in-use') message ="An account with this email already exists.";
+      else if (error.code === 'auth/invalid-email') message ="Invalid email address.";
+      else if (error.code === 'auth/weak-password') message ="Password should be at least 6 characters.";
       
       if (showToast) showToast(message);
     } finally {
@@ -270,7 +260,7 @@ export default function Signup() {
                <label className="text-sm font-bold text-slate-700">Create Password</label>
                <div className="relative">
                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                 <input type={showPassword ? "text" : "password"} required placeholder="Create Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium" />
+                 <input type={showPassword ?"text" :"password"} required placeholder="Create Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium" />
                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                  </button>
@@ -281,15 +271,15 @@ export default function Signup() {
                <label className="text-sm font-bold text-slate-700">Confirm Password</label>
                <div className="relative">
                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                 <input type={showConfirmPassword ? "text" : "password"} required placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium" />
+                 <input type={showConfirmPassword ?"text" :"password"} required placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium" />
                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                  </button>
                </div>
              </div>
 
-             <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full py-4 mt-2 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
-               {loading ? "Creating Account..." : "Sign Up"}
+             <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="btn-3d btn-blue w-full py-4 mt-2 font-bold flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+               {loading ?"Creating Account..." :"Sign Up"}
                {!loading && <ArrowRight size={20} />}
              </motion.button>
            </form>

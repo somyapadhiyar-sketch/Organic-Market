@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { ArrowRight, Mail, Lock, User, Eye, EyeOff, Phone, MapPin, Camera, Upload } from 'lucide-react';
 import { Country, State, City } from 'country-state-city';
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword, updateProfile } from"firebase/auth";
+import { getFirestore, doc, setDoc } from"firebase/firestore";
 import { auth } from '../firebase';
 
 export default function DeliverySignup() {
@@ -78,7 +78,7 @@ export default function DeliverySignup() {
 
       // 3. Save User Details to Firestore Backend
       const db = getFirestore(auth.app);
-      await setDoc(doc(db, "users", user.uid), {
+      await setDoc(doc(db,"users", user.uid), {
         uid: user.uid,
         name,
         email,
@@ -98,10 +98,10 @@ export default function DeliverySignup() {
       navigate('/login/delivery');
     } catch (error) {
       console.error("Delivery Signup Error:", error);
-      let message = "Failed to create account.";
-      if (error.code === 'auth/email-already-in-use') message = "An account with this email already exists.";
-      else if (error.code === 'auth/invalid-email') message = "Invalid email address.";
-      else if (error.code === 'auth/weak-password') message = "Password should be at least 6 characters.";
+      let message ="Failed to create account.";
+      if (error.code === 'auth/email-already-in-use') message ="An account with this email already exists.";
+      else if (error.code === 'auth/invalid-email') message ="Invalid email address.";
+      else if (error.code === 'auth/weak-password') message ="Password should be at least 6 characters.";
       
       if (showToast) showToast(message);
     } finally {
@@ -226,15 +226,15 @@ export default function DeliverySignup() {
                <label className="text-sm font-bold text-slate-700">Password</label>
                <div className="relative">
                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                 <input type={showPassword ? "text" : "password"} required placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition-all font-medium" />
+                 <input type={showPassword ?"text" :"password"} required placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition-all font-medium" />
                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                  </button>
                </div>
              </div>
 
-             <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full py-4 mt-2 bg-orange-500 text-white font-bold rounded-xl shadow-lg hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
-               {loading ? "Submitting..." : "Register for Delivery"}
+             <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="btn-3d btn-orange w-full py-4 mt-2 font-bold flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+               {loading ?"Submitting..." :"Register for Delivery"}
                {!loading && <ArrowRight size={20} />}
              </motion.button>
            </form>

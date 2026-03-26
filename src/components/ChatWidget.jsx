@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 
 const INITIAL_MESSAGES = [
-  { text: "Hi there! 👋 Welcome to Zesty. How can I help you today?", sender: 'bot' }
+  { text:"Hi there! 👋 Welcome to Zesty. How can I help you today?", sender: 'bot' }
 ];
 
 export default function ChatWidget() {
@@ -39,15 +39,15 @@ export default function ChatWidget() {
 
     // Simulate bot reply
     setTimeout(() => {
-      let botReply = "I'm sorry, I'm not sure how to answer that. For more complex questions, please contact our support team.";
+      let botReply ="I'm sorry, I'm not sure how to answer that. For more complex questions, please contact our support team.";
       if (lowerCaseInput.includes('payment') || lowerCaseInput.includes('pay')) {
-        botReply = "We accept all major credit/debit cards, UPI, and Cash on Delivery (COD)."
+        botReply ="We accept all major credit/debit cards, UPI, and Cash on Delivery (COD)."
       } else if (lowerCaseInput.includes('hello') || lowerCaseInput.includes('hi') || lowerCaseInput.includes('hey')) {
-        botReply = "Hello! How can I assist you today? You can ask about delivery, returns, or payments."
+        botReply ="Hello! How can I assist you today? You can ask about delivery, returns, or payments."
       } else if (lowerCaseInput.includes('delivery') || lowerCaseInput.includes('time') || lowerCaseInput.includes('deliver')) {
-        botReply = "We deliver from 8 AM to 10 PM, 7 days a week! Most orders arrive within 30-60 minutes."
+        botReply ="We deliver from 8 AM to 10 PM, 7 days a week! Most orders arrive within 30-60 minutes."
       } else if (lowerCaseInput.includes('return') || lowerCaseInput.includes('refund') || lowerCaseInput.includes('policy')) {
-        botReply = "If you're not happy with an item, you can return it at the time of delivery. For any issues after delivery, please contact our support team within 24 hours."
+        botReply ="If you're not happy with an item, you can return it at the time of delivery. For any issues after delivery, please contact our support team within 24 hours."
       }
       setMessages(prev => [...prev, { text: botReply, sender: 'bot' }]);
     }, 1000);
@@ -78,7 +78,7 @@ export default function ChatWidget() {
             initial={{ opacity: 0, y: 20, scale: 0.9 }} 
             animate={{ opacity: 1, y: 0, scale: 1 }} 
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 250, damping: 25 }}
+            transition={{ type:"spring", stiffness: 250, damping: 25 }}
             className="absolute bottom-20 right-0 w-80 h-96 bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0px_20px_50px_rgba(0,0,0,0.2)] border border-slate-200 flex flex-col overflow-hidden"
           >
             {/* Header */}
@@ -88,7 +88,7 @@ export default function ChatWidget() {
                 <h3 className="font-black">Support Chat</h3>
               </div>
               <div className="flex items-center gap-3">
-                <button onClick={clearChat} className="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg font-bold transition-colors">Clear</button>
+                <button onClick={clearChat} className="btn-3d btn-lime text-xs px-3 py-1.5 font-bold">Clear</button>
                 <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white transition-colors font-black">✕</button>
               </div>
             </div>
@@ -118,7 +118,7 @@ export default function ChatWidget() {
                 onChange={(e) => setInputValue(e.target.value)}
                 className="flex-1 bg-slate-100 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-green-500 transition-all text-slate-800 font-medium"
               />
-              <button type="submit" className="bg-slate-900 text-white p-2 rounded-xl hover:bg-slate-800 transition-colors shadow-md">
+              <button type="submit" className="btn-3d btn-lime p-2">
                 ➔
               </button>
             </form>

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useStore } from "../context/StoreContext";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import { Country, State, City } from "country-state-city";
-import { getFirestore, doc, updateDoc } from "firebase/firestore";
-import { auth } from "../firebase";
+import React, { useEffect, useState } from"react";
+import { Link, useNavigate } from"react-router-dom";
+import { useStore } from"../context/StoreContext";
+import Navbar from"../components/Navbar";
+import Footer from"../components/Footer";
+import { Country, State, City } from"country-state-city";
+import { getFirestore, doc, updateDoc } from"firebase/firestore";
+import { auth } from"../firebase";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export default function Profile() {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddressIndex, setEditingAddressIndex] = useState(null);
   const [addressFormData, setAddressFormData] = useState({
-    name: "", phone: "", street: "", country: "", state: "", city: "", pincode: "", type: "Home"
+    name:"", phone:"", street:"", country:"", state:"", city:"", pincode:"", type:"Home"
   });
 
   const countries = Country.getAllCountries();
@@ -39,7 +39,7 @@ export default function Profile() {
   // Password change modal state
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [passwordData, setPasswordData] = useState({
-    currentPassword: "", newPassword: "", confirmPassword: "",
+    currentPassword:"", newPassword:"", confirmPassword:"",
   });
 
   // Account info
@@ -60,7 +60,7 @@ export default function Profile() {
       return;
     }
 
-    setEditName(currentUser.name || "");
+    setEditName(currentUser.name ||"");
 
     // Load addresses from currentUser object
     setAddresses(currentUser.savedAddresses || []);
@@ -70,12 +70,12 @@ export default function Profile() {
     if (savedMemberSince) {
       setMemberSince(savedMemberSince);
     } else {
-      const formatted = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" });
+      const formatted = new Date().toLocaleDateString("en-US", { year:"numeric", month:"long" });
       setMemberSince(formatted);
       localStorage.setItem("memberSince_" + currentUser.email, formatted);
     }
 
-    const nowFormatted = new Date().toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    const nowFormatted = new Date().toLocaleString("en-US", { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" });
     setLastLogin(nowFormatted);
 
     const savedPrefs = localStorage.getItem("notificationPrefs_" + currentUser.email);
@@ -99,7 +99,7 @@ export default function Profile() {
     updateUser({ ...currentUser, password: passwordData.newPassword });
     showToast("Password changed successfully!");
     setShowPasswordChange(false);
-    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    setPasswordData({ currentPassword:"", newPassword:"", confirmPassword:"" });
   };
 
   // --- Sync to Firebase helper ---
@@ -107,7 +107,7 @@ export default function Profile() {
     if (currentUser?.uid) {
       try {
         const db = getFirestore(auth.app);
-        await updateDoc(doc(db, "users", currentUser.uid), updates);
+        await updateDoc(doc(db,"users", currentUser.uid), updates);
       } catch (error) { console.error("Firestore sync error:", error); }
     }
   };
@@ -115,7 +115,7 @@ export default function Profile() {
   // --- Address Management ---
   const openAddAddressForm = () => {
     setEditingAddressIndex(null);
-    setAddressFormData({ name: currentUser.name || "", phone: currentUser.phone || "", street: "", country: "", state: "", city: "", pincode: "", type: "Home" });
+    setAddressFormData({ name: currentUser.name ||"", phone: currentUser.phone ||"", street:"", country:"", state:"", city:"", pincode:"", type:"Home" });
     setShowAddressForm(true);
   };
 
@@ -229,7 +229,7 @@ export default function Profile() {
                 <div className="border-b border-slate-100 pb-6">
                   <div className="flex justify-between items-center cursor-pointer group" onClick={() => setShowEditProfile(!showEditProfile)}>
                     <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Personal Information</span>
-                    <span className="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1.5 rounded-lg">{showEditProfile ? "Close ↑" : "Edit →"}</span>
+                    <span className="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1.5 rounded-lg">{showEditProfile ?"Close ↑" :"Edit →"}</span>
                   </div>
                   {showEditProfile && (
                     <div className="mt-5 space-y-4 animate-in fade-in slide-in-from-top-2">
@@ -237,7 +237,7 @@ export default function Profile() {
                         <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Full Name</label>
                         <div className="flex gap-3">
                           <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800" />
-                          <button onClick={handleSaveProfile} className="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-xl text-sm font-bold shadow-sm transition-colors">Save</button>
+                          <button onClick={handleSaveProfile} className="btn-3d btn-blue px-6 text-sm font-bold">Save</button>
                         </div>
                       </div>
                       <div>
@@ -253,14 +253,14 @@ export default function Profile() {
                 <div className="border-b border-slate-100 pb-6">
                   <div className="flex justify-between items-center cursor-pointer group" onClick={() => setShowPasswordChange(!showPasswordChange)}>
                     <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Change Password</span>
-                    <span className="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1.5 rounded-lg">{showPasswordChange ? "Close ↑" : "Update →"}</span>
+                    <span className="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1.5 rounded-lg">{showPasswordChange ?"Close ↑" :"Update →"}</span>
                   </div>
                   {showPasswordChange && (
                     <div className="mt-5 space-y-4 animate-in fade-in slide-in-from-top-2">
                       <input type="password" value={passwordData.currentPassword} onChange={e => setPasswordData({...passwordData, currentPassword: e.target.value})} placeholder="Current Password" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800" />
                       <input type="password" value={passwordData.newPassword} onChange={e => setPasswordData({...passwordData, newPassword: e.target.value})} placeholder="New Password" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800" />
                       <input type="password" value={passwordData.confirmPassword} onChange={e => setPasswordData({...passwordData, confirmPassword: e.target.value})} placeholder="Confirm New Password" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800" />
-                      <button onClick={handlePasswordChange} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-bold text-sm shadow-sm transition-colors">Update Password</button>
+                      <button onClick={handlePasswordChange} className="btn-3d btn-lime w-full py-3.5 font-bold text-sm">Update Password</button>
                     </div>
                   )}
                 </div>
@@ -269,7 +269,7 @@ export default function Profile() {
                 <div className="border-b border-slate-100 pb-6">
                   <div className="flex justify-between items-center cursor-pointer group" onClick={() => setShowAddresses(!showAddresses)}>
                     <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Shipping Addresses ({addresses.length})</span>
-                    <span className="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1.5 rounded-lg">{showAddresses ? "Close ↑" : "Manage →"}</span>
+                    <span className="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1.5 rounded-lg">{showAddresses ?"Close ↑" :"Manage →"}</span>
                   </div>
 
                   {showAddresses && (
@@ -282,7 +282,7 @@ export default function Profile() {
 
                       {showAddressForm && (
                         <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                          <h4 className="font-black text-slate-900 mb-5">{editingAddressIndex !== null ? "Edit Address" : "Add New Address"}</h4>
+                          <h4 className="font-black text-slate-900 mb-5">{editingAddressIndex !== null ?"Edit Address" :"Add New Address"}</h4>
                           <div className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <input type="text" value={addressFormData.name} onChange={e => setAddressFormData({...addressFormData, name: e.target.value})} placeholder="Full Name" className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 transition-all text-slate-800" />
@@ -319,7 +319,7 @@ export default function Profile() {
                               ))}
                             </div>
                             <div className="flex gap-3 pt-2">
-                              <button onClick={saveAddress} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-bold text-sm shadow-sm transition-colors">Save Address</button>
+                              <button onClick={saveAddress} className="btn-3d btn-blue flex-1 py-3.5 font-bold text-sm">Save Address</button>
                               <button onClick={() => setShowAddressForm(false)} className="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-3.5 rounded-xl font-bold text-sm transition-colors">Cancel</button>
                             </div>
                           </div>
@@ -334,7 +334,7 @@ export default function Profile() {
                             const displayState = addr.country ? State.getStateByCodeAndCountry(addr.state, addr.country)?.name || addr.state : addr.state;
                             const displayCountry = addr.country ? Country.getCountryByCode(addr.country)?.name || addr.country : addr.country;
                             return (
-                            <div key={index} className={`p-5 rounded-2xl border-2 transition-all ${index === 0 ? "border-green-500 bg-green-50/30" : "border-slate-100 bg-white"}`}>
+                            <div key={index} className={`p-5 rounded-2xl border-2 transition-all ${index === 0 ?"border-green-500 bg-green-50/30" :"border-slate-100 bg-white"}`}>
                               <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
                                 <div>
                                   <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -364,14 +364,14 @@ export default function Profile() {
                 <div className="border-b border-slate-100 pb-6">
                   <div className="flex justify-between items-center cursor-pointer group" onClick={() => setShowSupport(!showSupport)}>
                     <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Help & Support</span>
-                    <span className="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1.5 rounded-lg">{showSupport ? "Close ↑" : "View →"}</span>
+                    <span className="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1.5 rounded-lg">{showSupport ?"Close ↑" :"View →"}</span>
                   </div>
                   {showSupport && (
                     <div className="mt-4 animate-in fade-in space-y-3">
-                      <div onClick={() => setActiveSupportSection(activeSupportSection === "contact" ? null : "contact")} className="p-4 rounded-xl text-sm cursor-pointer font-bold flex justify-between bg-slate-50 hover:bg-blue-50 text-slate-700 transition-colors border border-slate-100">
-                        Contact Customer Service <span>{activeSupportSection === "contact" ? "−" : "+"}</span>
+                      <div onClick={() => setActiveSupportSection(activeSupportSection ==="contact" ? null :"contact")} className="p-4 rounded-xl text-sm cursor-pointer font-bold flex justify-between bg-slate-50 hover:bg-blue-50 text-slate-700 transition-colors border border-slate-100">
+                        Contact Customer Service <span>{activeSupportSection ==="contact" ?"−" :"+"}</span>
                       </div>
-                      {activeSupportSection === "contact" && (
+                      {activeSupportSection ==="contact" && (
                         <div className="p-5 bg-white border border-slate-100 rounded-xl text-sm text-slate-600 font-medium ml-4">
                           <p className="font-black text-slate-900 mb-3">We're here to help!</p>
                           <p className="mb-1">Email: <a href="mailto:support@zesty.com" className="text-blue-600 hover:underline font-bold">support@zesty.com</a></p>
@@ -380,12 +380,12 @@ export default function Profile() {
                         </div>
                       )}
 
-                      <div onClick={() => setActiveSupportSection(activeSupportSection === "faq" ? null : "faq")} className="p-4 rounded-xl text-sm cursor-pointer font-bold flex justify-between bg-slate-50 hover:bg-blue-50 text-slate-700 transition-colors border border-slate-100">
-                        Frequently Asked Questions <span>{activeSupportSection === "faq" ? "−" : "+"}</span>
+                      <div onClick={() => setActiveSupportSection(activeSupportSection ==="faq" ? null :"faq")} className="p-4 rounded-xl text-sm cursor-pointer font-bold flex justify-between bg-slate-50 hover:bg-blue-50 text-slate-700 transition-colors border border-slate-100">
+                        Frequently Asked Questions <span>{activeSupportSection ==="faq" ?"−" :"+"}</span>
                       </div>
-                      {activeSupportSection === "faq" && (
+                      {activeSupportSection ==="faq" && (
                         <div className="p-5 bg-white border border-slate-100 rounded-xl text-sm text-slate-600 font-medium ml-4 space-y-4">
-                          <div><p className="font-black text-slate-900 mb-1">How do I track my order?</p><p>Check the "Recent Orders" section above.</p></div>
+                          <div><p className="font-black text-slate-900 mb-1">How do I track my order?</p><p>Check the"Recent Orders" section above.</p></div>
                           <div><p className="font-black text-slate-900 mb-1">Can I cancel my order?</p><p>Cancellations are allowed if the order hasn't been picked up.</p></div>
                         </div>
                       )}

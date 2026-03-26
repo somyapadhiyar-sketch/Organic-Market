@@ -7,6 +7,9 @@ export default {
   theme: {
     extend: {
       colors: {
+        accent: '#A3E635', /* Neon Lime 400 */
+      },
+      backgroundImage: {
         'purple-gradient': 'linear-gradient(135deg, #667eea, #764ba2)',
         'blue-gradient': 'linear-gradient(135deg, #74b9ff, #a29bfe)',
         'green-gradient': 'linear-gradient(135deg, #81c784, #4caf50)',

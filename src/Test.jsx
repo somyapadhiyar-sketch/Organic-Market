@@ -23,7 +23,7 @@ function Test() {
       });
 
       if (response.ok) {
-        // If the API says "OK", we remove it from our React state
+        // If the API says"OK", we remove it from our React state
         setPosts(posts.filter(post => post.id !== id));
         alert(`Post ${id} deleted successfully!`);
       }
@@ -57,7 +57,7 @@ export default Test;
 
 
 
-/*import { useState, useEffect } from "react";
+/*import { useState, useEffect } from"react";
 
 function Test() {
   const [user, setUser] = useState([]);
@@ -65,8 +65,7 @@ function Test() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          "https://jsonplaceholder.typicode.com/users"
+        const response = await fetch("https://jsonplaceholder.typicode.com/users"
         );
         const jresponse = await response.json();
         console.log(jresponse);

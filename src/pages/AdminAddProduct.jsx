@@ -11,8 +11,8 @@ export default function AdminAddProduct() {
   const [isUploading, setIsUploading] = useState(false)
 
   // 🔴 IMPORTANT: Replace this with your actual unsigned preset name
-  const uploadPreset = "zesty store"; 
-  const cloudName = "dbnuemnv5";
+  const uploadPreset ="zesty store"; 
+  const cloudName ="dbnuemnv5";
 
   const uploadToCloudinary = async (file) => {
     const formData = new FormData();
@@ -20,7 +20,7 @@ export default function AdminAddProduct() {
     formData.append("upload_preset", uploadPreset);
     try {
       const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
-        method: "POST",
+        method:"POST",
         body: formData,
       });
       const data = await response.json();
@@ -45,7 +45,7 @@ export default function AdminAddProduct() {
     addNewProduct(formattedProduct); showToast("Product Added!"); navigate('/admin');
   }
 
-  const inputStyle = "w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-colors font-bold text-slate-900 text-base shadow-inner";
+  const inputStyle ="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-colors font-bold text-slate-900 text-base shadow-inner";
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-6 flex items-center justify-center font-sans text-slate-800">
@@ -78,7 +78,7 @@ export default function AdminAddProduct() {
             <div><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Shelf Life</label><input value={newProduct.shelfLife} onChange={e => setNewProduct({...newProduct, shelfLife: e.target.value})} className={inputStyle} /></div>
             <div><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Storage</label><input value={newProduct.storage} onChange={e => setNewProduct({...newProduct, storage: e.target.value})} className={inputStyle} /></div>
           </div>
-          <div className="md:col-span-2 mt-6"><motion.button disabled={isUploading} whileTap={{ scale: 0.95 }} type="submit" className="w-full py-5 bg-slate-900 text-white text-xl font-black rounded-2xl shadow-xl hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{isUploading ? 'Processing...' : 'Publish Product'}</motion.button></div>
+          <div className="md:col-span-2 mt-6"><motion.button disabled={isUploading} whileTap={{ scale: 0.95 }} type="submit" className="btn-3d btn-lime w-full py-5 text-xl font-black disabled:opacity-50 disabled:cursor-not-allowed">{isUploading ? 'Processing...' : 'Publish Product'}</motion.button></div>
         </form>
       </motion.div>
     </div>

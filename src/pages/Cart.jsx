@@ -5,23 +5,13 @@ import { Plus, Minus, MapPin, CreditCard, Banknote, Building, CheckCircle2, Load
 import { Country, State, City } from 'country-state-city'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import { getFirestore, doc, updateDoc, collection, addDoc } from "firebase/firestore";
-import { auth } from "../firebase";
+import { getFirestore, doc, updateDoc, collection, addDoc } from"firebase/firestore";
+import { auth } from"../firebase";
 import ProductCard from '../components/ProductCard';
 
 // Mock Pincode data for validation
-const MOCK_PINCODE_DATA = {
-  "India": {
-    "Gujarat": {
-      "Ahmedabad": ["380001", "380006", "380009", "380015", "380052"],
-      "Surat": ["395003", "395004", "395007", "395010"],
-      "Vadodara": ["390001", "390002", "390007"],
-      "Rajkot": ["360001", "360002", "360004"],
-      "Gandhinagar": ["382010", "382016", "382021"]
-    },
-    "Maharashtra": {
-      "Mumbai": ["400001", "400002", "400011"],
-      "Pune": ["411001", "411002", "411005"]
+const MOCK_PINCODE_DATA = {"India": {"Gujarat": {"Ahmedabad": ["380001","380006","380009","380015","380052"],"Surat": ["395003","395004","395007","395010"],"Vadodara": ["390001","390002","390007"],"Rajkot": ["360001","360002","360004"],"Gandhinagar": ["382010","382016","382021"]
+    },"Maharashtra": {"Mumbai": ["400001","400002","400011"],"Pune": ["411001","411002","411005"]
     }
   }
 };
@@ -72,7 +62,7 @@ export default function Cart() {
   // Coupon & OTP States
   const [couponCode, setCouponCode] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
-  const [couponMessage, setCouponMessage] = useState({ type: "", text: "" });
+  const [couponMessage, setCouponMessage] = useState({ type:"", text:"" });
   const [showOffers, setShowOffers] = useState(false);
 
   const [otp, setOtp] = useState("");
@@ -200,16 +190,16 @@ export default function Cart() {
   }, [currentUser, navigate]);
 
   const availableOffers = [
-    { code: "ZESTY20", desc: "Get 20% OFF on your entire order." },
-    { code: "WELCOME50", desc: "Flat 50% OFF for new users!" },
+    { code:"ZESTY20", desc:"Get 20% OFF on your entire order." },
+    { code:"WELCOME50", desc:"Flat 50% OFF for new users!" },
   ];
 
   const handleApplyCoupon = () => {
     const code = couponCode.trim().toUpperCase();
-    if (code === "ZESTY20") { setDiscountPercent(0.2); setCouponMessage({ type: "success", text: "Coupon applied! 20% OFF" }); }
-    else if (code === "WELCOME50") { setDiscountPercent(0.5); setCouponMessage({ type: "success", text: "Coupon applied! 50% OFF" }); }
-    else if (code === "") { setDiscountPercent(0); setCouponMessage({ type: "error", text: "Please enter a code." }); }
-    else { setDiscountPercent(0); setCouponMessage({ type: "error", text: "Invalid or expired coupon." }); }
+    if (code ==="ZESTY20") { setDiscountPercent(0.2); setCouponMessage({ type:"success", text:"Coupon applied! 20% OFF" }); }
+    else if (code ==="WELCOME50") { setDiscountPercent(0.5); setCouponMessage({ type:"success", text:"Coupon applied! 50% OFF" }); }
+    else if (code ==="") { setDiscountPercent(0); setCouponMessage({ type:"error", text:"Please enter a code." }); }
+    else { setDiscountPercent(0); setCouponMessage({ type:"error", text:"Invalid or expired coupon." }); }
   };
 
   const discountAmount = Math.round(total * discountPercent);
@@ -268,7 +258,7 @@ export default function Cart() {
           
           if (currentUser?.uid) {
             const db = getFirestore(auth.app);
-            updateDoc(doc(db, "users", currentUser.uid), { savedAddresses: updatedSavedAddresses }).catch(console.error);
+            updateDoc(doc(db,"users", currentUser.uid), { savedAddresses: updatedSavedAddresses }).catch(console.error);
           }
           
           try {
@@ -316,7 +306,7 @@ export default function Cart() {
       
       if (result && !result.success) {
         setIsProcessing(false);
-        return showToast(result.msg || "Payment failed. Please try again.");
+        return showToast(result.msg ||"Payment failed. Please try again.");
       }
       
       setIsProcessing(false);
@@ -388,7 +378,7 @@ export default function Cart() {
             <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-800 mb-3">Your Cart is Empty</h2>
             <p className="text-slate-500 font-medium text-lg mb-8">Looks like you haven't added anything to your cart yet.</p>
             <Link to="/user/fruits">
-              <button className="px-8 py-4 bg-slate-800 text-white font-bold rounded-2xl hover:bg-slate-700 transition-colors shadow-lg">Start Shopping</button>
+              <button className="px-8 py-4 btn-3d btn-lime font-bold shadow-lg">Start Shopping</button>
             </Link>
           </div>
         ) : (
@@ -664,9 +654,9 @@ export default function Cart() {
                               setOtpTimer(30);
                             }}
                             disabled={otpTimer > 0}
-                            className={`w-1/3 bg-green-100 hover:bg-green-200 text-green-700 font-bold rounded-xl text-sm transition-colors ${otpTimer > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+                            className={`w-1/3 bg-green-100 hover:bg-green-200 text-green-700 font-bold rounded-xl text-sm transition-colors ${otpTimer > 0 ?"opacity-50 cursor-not-allowed" :""}`}
                           >
-                            {otpTimer > 0 ? `Wait ${otpTimer}s` : otpSent ? "Resend" : "Get OTP"}
+                            {otpTimer > 0 ? `Wait ${otpTimer}s` : otpSent ?"Resend" :"Get OTP"}
                           </button>
                         </div>
                       </div>
@@ -706,13 +696,13 @@ export default function Cart() {
                 </div>
 
                 {step === 1 && (
-                  <button onClick={handleProceed} className="w-full py-3.5 sm:py-4 bg-slate-800 text-white font-bold text-sm sm:text-base rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center gap-2">
+                  <button onClick={handleProceed} className="btn-3d btn-orange w-full py-3.5 sm:py-4 font-bold text-sm sm:text-base gap-2">
                     Proceed to Address <ArrowRight size={20} />
                   </button>
                 )}
 
                 {step === 2 && (
-                  <button onClick={handleProceed} className="w-full py-3.5 sm:py-4 bg-slate-800 text-white font-bold text-sm sm:text-base rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center gap-2">
+                  <button onClick={handleProceed} className="btn-3d btn-blue w-full py-3.5 sm:py-4 font-bold text-sm sm:text-base gap-2">
                     Proceed to Payment <ArrowRight size={20} />
                   </button>
                 )}
@@ -721,7 +711,7 @@ export default function Cart() {
                     <button 
                     onClick={() => document.getElementById('real-checkout-btn').click()} 
                     disabled={isCheckoutDisabled() || pendingOrderId}
-                    className="w-full py-3.5 sm:py-4 bg-green-600 text-white font-bold text-sm sm:text-base rounded-2xl hover:bg-green-700 transition-colors flex justify-center items-center gap-2 disabled:bg-slate-400 disabled:cursor-wait shadow-lg shadow-green-200"
+                    className="btn-3d btn-emerald w-full py-3.5 sm:py-4 font-bold text-sm sm:text-base gap-2 disabled:opacity-50 disabled:cursor-wait"
                   >
                     {pendingOrderId ? 'Processing...' : isProcessing ? <><Loader2 className="animate-spin w-4 h-4 sm:w-5 sm:h-5" /> Processing...</> : `Pay ₹${grandTotal} Securely`}
                   </button>
@@ -737,18 +727,18 @@ export default function Cart() {
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="font-bold text-md text-slate-800">Have a coupon?</h3>
                     <button onClick={() => setShowOffers(!showOffers)} className="text-xs text-green-600 font-bold hover:underline">
-                      {showOffers ? "Hide offers" : "View offers"}
+                      {showOffers ?"Hide offers" :"View offers"}
                     </button>
                   </div>
                   <div className="flex gap-2">
                   <input type="text" placeholder="ZESTY20" value={couponCode} onChange={(e) => {
                     setCouponCode(e.target.value);
-                    if (e.target.value.trim() === "") {
+                    if (e.target.value.trim() ==="") {
                       setDiscountPercent(0);
-                      setCouponMessage({ type: "", text: "" });
+                      setCouponMessage({ type:"", text:"" });
                     }
                   }} className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 font-medium text-sm uppercase"/>
-                    <button onClick={handleApplyCoupon} className="px-4 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors text-xs">APPLY</button>
+                    <button onClick={handleApplyCoupon} className="px-4 btn-3d btn-lime font-bold text-xs">APPLY</button>
                   </div>
                   {showOffers && (
                     <div className="mt-3 space-y-2">
@@ -761,7 +751,7 @@ export default function Cart() {
                     </div>
                   )}
                   {couponMessage.text && (
-                    <p className={`mt-2 text-xs font-bold ${couponMessage.type === "success" ? "text-green-600" : "text-red-500"}`}>{couponMessage.type === "success" ? "✓ " : "✕ "}{couponMessage.text}</p>
+                    <p className={`mt-2 text-xs font-bold ${couponMessage.type ==="success" ?"text-green-600" :"text-red-500"}`}>{couponMessage.type ==="success" ?"✓" :"✕"}{couponMessage.text}</p>
                   )}
                 </div>
               </div>

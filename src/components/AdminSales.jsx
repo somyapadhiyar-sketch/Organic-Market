@@ -119,7 +119,7 @@ export default function AdminSales() {
     doc.text(`Total Revenue: Rs. ${totalSales.toFixed(2)}`, 14, 36);
     doc.text(`Total Orders: ${totalOrders}`, 14, 42);
 
-    const tableColumn = ["Order ID", "Customer", "Date", "Items", "Payment", "Total"];
+    const tableColumn = ["Order ID","Customer","Date","Items","Payment","Total"];
     const tableRows = [];
 
     filteredOrders.forEach(order => {
@@ -153,7 +153,7 @@ export default function AdminSales() {
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Data");
+    XLSX.utils.book_append_sheet(workbook, worksheet,"Sales Data");
 
     const cols = Object.keys(worksheetData[0] || {});
     const colWidths = cols.map(col => ({ wch: Math.max(...worksheetData.map(row => row[col]?.toString().length || 0), col.length) }));
@@ -181,10 +181,10 @@ export default function AdminSales() {
           <input type="date" onChange={e => handleCustomDateChange(e, 'endDate')} value={dateRange.endDate ? dateRange.endDate.toISOString().split('T')[0] : ''} className="p-1.5 border border-gray-300 rounded-lg bg-slate-50" />
         </div>
         <div className="flex items-center gap-2">
-            <button onClick={handlePdfDownload} disabled={filteredOrders.length === 0} className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-bold rounded-lg hover:bg-red-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <button onClick={handlePdfDownload} disabled={filteredOrders.length === 0} className="btn-3d btn-danger flex items-center gap-2 px-3 py-1.5 text-xs font-bold transition disabled:opacity-50 disabled:cursor-not-allowed">
                 <Download size={14} /> PDF
             </button>
-            <button onClick={handleXlsxDownload} disabled={filteredOrders.length === 0} className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 text-xs font-bold rounded-lg hover:bg-green-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <button onClick={handleXlsxDownload} disabled={filteredOrders.length === 0} className="btn-3d btn-emerald flex items-center gap-2 px-3 py-1.5 text-xs font-bold transition disabled:opacity-50 disabled:cursor-not-allowed">
                 <Download size={14} /> XLSX
             </button>
         </div>

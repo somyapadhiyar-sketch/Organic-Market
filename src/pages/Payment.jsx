@@ -47,7 +47,7 @@ export default function Payment() {
       };
       const result = await placeOrder(orderData);
       if (result && !result.success) {
-        return showToast(result.msg || "Failed to place order");
+        return showToast(result.msg ||"Failed to place order");
       }
       setTimeout(() => setOrderPlaced(true), 1000);
     } catch (e) {
@@ -62,7 +62,7 @@ export default function Payment() {
         <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"><span className="text-5xl">🎉</span></div>
         <h2 className="text-3xl font-black text-slate-800 mb-2">Order Confirmed!</h2>
         <p className="text-slate-500 mb-8">Your organic order is on the way to <b>{userDetails.type}</b>.</p>
-        <Link to="/home" className="block w-full py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-200">Shop More</Link>
+        <Link to="/home" className="btn-3d btn-emerald block w-full py-4 font-bold transition">Shop More</Link>
       </div>
     </div>
   )
@@ -93,7 +93,7 @@ export default function Payment() {
                 <div className="md:col-span-2 flex gap-3 mt-2">
                   {['Home', 'Work', 'Other'].map(type => (<button key={type} type="button" onClick={() => setUserDetails({...userDetails, type: type})} className={`px-4 py-2 rounded-full text-sm font-bold border transition ${userDetails.type === type ? 'bg-green-100 border-green-500 text-green-700' : 'bg-white border-slate-200 text-slate-500'}`}>{type}</button>))}
                 </div>
-                <div className="md:col-span-2 mt-4"><button type="submit" className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl shadow-lg hover:bg-slate-800 transition">Save & Proceed</button></div>
+                <div className="md:col-span-2 mt-4"><button type="submit" className="btn-3d btn-lime w-full py-4 font-bold transition">Save & Proceed</button></div>
               </form>
             </div>
           )}
@@ -114,12 +114,12 @@ export default function Payment() {
             <h3 className="font-bold text-lg mb-4 text-slate-700">Order Summary</h3>
             <div className="space-y-3 text-sm text-slate-600">
               <div className="flex justify-between"><span>Item Total</span><span>₹{itemTotal}</span></div>
-              <div className="flex justify-between"><span>Delivery Charge</span><span className="text-green-600 font-bold">{deliveryCharge === 0 ? "FREE" : `₹${deliveryCharge}`}</span></div>
+              <div className="flex justify-between"><span>Delivery Charge</span><span className="text-green-600 font-bold">{deliveryCharge === 0 ?"FREE" : `₹${deliveryCharge}`}</span></div>
             </div>
             <div className="my-4 p-3 bg-green-50 rounded-lg border border-green-100 flex justify-between items-center">
                <span className="text-green-700 font-bold text-sm">Grand Total</span><span className="text-green-700 font-black text-xl">₹{grandTotal}</span>
             </div>
-            {step === 2 && (<button onClick={handlePlaceOrder} disabled={!!pendingOrderId || cart.length === 0} className="w-full py-4 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-all flex justify-between px-6 disabled:bg-slate-400 disabled:cursor-wait disabled:shadow-none"><span>{pendingOrderId ? 'Processing...' : 'PAY NOW'}</span><span>₹{grandTotal}</span></button>)}
+            {step === 2 && (<button onClick={handlePlaceOrder} disabled={!!pendingOrderId || cart.length === 0} className="btn-3d btn-emerald w-full py-4 font-bold flex justify-between px-6 disabled: disabled:cursor-wait disabled:"><span>{pendingOrderId ? 'Processing...' : 'PAY NOW'}</span><span>₹{grandTotal}</span></button>)}
           </div>
         </div>
       </main>

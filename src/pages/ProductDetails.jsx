@@ -34,7 +34,7 @@ export default function ProductDetails() {
   const { product } = state;
   const displayPrice = calculatePrice ? calculatePrice(product.price, quantity) : Math.round(product.price * quantity);
 
-  // Helper to ensure we have an array for "why you will love this"
+  // Helper to ensure we have an array for"why you will love this"
   const features = Array.isArray(product.whyYouWillLoveThis) 
     ? product.whyYouWillLoveThis 
     : typeof product.whyYouWillLoveThis === 'string' 
@@ -90,7 +90,7 @@ export default function ProductDetails() {
                 
                 <motion.div 
                     whileHover={{ scale: 1.05, rotate: 2 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    transition={{ type:"spring", stiffness: 300, damping: 20 }}
                     className="relative z-10 flex items-center justify-center min-h-[400px]"
                 >
                     <img 
@@ -170,15 +170,15 @@ export default function ProductDetails() {
                     whileTap={!isOutOfStock && availableQuantityOptions.length > 0 ? { scale: 0.98 } : {}}
                     onClick={!isOutOfStock && availableQuantityOptions.length > 0 ? handleAddToCart : undefined}
                     disabled={isOutOfStock || availableQuantityOptions.length === 0}
-                    className={`w-full py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-3 shadow-lg transition-all duration-300 
+                    className={`w-full py-4 font-black flex items-center justify-center gap-3 
                         ${(isOutOfStock || availableQuantityOptions.length === 0) 
-                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none' 
+                            ? 'btn-3d btn-lime opacity-50 cursor-not-allowed' 
                             : isAdded 
-                                ? 'bg-green-500 text-white shadow-green-200' 
-                                : 'bg-slate-900 text-white shadow-slate-300 hover:bg-slate-800'
+                                ? 'btn-3d btn-emerald opacity-90' 
+                                : 'btn-3d btn-emerald'
                         }`}
                 >
-                    {(isOutOfStock || availableQuantityOptions.length === 0) ? "Out of Stock" : isAdded ? (
+                    {(isOutOfStock || availableQuantityOptions.length === 0) ?"Out of Stock" : isAdded ? (
                         <>
                             <CheckCircle2 size={24} /> Added to Cart
                         </>
@@ -245,7 +245,7 @@ export default function ProductDetails() {
                         <Info size={20} className="text-blue-600" /> About the Product
                     </h3>
                     <p className="text-slate-600 leading-relaxed font-medium text-base">
-                        {product.about || product.desc || "Our products are sourced directly from certified organic farms to ensure the highest quality and freshness. We believe in sustainable farming practices that are good for you and the planet."}
+                        {product.about || product.desc ||"Our products are sourced directly from certified organic farms to ensure the highest quality and freshness. We believe in sustainable farming practices that are good for you and the planet."}
                     </p>
                 </div>
             </motion.div>

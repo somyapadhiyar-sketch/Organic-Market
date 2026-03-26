@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion'
 import { LifeBuoy, ShieldCheck, ShoppingBag, ArrowRight, Star } from 'lucide-react'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
@@ -11,8 +11,8 @@ const FadeIn = ({ children, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0, scale: 1 }}
-    viewport={{ once: true, margin: "-50px" }}
-    transition={{ duration: 0.6, delay, ease: "easeOut" }}
+    viewport={{ once: true, margin:"-50px" }}
+    transition={{ duration: 0.6, delay, ease:"easeOut" }}
     className="w-full block"
   >
     {children}
@@ -23,6 +23,33 @@ export default function Home() {
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const { currentUser } = useStore();
+
+  // MOUSE TILT LOGIC
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x);
+  const mouseYSpring = useSpring(y);
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["17.5deg", "-17.5deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-17.5deg", "17.5deg"]);
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
 
   useEffect(() => {
     if (currentUser?.role === 'admin') navigate('/admin', { replace: true });
@@ -68,10 +95,10 @@ export default function Home() {
 
               <FadeIn delay={0.2}>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                  <Link to="/user/fruits" className="px-8 py-4 bg-blue-600 text-white font-bold text-lg rounded-2xl shadow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 active:scale-95">
+                  <Link to="/user/fruits" className="btn-3d btn-emerald px-8 py-4 font-bold text-lg shadow-lg gap-2 active:scale-95">
                     Start Shopping <ArrowRight size={20} />
                   </Link>
-                  <Link to="/user/about" className="px-8 py-4 bg-white text-slate-700 font-bold text-lg rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-2 active:scale-95">
+                  <Link to="/user/about" className="btn-3d btn-lime px-8 py-4 font-bold text-lg shadow-sm gap-2 active:scale-95">
                     Our Story
                   </Link>
                 </div>
@@ -93,40 +120,90 @@ export default function Home() {
             </div>
 
             {/* Hero Image / Illustration Placeholder */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, x: 50 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="relative hidden md:block"
-            >
-               <div className="relative z-10 bg-white p-4 rounded-[2.5rem] shadow-2xl border border-slate-100 rotate-3 hover:rotate-0 transition-transform duration-500">
-                  <div className="bg-slate-50 rounded-[2rem] h-[400px] flex items-center justify-center relative overflow-hidden">
-                     
-                     <span className="text-[12rem] drop-shadow-2xl">🥑</span>
-                     
-                     <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-sm p-4 rounded-2xl border border-white/50 shadow-sm flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-black text-blue-600">Fresh Delivery</p>
-                          <p className="text-xs font-bold text-green-600">From Farm to Home</p>
-                        </div>
-                        <button onClick={() => navigate(currentUser ? '/user/fruits' : '/login/user')} className="w-8 h-8 bg-blue-600 rounded-full text-white flex items-center justify-center hover:bg-green-600 transition-colors">
-                          <ShoppingBag size={14} />
-                        </button>
-                     </div>
+             <motion.div 
+               onMouseMove={handleMouseMove}
+               onMouseLeave={handleMouseLeave}
+               initial={{ opacity: 0, scale: 0.9, x: 50 }}
+               animate={{ opacity: 1, scale: 1, x: 0 }}
+               transition={{ duration: 0.8, ease: "easeOut" }}
+               className="relative hidden md:flex items-center justify-center min-h-[500px] w-full"
+             >
+                {/* 3D BENTO CARD WITH MOUSE TILT */}
+                <motion.div 
+                  style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+                  className="relative z-10 w-[420px] h-[480px] bg-white rounded-[3rem] border border-slate-200 shadow-[0_45px_100px_-30px_rgba(0,0,0,0.2)] flex flex-col items-center justify-center p-8 overflow-visible"
+                >
+                   {/* CENTRAL 3D FRUIT ELEMENT */}
+                   <div className="relative pointer-events-none mb-12" style={{ transform: "translateZ(75px)" }}>
+                    <motion.div 
+                      animate={{ y: [0, -10, 0], scale: [1, 1.05, 1] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      className="text-[10rem] filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.2)]"
+                    >
+                      🧺
+                    </motion.div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <motion.span animate={{ y: [-10, 10, -10] }} transition={{ duration: 3.5, repeat: Infinity }} className="text-6xl -mt-16 ml-1 drop-shadow-lg opacity-90">🍎</motion.span>
+                    </div>
                   </div>
-               </div>
+
+                  {/* HIGH-CONTRAST ACTION BOX */}
+                  <div className="w-full bg-slate-50 border border-slate-200 p-6 rounded-[2.5rem] shadow-sm flex items-center justify-between" style={{ transform: "translateZ(70px)" }}>
+                    <div>
+                      <h4 className="text-lg font-black text-slate-900 tracking-tight leading-none mb-1">Fresh Delivery</h4>
+                      <p className="text-[11px] font-bold text-green-600 uppercase tracking-widest">100% Organic Farm</p>
+                    </div>
+                    <button 
+                      onClick={() => navigate(currentUser ? '/user/fruits' : '/login/user')} 
+                      className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all text-white"
+                    >
+                      <ShoppingBag size={24} strokeWidth={2.5} />
+                    </button>
+                  </div>
+
+                  {/* REDIRECTED ROAMING FRUITS - Clustered specifically around the card now */}
+                  {[
+                    { emoji: "🍒", x: -160, y: -80, d: 4 },
+                    { emoji: "🍍", x: 440,  y: 0,   d: 5 },
+                    { emoji: "🍉", x: 400,  y: 360, d: 5.5 },
+                    { emoji: "🍓", x: -120, y: 380, d: 4.5 },
+                    { emoji: "🥝", x: 260,  y: -140, d: 4.8 }
+                  ].map((f, i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ 
+                        y: [f.y, f.y - 40, f.y],
+                        x: [f.x, f.x + 20, f.x],
+                        rotate: [0, 20, -20, 0]
+                      }}
+                      transition={{ 
+                        duration: f.d, 
+                        repeat: Infinity, 
+                        ease: "easeInOut",
+                        delay: i * 0.5 
+                      }}
+                      className="absolute text-5xl z-0 select-none pointer-events-none drop-shadow-2xl"
+                      style={{ left: 0, top: 0, transformStyle: "preserve-3d" }}
+                    >
+                      {f.emoji}
+                    </motion.div>
+                  ))}
+               </motion.div>
                
-               {/* Floating elements */}
+
+
+               {/* Quality Badge */}
                <motion.div 
                  animate={{ y: [0, -10, 0] }} 
                  transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-                 className="absolute -top-6 -right-6 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 z-20"
+                 className="absolute -top-6 -right-6 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/60 z-20"
+                 style={{ transform: "translateZ(100px)" }}
                >
                  <div className="flex items-center gap-2">
-                   <div className="bg-yellow-100 p-2 rounded-full"><Star size={16} className="text-yellow-600 fill-yellow-600"/></div>
+                   <div className="bg-yellow-100 p-2 rounded-full"><Star size={18} className="text-yellow-600 fill-yellow-600"/></div>
                    <div>
-                     <p className="text-xs font-bold text-blue-600">4.9 Rating</p>
-                     <p className="text-[10px] font-medium text-slate-500">Top Quality</p>
+                     <p className="text-xs font-black text-blue-600">4.9/5</p>
+                     <p className="text-[10px] font-bold text-slate-500">Farmers Choice</p>
                    </div>
                  </div>
                </motion.div>
@@ -153,9 +230,9 @@ export default function Home() {
 
             <div className="grid md:grid-cols-3 gap-8">
               {[
-                { icon: <ShieldCheck size={32} className="text-green-600" />, title: "Certified Organic", desc: "100% chemical-free produce grown with love and care.", color: "bg-green-50" },
-                { icon: <ShoppingBag size={32} className="text-blue-600" />, title: "Superfast Delivery", desc: "Get your groceries delivered in 10 minutes or less.", color: "bg-blue-50" },
-                { icon: <LifeBuoy size={32} className="text-purple-600" />, title: "Direct from Farmers", desc: "Direct from farmers means better prices for you and them.", color: "bg-purple-50" }
+                { icon: <ShieldCheck size={32} className="text-green-600" />, title:"Certified Organic", desc:"100% chemical-free produce grown with love and care.", color:"bg-green-50" },
+                { icon: <ShoppingBag size={32} className="text-blue-600" />, title:"Superfast Delivery", desc:"Get your groceries delivered in 10 minutes or less.", color:"bg-blue-50" },
+                { icon: <LifeBuoy size={32} className="text-purple-600" />, title:"Direct from Farmers", desc:"Direct from farmers means better prices for you and them.", color:"bg-purple-50" }
               ].map((feature, i) => (
                 <FadeIn delay={i * 0.1} key={i}>
                   <div className="p-6 rounded-3xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">

@@ -38,7 +38,7 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <Link to={`/user/product/${product.name}`} state={{ product }} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 flex flex-col group hover:shadow-xl hover:-translate-y-1 transition-all h-full">
+    <Link to={`/user/product/${product.name}`} state={{ product }} className="bg-white rounded-2xl p-4 shadow-sm border flex flex-col group hover:shadow-xl hover:-translate-y-1 transition-all h-full">
       <div className="relative">
         <div className="h-40 w-full bg-gray-50 rounded-xl flex items-center justify-center p-4 mb-4 overflow-hidden">
           <img 
@@ -62,16 +62,16 @@ export default function ProductCard({ product }) {
       <div className="flex justify-between items-center mt-4">
         <p className="font-extrabold text-lg text-gray-900">₹{product.price}</p>
         {isOutOfStock ? (
-          <button disabled className="px-4 py-2 bg-slate-200 text-slate-500 rounded-xl font-bold text-sm cursor-not-allowed">Out of Stock</button>
+          <button disabled className="btn-3d btn-danger px-4 py-2 font-bold text-[13px] opacity-70 cursor-not-allowed">Out of Stock</button>
         ) : quantity > 0 ? (
-          <div className="flex items-center bg-green-100 text-green-800 rounded-xl h-9 shadow-sm border border-green-200">
-            <button onClick={handleDecrease} className="px-2.5 h-full flex items-center justify-center rounded-l-xl hover:bg-green-200 transition-colors"><Minus size={14} strokeWidth={3}/></button>
-            <span className="font-bold text-sm w-7 text-center">{quantity}</span>
-            <button onClick={handleIncrease} className="px-2.5 h-full flex items-center justify-center rounded-r-xl hover:bg-green-200 transition-colors"><Plus size={14} strokeWidth={3}/></button>
+          <div className="flex items-center bg-white border border-gray-200 rounded-full h-10 shadow-sm overflow-hidden z-10 relative">
+            <button onClick={handleDecrease} className="h-full w-9 flex items-center justify-center p-0 rounded-none border-none shadow-none text-slate-500 bg-slate-50 hover:bg-slate-200 transition-colors"><Minus size={14} strokeWidth={3}/></button>
+            <span className="font-bold text-[13px] w-8 text-center bg-white text-gray-800 z-10">{quantity}</span>
+            <button onClick={handleIncrease} className="h-full w-9 flex items-center justify-center p-0 rounded-none border-none shadow-none text-green-700 bg-green-50 hover:bg-green-100 transition-colors"><Plus size={14} strokeWidth={3}/></button>
           </div>
         ) : (
-          <button onClick={handleAddToCart} className="p-2.5 bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors">
-            <ShoppingBag size={18} />
+          <button onClick={handleAddToCart} className="btn-3d btn-emerald px-4 py-2 flex items-center gap-2 font-bold text-[13px]">
+            <Plus size={14} strokeWidth={3}/> Add
           </button>
         )}
       </div>

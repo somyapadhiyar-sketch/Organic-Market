@@ -16,7 +16,7 @@ export default function AdminEditProduct() {
     if (foundProduct) {
       setProduct({ 
         ...foundProduct, 
-        whyYouWillLoveThis: Array.isArray(foundProduct.whyYouWillLoveThis) ? foundProduct.whyYouWillLoveThis.join(', ') : (foundProduct.whyYouWillLoveThis || "100% Organic, Farm Fresh, No Pesticides"), 
+        whyYouWillLoveThis: Array.isArray(foundProduct.whyYouWillLoveThis) ? foundProduct.whyYouWillLoveThis.join(', ') : (foundProduct.whyYouWillLoveThis ||"100% Organic, Farm Fresh, No Pesticides"), 
         shelfLife: foundProduct.shelfLife || '3-4 Days', 
         storage: foundProduct.storage || 'Keep in cool dry place.' 
       })
@@ -24,8 +24,8 @@ export default function AdminEditProduct() {
   }, [id, products])
 
   // 🔴 IMPORTANT: Replace this with your actual unsigned preset name
-  const uploadPreset = "zesty store"; 
-  const cloudName = "dbnuemnv5";
+  const uploadPreset ="zesty store"; 
+  const cloudName ="dbnuemnv5";
 
   const uploadToCloudinary = async (file) => {
     const formData = new FormData();
@@ -33,7 +33,7 @@ export default function AdminEditProduct() {
     formData.append("upload_preset", uploadPreset);
     try {
       const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
-        method: "POST",
+        method:"POST",
         body: formData,
       });
       const data = await response.json();
@@ -70,12 +70,12 @@ export default function AdminEditProduct() {
 
   if (!product) return <div className="min-h-screen bg-slate-50 text-slate-800 flex justify-center items-center font-black text-2xl">Loading Editor...</div>
 
-  const inputStyle = "w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-slate-800 shadow-inner text-sm"
+  const inputStyle ="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-slate-800 shadow-inner text-sm"
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 flex items-center justify-center font-sans text-slate-800">
       <motion.div 
-        initial={{ opacity: 0, y: 40, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.5, ease: "easeOut" }}
+        initial={{ opacity: 0, y: 40, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.5, ease:"easeOut" }}
         className="max-w-3xl w-full bg-white p-6 sm:p-8 md:p-12 rounded-[2rem] sm:rounded-[3rem] shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-slate-100 mt-16 md:mt-0"
       >
         <div className="flex justify-between items-center mb-10 pb-6 border-b border-slate-100">

@@ -18,10 +18,10 @@ export default function Auth() {
     }
     const res = loginUser(email, password, role);
     if (res?.success) navigate(role === 'admin' ? '/admin' : '/user/home', { replace: true });
-    else showToast(res?.msg || "Login failed");
+    else showToast(res?.msg ||"Login failed");
   };
 
-  const inputClass = "w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-purple-500 focus:bg-white transition-all font-black text-slate-800 placeholder:text-slate-400 text-lg shadow-inner";
+  const inputClass ="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-purple-500 focus:bg-white transition-all font-black text-slate-800 placeholder:text-slate-400 text-lg shadow-inner";
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 font-sans">
@@ -40,7 +40,7 @@ export default function Auth() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <input type="email" required placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} />
           <input type="password" required placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className={inputClass} />
-          <motion.button whileTap={{ scale: 0.95 }} type="submit" className="w-full py-5 mt-4 bg-slate-900 text-white font-black text-xl rounded-2xl shadow-[0_10px_20px_rgba(0,0,0,0.2)] hover:bg-purple-600 transition-colors">
+          <motion.button whileTap={{ scale: 0.95 }} type="submit" className="btn-3d btn-lime w-full py-5 mt-4 font-black text-xl shadow-[0_10px_20px_rgba(0,0,0,0.2)] hover:bg-purple-600">
             Login Securely
           </motion.button>
         </form>

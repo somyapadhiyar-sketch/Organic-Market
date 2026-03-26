@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, where, updateDoc, onSnapshot, increment, runTransaction } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, where, updateDoc, onSnapshot, increment, runTransaction } from"firebase/firestore";
 import { auth } from '../firebase';
 
 let hasAlertedQuota = false;
@@ -48,12 +48,12 @@ export function StoreProvider({ children }) {
     const fetchProducts = async () => {
       try {
         const db = getFirestore(auth.app);
-        const querySnapshot = await getDocs(collection(db, "products"));
+        const querySnapshot = await getDocs(collection(db,"products"));
         
         if (querySnapshot.empty) {
           // First time setup: Seed Firestore with your default products
           for (const prod of defaultProducts) {
-            await setDoc(doc(db, "products", prod.id), prod);
+            await setDoc(doc(db,"products", prod.id), prod);
           }
           setProducts(defaultProducts);
         } else {
@@ -64,7 +64,7 @@ export function StoreProvider({ children }) {
           const missingProducts = defaultProducts.filter(dp => !fbProducts.some(fbp => fbp.id === dp.id));
           if (missingProducts.length > 0) {
             for (const prod of missingProducts) {
-              await setDoc(doc(db, "products", prod.id), prod);
+              await setDoc(doc(db,"products", prod.id), prod);
               fbProducts.push(prod);
             }
           }
@@ -82,7 +82,7 @@ export function StoreProvider({ children }) {
         const fetchPartners = async () => {
           try {
             const db = getFirestore(auth.app);
-            const q = query(collection(db, "users"), where("role", "==", "delivery"));
+            const q = query(collection(db,"users"), where("role","==","delivery"));
             const querySnapshot = await getDocs(q);
             if (!querySnapshot.empty) {
               const fbPartners = querySnapshot.docs.map(doc => doc.data());
@@ -98,7 +98,7 @@ export function StoreProvider({ children }) {
   // Fetch Orders from Firebase in Real-time
   useEffect(() => {
     const db = getFirestore(auth.app);
-    const unsubscribe = onSnapshot(collection(db, "orders"), (snapshot) => {
+    const unsubscribe = onSnapshot(collection(db,"orders"), (snapshot) => {
       if (!snapshot.empty) {
         const fbOrders = snapshot.docs.map(doc => doc.data());
         // Sort orders so newest are first (using the timestamp embedded in ID)
@@ -125,7 +125,7 @@ export function StoreProvider({ children }) {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     thirtyDaysAgo.setHours(0, 0, 0, 0);
 
-    const q = query(salesCollection, where("timestamp", ">=", thirtyDaysAgo));
+    const q = query(salesCollection, where("timestamp",">=", thirtyDaysAgo));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       // Each time we get an update, we'll rebuild the history from scratch
@@ -210,10 +210,10 @@ export function StoreProvider({ children }) {
     setDeliveryPartners(prev => prev.map(d => d.email === email ? { ...d, status: 'Approved' } : d));
     try {
       const db = getFirestore(auth.app);
-      const q = query(collection(db, "users"), where("email", "==", email), where("role", "==", "delivery"));
+      const q = query(collection(db,"users"), where("email","==", email), where("role","==","delivery"));
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach(async (document) => {
-        await updateDoc(doc(db, "users", document.id), { status: 'Approved' });
+        await updateDoc(doc(db,"users", document.id), { status: 'Approved' });
       });
     } catch(e) { console.error("Error updating approval in Firestore:", e); }
   };
@@ -224,7 +224,7 @@ export function StoreProvider({ children }) {
     if (product) {
       try {
         const db = getFirestore(auth.app);
-        await setDoc(doc(db, "products", id), { disabled: !product.disabled }, { merge: true });
+        await setDoc(doc(db,"products", id), { disabled: !product.disabled }, { merge: true });
       } catch(e) { console.error(e); }
     }
   };
@@ -235,13 +235,13 @@ export function StoreProvider({ children }) {
       setCart(prev => prev.filter(item => !item.id.startsWith(id))); // Remove variants
       try {
         const db = getFirestore(auth.app);
-        await deleteDoc(doc(db, "products", id));
+        await deleteDoc(doc(db,"products", id));
       } catch(e) { console.error(e); }
     }
   };
 
   const addNewProduct = async (product) => {
-    // Parse "whyYouWillLoveThis" into an array if it comes as a comma-separated string from the UI
+    // Parse"whyYouWillLoveThis" into an array if it comes as a comma-separated string from the UI
     const parsedReasons = Array.isArray(product.whyYouWillLoveThis) 
       ? product.whyYouWillLoveThis 
       : (product.whyYouWillLoveThis ? product.whyYouWillLoveThis.split(',').map(item => item.trim()).filter(Boolean) : []);
@@ -270,7 +270,7 @@ export function StoreProvider({ children }) {
     setProducts(prev => [newProduct, ...prev]);
     try {
       const db = getFirestore(auth.app);
-      await setDoc(doc(db, "products", newProduct.id), newProduct);
+      await setDoc(doc(db,"products", newProduct.id), newProduct);
     } catch(e) { console.error(e); }
   };
 
@@ -278,7 +278,7 @@ export function StoreProvider({ children }) {
     setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updatedData } : p));
     try {
       const db = getFirestore(auth.app);
-      await setDoc(doc(db, "products", id), updatedData, { merge: true });
+      await setDoc(doc(db,"products", id), updatedData, { merge: true });
     } catch(e) { console.error(e); }
   };
 
@@ -306,7 +306,7 @@ export function StoreProvider({ children }) {
       };
       
       // 2. Create the order document in Firebase
-      await setDoc(doc(db, "orders", orderId), newOrder);
+      await setDoc(doc(db,"orders", orderId), newOrder);
 
       // 3. Clear the cart AFTER the order is confirmed
       setCart([]);
@@ -324,13 +324,13 @@ export function StoreProvider({ children }) {
         const product = products.find(p => p.id === cartItem.id);
         if (product) {
           const newStock = Math.max(0, (product.stock || 0) - cartItem.quantity);
-          setDoc(doc(db, "products", product.id), { stock: newStock }, { merge: true }).catch(console.error);
+          setDoc(doc(db,"products", product.id), { stock: newStock }, { merge: true }).catch(console.error);
         }
       });
 
       // 5. Update the sales figures (non-blocking)
       const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      const salesDocRef = doc(db, "sales", dateStr);
+      const salesDocRef = doc(db,"sales", dateStr);
       setDoc(salesDocRef, {
         sales: increment(details.total || 0),
         revenue: increment(details.total || 0),
@@ -365,7 +365,7 @@ export function StoreProvider({ children }) {
 
     try {
       const db = getFirestore(auth.app);
-      await updateDoc(doc(db, "orders", id), updatedFields);
+      await updateDoc(doc(db,"orders", id), updatedFields);
 
       // If order is cancelled, and it was not cancelled before, decrement sales
       if (status === 'Cancelled' && orderToUpdate.status !== 'Cancelled') {
@@ -380,7 +380,7 @@ export function StoreProvider({ children }) {
 
         if (!isNaN(orderDate)) {
             const dateStr = orderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            const salesDocRef = doc(db, "sales", dateStr);
+            const salesDocRef = doc(db,"sales", dateStr);
             const saleUpdate = {
                 sales: increment(-orderToUpdate.total),
                 revenue: increment(-orderToUpdate.total),

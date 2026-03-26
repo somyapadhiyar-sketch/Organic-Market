@@ -30,7 +30,7 @@ export default function Wishlist() {
             <h2 className="text-2xl font-bold mt-6 text-slate-700">Your wishlist is empty</h2>
             <p className="text-slate-500 mt-2 mb-8">Add your favorite items to your wishlist to see them here.</p>
             <Link to="/user/fruits">
-              <button className="px-8 py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors shadow-lg">
+              <button className="px-8 py-3 btn-3d btn-lime font-bold shadow-lg">
                 Explore Products
               </button>
             </Link>
@@ -67,7 +67,7 @@ export default function Wishlist() {
                         <ShoppingBag size={18} />
                       </button>
                     )}
-                    <button onClick={() => { toggleWishlist(item); showToast(`${item.name} removed from wishlist`); }} className="p-2.5 bg-red-50 text-red-600 rounded-full hover:bg-red-100 transition-colors" title="Remove from Wishlist">
+                    <button onClick={() => { toggleWishlist(item); showToast(`${item.name} removed from wishlist`); }} className="p-2.5 btn-3d btn-danger text-sm font-bold transition-colors" title="Remove from Wishlist">
                       <Trash2 size={18} />
                     </button>
                   </div>

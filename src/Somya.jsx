@@ -46,7 +46,7 @@ export default App;*/
 //     if (cart.length > 0) {
 //       document.title = `(${cart.length}) Cart | Organic Market`
 //     } else {
-//       document.title = "Organic Market - Fresh & Healthy"
+//       document.title ="Organic Market - Fresh & Healthy"
 //     }
 //   }, [cart]) 
 
