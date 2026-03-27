@@ -56,9 +56,9 @@ export default function AdminEditProduct() {
     let finalImageUrl = product.image;
     if (file) {
       finalImageUrl = await uploadToCloudinary(file) || product.image;
-    }
+    } 
 
-    const formattedProduct = { 
+    const formattedProduct = {  
       ...product, 
       image: finalImageUrl,
       whyYouWillLoveThis: typeof product.whyYouWillLoveThis === 'string' ? product.whyYouWillLoveThis.split(',').map(i => i.trim()) : product.whyYouWillLoveThis

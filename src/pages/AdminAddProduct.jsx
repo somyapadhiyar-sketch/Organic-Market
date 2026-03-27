@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 export default function AdminAddProduct() {
-  const { addNewProduct, showToast } = useStore()
+  const { products, addNewProduct, showToast } = useStore()
   const navigate = useNavigate()
   const [newProduct, setNewProduct] = useState({ name: '', price: '', category: 'Fruits', desc: '', about: '', image: '', whyYouWillLoveThis: '100% Organic, Farm Fresh', shelfLife: '3-4 Days', storage: 'Keep cool.' })
   const [file, setFile] = useState(null)
@@ -41,7 +41,51 @@ export default function AdminAddProduct() {
     const fileUrl = await uploadToCloudinary(file);
     if(!fileUrl) { setIsUploading(false); return showToast("Image upload failed!"); }
     
-    const formattedProduct = { ...newProduct, image: fileUrl, whyYouWillLoveThis: newProduct.whyYouWillLoveThis.split(',').map(i => i.trim()) };
+    // Generate automatic ID (e.g. f15, v26, p10) based on max existing number in category
+    const prefix = newProduct.category.charAt(0).toLowerCase(); // 'f', 'v', or 'p'
+    const categoryProducts = products.filter(p => p.category === newProduct.category);
+    let maxIdNum = 0;
+    categoryProducts.forEach(p => {
+      if (p.id) {
+        const num = parseInt(String(p.id).replace(/\D/g, ''), 10);
+        if (!isNaN(num) && num > maxIdNum) maxIdNum = num;
+      }
+    });
+    const newId = `${prefix}${maxIdNum + 1}`;
+
+    // Generate automatic rating & buying frequency
+    const randomRating = Number((Math.random() * (5.0 - 4.0) + 4.0).toFixed(1));
+    const randomPurchaseFrequency = parseInt(Math.floor(Math.random() * (98 - 85 + 1)) + 85, 10);
+
+    const formattedProduct = { 
+      ...newProduct, 
+      id: newId, 
+      rating: randomRating, 
+      purchase_frequency: randomPurchaseFrequency, 
+      image: fileUrl, 
+      whyYouWillLoveThis: newProduct.whyYouWillLoveThis.split(',').map(i => i.trim()) 
+    };
+
+    try {
+      // Trigger the n8n Webhook to sync the new product to MongoDB
+      // This payload is structured exactly like the MongoDB collection
+      await fetch('http://localhost:5678/webhook/syncdb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formattedProduct.name,
+          category: formattedProduct.category,
+          price: Number(formattedProduct.price),
+          rating: formattedProduct.rating,
+          purchase_frequency: formattedProduct.purchase_frequency,
+          productId: newId
+        }),
+      });
+      console.log("Successfully triggered n8n to sync to MongoDB!");
+    } catch (error) {
+      console.error("n8n webhook failed to sync:", error);
+    }
+
     addNewProduct(formattedProduct); showToast("Product Added!"); navigate('/admin');
   }
 
