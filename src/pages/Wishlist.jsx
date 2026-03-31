@@ -1,5 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useLayoutEffect } from 'react'
 import { useStore } from '../context/StoreContext'
 import { Heart, ShoppingBag, Trash2, Plus, Minus } from 'lucide-react'
 import Navbar from '../components/Navbar'
@@ -8,6 +8,11 @@ import Footer from '../components/Footer'
 export default function Wishlist() {
   const { wishlist, toggleWishlist, addToCart, showToast, cart, decreaseCartQuantity, currentUser } = useStore()
   const navigate = useNavigate()
+  const { pathname } = useLocation();
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     if (currentUser?.role === 'admin') navigate('/admin', { replace: true });

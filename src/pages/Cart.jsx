@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { Plus, Minus, MapPin, CreditCard, Banknote, Building, CheckCircle2, Loader2, ArrowRight, ShoppingCart, Truck, Wallet, Home, Briefcase, Map } from 'lucide-react'
 import { Country, State, City } from 'country-state-city'
@@ -20,6 +20,7 @@ export default function Cart() {
   const { cart, addToCart, decreaseCartQuantity, getCartTotal, placeOrder, clearCart, currentUser, showToast, updateUser, setUserLocation, products, pendingOrderId } = useStore()
   const total = getCartTotal()
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   
   const [step, setStep] = useState(1); // 1 = Cart, 2 = Address, 3 = Payment
   const [paymentMethod, setPaymentMethod] = useState('UPI');
@@ -175,6 +176,10 @@ export default function Cart() {
       abortController.abort(); // Cleanup: Cancels any ongoing fetch if component unmounts
     };
   }, [cart, products]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     let interval;
@@ -399,7 +404,11 @@ export default function Cart() {
                     </div>
 
                     <div className="space-y-6">
-                      {cart.map((item, idx) => (
+                      {cart.map((item, idx) => {
+                        const product = products.find(p => p.id === item.id) || {};
+                        const unit = product.category === 'Oil' ? 'L' : 'kg';
+
+                        return (
                         <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 border-b border-slate-100 pb-6 last:border-0 last:pb-0">
                           <div className="flex items-center gap-4 flex-1">
                             <div className="w-16 h-16 sm:w-24 sm:h-24 bg-slate-50 border border-slate-100 rounded-2xl p-2 flex-shrink-0 flex items-center justify-center">
@@ -407,7 +416,7 @@ export default function Cart() {
                             </div>
                             <div className="flex-1">
                               <h4 className="font-semibold text-base sm:text-lg text-slate-800 leading-tight line-clamp-2">{item.name}</h4>
-                              <p className="text-xs sm:text-sm font-medium text-slate-500 mt-0.5 sm:mt-1">1 kg</p>
+                              <p className="text-xs sm:text-sm font-medium text-slate-500 mt-0.5 sm:mt-1">1 {unit}</p>
                               <p className="font-bold text-base sm:text-lg text-slate-900 mt-1 sm:mt-2">₹{item.price}</p>
                             </div>
                           </div>
@@ -419,7 +428,8 @@ export default function Cart() {
                             </div>
                           </div>
                         </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
 

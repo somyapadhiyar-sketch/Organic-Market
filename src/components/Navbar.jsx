@@ -32,11 +32,11 @@ export default function Navbar() {
     if (query.trim()) {
       // Find the first product that matches the search query
       const matchedProduct = products.find(product =>
-        product.name.toLowerCase().includes(query.toLowerCase())
+        (product.name || '').toLowerCase().includes(query.toLowerCase())
       );
 
       if (matchedProduct) {
-        navigate(`/user/${matchedProduct.category.toLowerCase()}`);
+        navigate(`/user/${String(matchedProduct.category || '').toLowerCase()}`);
       } else {
         // If no match, navigate to a default page to show"no results".
         navigate('/user/fruits');
@@ -280,6 +280,7 @@ export default function Navbar() {
         <Link to="/user/fruits" className={`py-3 text-[14px] font-bold whitespace-nowrap ${isActive('fruits')}`}>🍎 Fresh Fruits</Link>
         <Link to="/user/vegetables" className={`py-3 text-[14px] font-bold whitespace-nowrap ${isActive('vegetables')}`}>🥦 Fresh Vegetables</Link>
         <Link to="/user/pulses" className={`py-3 text-[14px] font-bold whitespace-nowrap ${isActive('pulses')}`}>🌾 Organic Pulses</Link>
+        <Link to="/user/oil" className={`py-3 text-[14px] font-bold whitespace-nowrap ${isActive('oil')}`}>🪔 Cooking Oils</Link>
         <Link to="/user/wishlist" className={`py-3 text-[14px] font-bold whitespace-nowrap ${isActive('wishlist')}`}>❤️ My Wishlist</Link>
         <Link to="/user/orders" className={`py-3 text-[14px] font-bold whitespace-nowrap ${isActive('orders')}`}>📦 My Orders</Link>
       </div>

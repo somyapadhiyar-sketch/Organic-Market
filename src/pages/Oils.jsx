@@ -6,7 +6,7 @@ import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
 import WaveBanner from '../components/WaveBanner';
 
-export default function Vegetables() {
+export default function Oils() {
   const { products, searchQuery, currentUser } = useStore();
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ export default function Vegetables() {
     window.scrollTo(0, 0);
   }, [pathname]);
   
-  const categoryData = products.filter(p => String(p.category || '').toLowerCase() === 'vegetables');
+  const categoryData = products.filter(p => String(p.category || '').toLowerCase() === 'oil');
 
   const filteredData = (searchQuery && searchQuery.trim() !== '')
     ? categoryData.filter(p => (p.name || '').toLowerCase().includes(searchQuery.toLowerCase())) 
@@ -31,12 +31,12 @@ export default function Vegetables() {
       <Navbar />
       
       <main className="pt-[140px] pb-12 flex-1">
-        <WaveBanner theme="green" title="Crisp & Fresh Veggies" subtitle="Daily harvested, delivered to your kitchen in 10 minutes." />
+        <WaveBanner theme="yellow" title="Pure & Healthy Oils" subtitle="Cold-pressed and naturally processed for your well-being." />
         
-        <div className="px-4 sm:px-6 lg:px-10 mt-8 mb-6 flex justify-between items-end border-b border-gray-200 pb-4">
+        <div className="px-4 sm:px-6 lg:px-10 mt-8 mb-6 flex justify-between items-end">
           <div>
-            <h2 className="text-[24px] font-black text-[#1C1C1C]">Buy Fresh Vegetables Online</h2>
-            <p className="text-gray-500 text-[14px] font-medium mt-1">Daily harvested, delivered to your kitchen in 10 minutes.</p>
+            <h2 className="text-[24px] font-black text-[#1C1C1C]">Buy Cooking Oils Online</h2>
+            <p className="text-gray-500 text-[14px] font-medium mt-1">From groundnut to olive, find the perfect oil for your kitchen.</p>
           </div>
         </div>
         

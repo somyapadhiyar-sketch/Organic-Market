@@ -57,7 +57,7 @@ export default function ProductCard({ product }) {
       </div>
       <div className="flex-1 flex flex-col">
         <h3 className="font-bold text-gray-800 text-base leading-tight line-clamp-2 flex-1">{product.name}</h3>
-        <p className="text-sm text-gray-500 mt-1">{product.quantityLabel || '1 kg'}</p>
+        <p className="text-sm text-gray-500 mt-1">{`1 ${product.unit || 'kg'}`}</p>
       </div>
       <div className="flex justify-between items-center mt-4">
         <p className="font-extrabold text-lg text-gray-900">₹{product.price}</p>

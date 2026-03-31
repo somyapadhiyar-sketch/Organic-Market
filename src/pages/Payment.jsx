@@ -1,13 +1,18 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect } from 'react'
 import Footer from '../components/Footer'
 
 export default function Payment() {
   const { cart, getCartTotal, clearCart, placeOrder, showToast, currentUser, pendingOrderId } = useStore()
   const navigate = useNavigate()
+  const { pathname } = useLocation();
   const [step, setStep] = useState(1)
   const [tip, setTip] = useState(0)
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     if (currentUser?.role === 'admin') navigate('/admin', { replace: true });

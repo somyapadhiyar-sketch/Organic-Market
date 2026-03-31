@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from"react";
-import { Link, useNavigate } from"react-router-dom";
+import React, { useEffect, useState, useLayoutEffect } from"react";
+import { Link, useNavigate, useLocation } from"react-router-dom";
 import { useStore } from"../context/StoreContext";
 import Navbar from"../components/Navbar";
 import Footer from"../components/Footer";
 
 export default function Orders() {
   const navigate = useNavigate();
-  const { currentUser, orders, addToCart, showToast } = useStore();
+  const { currentUser, orders, addToCart, showToast, products } = useStore();
+  const { pathname } = useLocation();
   const [userOrders, setUserOrders] = useState([]);
   const [statusFilter, setStatusFilter] = useState("All");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -14,7 +15,6 @@ export default function Orders() {
   const filterOptions = ["All","Out for Delivery","Pending","Delivered"];
 
   useEffect(() => {
-    window.scrollTo(0, 0);
     if (!currentUser) {
       navigate("/login/user");
       return;
@@ -32,6 +32,10 @@ export default function Orders() {
     );
     setUserOrders(filteredOrders);
   }, [navigate, currentUser, orders]);
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   const formatPrice = (priceVal) => {
     return new Intl.NumberFormat("en-IN", {
@@ -115,7 +119,10 @@ export default function Orders() {
                   </div>
 
                   <div className="space-y-3 border-t border-slate-200 pt-4">
-                    {(order.items || []).slice(0, 3).map((item, idx) => (
+                    {(order.items || []).slice(0, 3).map((item, idx) => {
+                      const product = products.find(p => p.id === item.id) || {};
+                      const unit = product.category === 'Oil' ? 'L' : 'kg';
+                      return (
                       <div key={idx} className="flex justify-between items-center text-sm">
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 p-1 flex-shrink-0">
@@ -124,11 +131,11 @@ export default function Orders() {
                           <span className="font-bold text-slate-700">{item.name}</span>
                         </div>
                         <div className="flex flex-col items-end gap-1">
-                          <span className="font-bold text-slate-900 bg-white px-3 py-1 rounded-lg border border-slate-200">Qty: {item.quantity}</span>
+                          <span className="font-bold text-slate-900 bg-white px-3 py-1 rounded-lg border border-slate-200">Qty: {item.quantity}{unit}</span>
                           <span className="text-xs font-bold text-slate-500">₹{Math.round(item.price * item.quantity)}</span>
                         </div>
                       </div>
-                    ))}
+                    )})}
                     {(order.items || []).length > 3 && <p className="text-xs font-bold text-slate-500 text-center bg-slate-200/50 py-2 rounded-lg">+{(order.items || []).length - 3} more items</p>}
                   </div>
 

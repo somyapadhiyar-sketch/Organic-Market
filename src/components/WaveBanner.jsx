@@ -37,6 +37,15 @@ const colorThemes = {
     dark2: 'fill-purple-700',
     darkest: 'fill-purple-800',
     text: 'text-purple-50'
+  },
+  yellow: {
+    bg: 'bg-yellow-500',
+    light1: 'fill-yellow-300',
+    light2: 'fill-yellow-400',
+    dark1: 'fill-yellow-600',
+    dark2: 'fill-yellow-700',
+    darkest: 'fill-yellow-800',
+    text: 'text-yellow-50'
   }
 };
 

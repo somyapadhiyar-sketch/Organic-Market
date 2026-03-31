@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect, useLayoutEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { ArrowRight, Mail, Lock, User, Eye, EyeOff, Phone, MapPin, Camera, Upload } from 'lucide-react';
@@ -25,11 +25,16 @@ export default function DeliverySignup() {
   const [loading, setLoading] = useState(false);
   const { showToast } = useStore();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   // Derived state for dropdowns
   const countries = Country.getAllCountries();
   const states = country ? State.getStatesOfCountry(country) : [];
   const cities = country && stateRegion ? City.getCitiesOfState(country, stateRegion) : [];
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   // Auto-set Address field
   useEffect(() => {

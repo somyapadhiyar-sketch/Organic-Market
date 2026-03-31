@@ -1,5 +1,5 @@
-import { useRef, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useRef, useEffect, useLayoutEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion'
 import { LifeBuoy, ShieldCheck, ShoppingBag, ArrowRight, Star } from 'lucide-react'
 import Footer from '../components/Footer'
@@ -23,6 +23,7 @@ export default function Home() {
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const { currentUser } = useStore();
+  const { pathname } = useLocation();
 
   // MOUSE TILT LOGIC
   const x = useMotionValue(0);
@@ -50,6 +51,12 @@ export default function Home() {
     x.set(0);
     y.set(0);
   };
+
+  useLayoutEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo(0, 0);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     if (currentUser?.role === 'admin') navigate('/admin', { replace: true });

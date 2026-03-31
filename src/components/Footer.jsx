@@ -22,6 +22,7 @@ export default function Footer() {
             <li><Link to="/user/fruits" className="text-gray-600 hover:text-blue-600 flex items-center">Shop Fruits <ChevronRight size={14} className="ml-1" /></Link></li>
             <li><Link to="/user/vegetables" className="text-gray-600 hover:text-blue-600 flex items-center">Shop Vegetables <ChevronRight size={14} className="ml-1" /></Link></li>
             <li><Link to="/user/pulses" className="text-gray-600 hover:text-blue-600 flex items-center">Shop Pulses <ChevronRight size={14} className="ml-1" /></Link></li>
+            <li><Link to="/user/oil" className="text-gray-600 hover:text-blue-600 flex items-center">Shop Oils <ChevronRight size={14} className="ml-1" /></Link></li>
           </ul>
         </div>
 

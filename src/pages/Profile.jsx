@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from"react";
-import { Link, useNavigate } from"react-router-dom";
+import React, { useEffect, useState, useLayoutEffect } from"react";
+import { Link, useNavigate, useLocation } from"react-router-dom";
 import { useStore } from"../context/StoreContext";
 import Navbar from"../components/Navbar";
 import Footer from"../components/Footer";
@@ -9,6 +9,7 @@ import { auth } from"../firebase";
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { currentUser, updateUser, deleteUser, logout, showToast } = useStore();
 
   const [showAddresses, setShowAddresses] = useState(false);
@@ -47,7 +48,6 @@ export default function Profile() {
   const [lastLogin, setLastLogin] = useState("");
 
   useEffect(() => {
-    window.scrollTo(0, 0);
     if (!currentUser) {
       navigate("/login/user");
       return;
@@ -80,8 +80,11 @@ export default function Profile() {
 
     const savedPrefs = localStorage.getItem("notificationPrefs_" + currentUser.email);
     if (savedPrefs) setNotificationPrefs(JSON.parse(savedPrefs));
-
   }, [navigate, currentUser]);
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   const handleNotificationToggle = (type) => {
     const updated = { ...notificationPrefs, [type]: !notificationPrefs[type] };

@@ -1,23 +1,30 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect } from 'react'
 import { useStore } from '../context/StoreContext'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { Clock, Archive, Info, CheckCircle2, ShoppingBag, ArrowLeft, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
-
-const quantityOptions = [
+const quantityOptionsKg = [
   { value: 0.25, label: '250g' }, 
   { value: 0.5, label: '500g' }, 
   { value: 1, label: '1kg' }, 
   { value: 2, label: '2kg' }, 
   { value: 5, label: '5kg' }
 ]
+const quantityOptionsL = [
+  { value: 0.25, label: '250ml' },
+  { value: 0.5, label: '500ml' },
+  { value: 1, label: '1L' },
+  { value: 2, label: '2L' },
+  { value: 5, label: '5L' }
+]
 
 export default function ProductDetails() {
   const { state } = useLocation(); 
   const navigate = useNavigate();
   const { addToCart, calculatePrice, currentUser } = useStore();
+  const { pathname } = useLocation();
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
 
@@ -26,12 +33,19 @@ export default function ProductDetails() {
     else if (currentUser?.role === 'delivery') navigate('/delivery', { replace: true });
   }, [currentUser, navigate]);
   
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  
   useEffect(() => { 
     if (!state?.product) navigate('/user/home') 
   }, [state, navigate])
   
   if (!state?.product) return null;
   const { product } = state;
+  const isOil = product.category === 'Oil';
+  const quantityOptions = isOil ? quantityOptionsL : quantityOptionsKg;
+
   const displayPrice = calculatePrice ? calculatePrice(product.price, quantity) : Math.round(product.price * quantity);
 
   // Helper to ensure we have an array for"why you will love this"
@@ -140,7 +154,7 @@ export default function ProductDetails() {
                             <span className="text-lg font-bold text-slate-300 line-through">₹{Math.round(product.price * quantity * 1.2)}</span>
                         </div>
                         {!isOutOfStock && product.stock <= 10 && (
-                            <p className="text-xs font-bold text-red-500 mt-2">Hurry! Only {product.stock}kg left in stock.</p>
+                            <p className="text-xs font-bold text-red-500 mt-2">Hurry! Only {product.stock}{isOil ? 'L' : 'kg'} left in stock.</p>
                         )}
                     </div>
                     <div className="text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0">

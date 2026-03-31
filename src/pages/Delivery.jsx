@@ -1,13 +1,14 @@
 import { useStore } from '../context/StoreContext'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Search, Camera, Mail, Phone, MapPin, CheckCircle2, Upload, Edit2, Save, X } from 'lucide-react'
-import { useState, useRef } from 'react'
+import { useState, useRef, useLayoutEffect } from 'react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { auth } from '../firebase'
 
 export default function Delivery() {
   const { orders, updateOrderStatus, logout, currentUser, updateUser } = useStore()
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const handleLogout = () => { logout(); navigate('/home', { replace: true }); };
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('orders');
@@ -17,6 +18,10 @@ export default function Delivery() {
   const [showCamera, setShowCamera] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   const handleEditToggle = async () => {
     if (isEditing) {

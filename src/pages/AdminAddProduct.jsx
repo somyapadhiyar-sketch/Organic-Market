@@ -1,14 +1,20 @@
-import { useState } from 'react'
+import { useState, useLayoutEffect } from 'react'
 import { useStore } from '../context/StoreContext'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 export default function AdminAddProduct() {
   const { products, addNewProduct, showToast } = useStore()
   const navigate = useNavigate()
-  const [newProduct, setNewProduct] = useState({ name: '', price: '', category: 'Fruits', desc: '', about: '', image: '', whyYouWillLoveThis: '100% Organic, Farm Fresh', shelfLife: '3-4 Days', storage: 'Keep cool.' })
+  const { pathname } = useLocation();
+  const [newProduct, setNewProduct] = useState({ name: '', price: '', category: 'Fruits', desc: '', about: '', image: '', whyYouWillLoveThis: '100% Organic, Farm Fresh', shelfLife: '3-4 Days', storage: 'Keep cool.'})
   const [file, setFile] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [productType, setProductType] = useState('Solid');
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   // 🔴 IMPORTANT: Replace this with your actual unsigned preset name
   const uploadPreset ="zesty store"; 
@@ -35,6 +41,15 @@ export default function AdminAddProduct() {
     }
   };
 
+  const handleTypeChange = (e) => {
+    const newType = e.target.value;
+    setProductType(newType);
+    setNewProduct(prev => ({
+      ...prev,
+      category: newType === 'Solid' ? 'Fruits' : 'Oil'
+    }));
+  };
+
   const handleAddProduct = async (e) => {
     e.preventDefault(); if(!file) return showToast("Please select an image!");
     setIsUploading(true);
@@ -42,14 +57,12 @@ export default function AdminAddProduct() {
     if(!fileUrl) { setIsUploading(false); return showToast("Image upload failed!"); }
     
     // Generate automatic ID (e.g. f15, v26, p10) based on max existing number in category
-    const prefix = newProduct.category.charAt(0).toLowerCase(); // 'f', 'v', or 'p'
-    const categoryProducts = products.filter(p => p.category === newProduct.category);
+    const prefix = newProduct.category === 'Oil' ? 'o' : newProduct.category.charAt(0).toLowerCase();
+    const categoryProducts = products.filter(p => p.category === newProduct.category && p.id && String(p.id).startsWith(prefix));
     let maxIdNum = 0;
     categoryProducts.forEach(p => {
-      if (p.id) {
-        const num = parseInt(String(p.id).replace(/\D/g, ''), 10);
-        if (!isNaN(num) && num > maxIdNum) maxIdNum = num;
-      }
+      const num = parseInt(String(p.id).substring(1), 10);
+      if (!isNaN(num) && num > maxIdNum) maxIdNum = num;
     });
     const newId = `${prefix}${maxIdNum + 1}`;
 
@@ -63,7 +76,11 @@ export default function AdminAddProduct() {
       rating: randomRating, 
       purchase_frequency: randomPurchaseFrequency, 
       image: fileUrl, 
-      whyYouWillLoveThis: newProduct.whyYouWillLoveThis.split(',').map(i => i.trim()) 
+      whyYouWillLoveThis: newProduct.whyYouWillLoveThis.split(',').map(i => i.trim()),
+      unit: newProduct.category === 'Oil' ? 'L' : 'kg',
+      stock: 150, // Default stock
+      disabled: false,
+      sold: 0
     };
 
     try {
@@ -105,8 +122,22 @@ export default function AdminAddProduct() {
             <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Product Name</label><input required value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} className={inputStyle} /></div>
             <div className="grid grid-cols-2 gap-4">
               <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Price (₹)</label><input required type="number" min="0" step="any" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} className={inputStyle} /></div>
-              <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Category</label><select value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} className={inputStyle}><option>Fruits</option><option>Vegetables</option><option>Pulses</option></select></div>
+              <div>
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Type</label>
+                <select value={productType} onChange={handleTypeChange} className={inputStyle}>
+                  <option>Solid</option>
+                  <option>Liquid</option>
+                </select>
+              </div>
             </div>
+            <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Category</label>
+              <select value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} className={inputStyle}>
+                {productType === 'Solid' ? (
+                  <><option>Fruits</option><option>Vegetables</option><option>Pulses</option></>
+                ) : (
+                  <option>Oil</option>
+                )}
+              </select></div>
             <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Short Desc</label><textarea required rows="2" value={newProduct.desc} onChange={e => setNewProduct({...newProduct, desc: e.target.value})} className={inputStyle} /></div>
             <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">About</label><textarea required rows="3" value={newProduct.about} onChange={e => setNewProduct({...newProduct, about: e.target.value})} className={inputStyle} /></div>
             <div><label className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2 block">Product Image</label><input required type="file" accept="image/*,.pdf" onChange={e => { setFile(e.target.files[0]); setNewProduct({...newProduct, image: URL.createObjectURL(e.target.files[0])}); }} className="w-full border border-slate-200 p-2 rounded-xl bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />{isUploading && <p className="text-sm font-bold text-blue-500 mt-2 animate-pulse">Uploading...</p>}</div>

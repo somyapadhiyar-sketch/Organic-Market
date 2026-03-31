@@ -45,38 +45,23 @@ export function StoreProvider({ children }) {
 
   // Fetch Products from Firebase on App Load
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const db = getFirestore(auth.app);
-        const querySnapshot = await getDocs(collection(db,"products"));
-        
-        if (querySnapshot.empty) {
-          // First time setup: Seed Firestore with your default products
-          for (const prod of defaultProducts) {
-            await setDoc(doc(db,"products", prod.id), prod);
-          }
-          setProducts(defaultProducts);
-        } else {
-          // Load from Firestore
-          const fbProducts = querySnapshot.docs.map(doc => doc.data());
-          
-          // Automatically add any missing default products to Firestore
-          const missingProducts = defaultProducts.filter(dp => !fbProducts.some(fbp => fbp.id === dp.id));
-          if (missingProducts.length > 0) {
-            for (const prod of missingProducts) {
-              await setDoc(doc(db,"products", prod.id), prod);
-              fbProducts.push(prod);
-            }
-          }
+    const db = getFirestore(auth.app);
 
-          setProducts(fbProducts);
-        }
-      } catch (error) {
-        console.error("Error fetching products from Firebase:", error);
+    // Real-time listener for products
+    const unsubscribeProducts = onSnapshot(collection(db, "products"), (snapshot) => {
+      if (!snapshot.empty) {
+        const fbProducts = snapshot.docs.map(doc => doc.data());
+        setProducts(fbProducts);
+      } else {
+        console.log("No products found in Firestore.");
+        setProducts([]); // Set to empty array if collection is empty
       }
-    };
+    }, (error) => {
+      console.error("Error fetching products in real-time:", error);
+    });
 
-    fetchProducts();
+    // The delivery partners don't need to be real-time for now, so a single fetch is fine.
+    // If they did, this would also be converted to an onSnapshot listener.
 
         // Fetch Delivery Partners from Firebase
         const fetchPartners = async () => {
@@ -93,7 +78,10 @@ export function StoreProvider({ children }) {
           }
         };
         fetchPartners();
-  }, []);
+
+    // Cleanup listener on component unmount
+    return () => unsubscribeProducts();
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   // Fetch Orders from Firebase in Real-time
   useEffect(() => {
@@ -241,36 +229,12 @@ export function StoreProvider({ children }) {
   };
 
   const addNewProduct = async (product) => {
-    // Parse"whyYouWillLoveThis" into an array if it comes as a comma-separated string from the UI
-    const parsedReasons = Array.isArray(product.whyYouWillLoveThis) 
-      ? product.whyYouWillLoveThis 
-      : (product.whyYouWillLoveThis ? product.whyYouWillLoveThis.split(',').map(item => item.trim()).filter(Boolean) : []);
-
-    let prefix = 'new_';
-    if (product.category === 'Fruits') prefix = 'f';
-    else if (product.category === 'Vegetables') prefix = 'v';
-    else if (product.category === 'Pulses') prefix = 'p';
-
-    const existingIds = products
-      .filter(p => p.id && p.id.startsWith(prefix))
-      .map(p => parseInt(p.id.replace(prefix, ''), 10))
-      .filter(num => !isNaN(num));
-
-    const maxIdNum = existingIds.length > 0 ? Math.max(...existingIds) : 0;
-    const generatedId = prefix === 'new_' ? `new_${Date.now()}` : `${prefix}${maxIdNum + 1}`;
-
-    const newProduct = { 
-      ...product, 
-      whyYouWillLoveThis: parsedReasons,
-      id: generatedId, 
-      disabled: false, 
-      stock: product.stock || 150, 
-      sold: 0 
-    };
-    setProducts(prev => [newProduct, ...prev]);
+    // The product object is now fully-formed from the AdminAddProduct component.
+    // This function just handles adding it to state and Firestore.
+    setProducts(prev => [product, ...prev]);
     try {
       const db = getFirestore(auth.app);
-      await setDoc(doc(db,"products", newProduct.id), newProduct);
+      await setDoc(doc(db,"products", product.id), product);
     } catch(e) { console.error(e); }
   };
 

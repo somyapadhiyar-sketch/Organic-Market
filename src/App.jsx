@@ -4,6 +4,7 @@ import Home from"./pages/Home";
 import Fruits from"./pages/Fruits";
 import Vegetables from"./pages/Vegetables";
 import Pulses from"./pages/Pulses";
+import Oils from"./pages/Oils";
 import Cart from"./pages/Cart";
 import ProductDetails from"./pages/ProductDetails";
 import Payment from"./pages/Payment";
@@ -41,6 +42,7 @@ function App() {
         <Route path="/user/fruits" element={<ProtectedRoute><Fruits /></ProtectedRoute>} />
         <Route path="/user/vegetables" element={<ProtectedRoute><Vegetables /></ProtectedRoute>} />
         <Route path="/user/pulses" element={<ProtectedRoute><Pulses /></ProtectedRoute>} />
+        <Route path="/user/oil" element={<ProtectedRoute><Oils /></ProtectedRoute>} />
         <Route path="/user/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
         <Route path="/user/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
         <Route path="/user/product/:name" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />

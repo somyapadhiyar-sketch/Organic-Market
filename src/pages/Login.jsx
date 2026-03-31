@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link, useParams } from 'react-router-dom';
+import { useState, useEffect, useLayoutEffect } from 'react';
+import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
@@ -10,6 +10,7 @@ import { auth } from '../firebase';
 export default function Login() {
   const { role } = useParams();
   const activeRole = ['admin', 'delivery'].includes(role) ? role : 'user';
+  const { pathname } = useLocation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,9 +28,9 @@ export default function Login() {
   const { loginUser, showToast, checkEmailExists, resetPassword, setCurrentUser } = useStore();
   const navigate = useNavigate();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [pathname]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

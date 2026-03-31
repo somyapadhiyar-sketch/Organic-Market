@@ -1,15 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect } from 'react'
 import { useStore } from '../context/StoreContext'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 export default function AdminEditProduct() {
   const { id } = useParams()
   const { products, editProduct, showToast } = useStore()
   const navigate = useNavigate()
+  const { pathname } = useLocation();
   const [product, setProduct] = useState(null)
   const [file, setFile] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     const foundProduct = products.find(p => p.id == id)
@@ -61,7 +66,8 @@ export default function AdminEditProduct() {
     const formattedProduct = {  
       ...product, 
       image: finalImageUrl,
-      whyYouWillLoveThis: typeof product.whyYouWillLoveThis === 'string' ? product.whyYouWillLoveThis.split(',').map(i => i.trim()) : product.whyYouWillLoveThis
+      whyYouWillLoveThis: typeof product.whyYouWillLoveThis === 'string' ? product.whyYouWillLoveThis.split(',').map(i => i.trim()) : product.whyYouWillLoveThis,
+      unit: product.category === 'Oil' ? 'L' : 'kg'
     };
     editProduct(product.id, formattedProduct)
     showToast("Product Updated Successfully!")
@@ -100,7 +106,7 @@ export default function AdminEditProduct() {
               <div>
                 <label className="text-xs font-bold text-slate-500 uppercase ml-2 mb-2 block tracking-wider">Category</label>
                 <select value={product.category} onChange={e => setProduct({...product, category: e.target.value})} className={inputStyle}>
-                  <option value="Fruits">Fruits</option><option value="Vegetables">Vegetables</option><option value="Pulses">Pulses</option>
+                  <option value="Fruits">Fruits</option><option value="Vegetables">Vegetables</option><option value="Pulses">Pulses</option><option value="Oil">Oil</option>
                 </select>
               </div>
             </div>

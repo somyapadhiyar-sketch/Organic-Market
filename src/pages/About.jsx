@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useLayoutEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, useInView } from 'framer-motion'
 import { useStore } from '../context/StoreContext'
 import Footer from '../components/Footer'
@@ -8,14 +8,14 @@ import Navbar from '../components/Navbar'
 export default function About() {
   const { currentUser } = useStore()
   const navigate = useNavigate()
+  const { pathname } = useLocation();
 
   const videoRef = useRef(null);
   const isVideoInView = useInView(videoRef, { margin:"-100px" });
 
   useEffect(() => {
-    if (currentUser?.role === 'admin') navigate('/admin', { replace: true });
-    else if (currentUser?.role === 'delivery') navigate('/delivery', { replace: true });
-  }, [currentUser, navigate]);
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     if (videoRef.current) {

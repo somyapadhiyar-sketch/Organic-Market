@@ -9,7 +9,7 @@ export default function Admin() {
   const { products, toggleProductStatus, deleteProduct, editProduct, deliveryPartners, approveDelivery, orders, logout, updateOrderStatus, showToast } = useStore()
   const navigate = useNavigate();
   const location = useLocation();
-  const initialTab = location.pathname.includes('sales') ? 'sales' : location.pathname.includes('vegetables') ? 'vegetables' : location.pathname.includes('pulses') ? 'pulses' : location.pathname.includes('orders') ? 'orders' : location.pathname.includes('delivery') ? 'delivery' : 'fruits';
+  const initialTab = location.pathname.includes('sales') ? 'sales' : location.pathname.includes('vegetables') ? 'vegetables' : location.pathname.includes('pulses') ? 'pulses' : location.pathname.includes('orders') ? 'orders' : location.pathname.includes('delivery') ? 'delivery' : location.pathname.includes('oil') ? 'oil' : 'fruits';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -24,7 +24,8 @@ export default function Admin() {
   };
 
   useEffect(() => {
-    const currentTab = location.pathname.includes('sales') ? 'sales' : location.pathname.includes('vegetables') ? 'vegetables' : location.pathname.includes('pulses') ? 'pulses' : location.pathname.includes('orders') ? 'orders' : location.pathname.includes('delivery') ? 'delivery' : 'fruits';
+    window.scrollTo(0, 0);
+    const currentTab = location.pathname.includes('sales') ? 'sales' : location.pathname.includes('vegetables') ? 'vegetables' : location.pathname.includes('pulses') ? 'pulses' : location.pathname.includes('orders') ? 'orders' : location.pathname.includes('delivery') ? 'delivery' : location.pathname.includes('oil') ? 'oil' : 'fruits';
     setActiveTab(currentTab);
     setSelectedProductId(null);
     setIsRefilling(false);
@@ -60,12 +61,12 @@ export default function Admin() {
 
   // Filter Helpers
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === 'fruits' ? p.category === 'Fruits' : activeTab === 'vegetables' ? p.category === 'Vegetables' : activeTab === 'pulses' ? p.category === 'Pulses' : true;
+    const matchesSearch = (p.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (p.category || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTab = activeTab === 'fruits' ? String(p.category || '').toLowerCase() === 'fruits' : activeTab === 'vegetables' ? String(p.category || '').toLowerCase() === 'vegetables' : activeTab === 'pulses' ? String(p.category || '').toLowerCase() === 'pulses' : activeTab === 'oil' ? String(p.category || '').toLowerCase() === 'oil' : true;
     return matchesSearch && matchesTab;
   });
   const filteredOrders = orders.filter(o => (o.id || '').toLowerCase().includes(searchQuery.toLowerCase()) || (o.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()));
-  const filteredPartners = deliveryPartners.filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase()) || d.email.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredPartners = deliveryPartners.filter(d => (d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div className="min-h-screen w-full bg-[#F4F6F9] font-sans text-[#1C1C1C]">
@@ -118,6 +119,7 @@ export default function Admin() {
           <button onClick={() => handleTabSwitch('fruits')} className={`py-3.5 text-[14px] font-bold whitespace-nowrap transition-colors ${activeTab === 'fruits' ? 'text-[#3B0060] border-b-[3px] border-[#3B0060]' : 'text-gray-500 hover:text-gray-900'}`}>🍎 Fruits</button>
           <button onClick={() => handleTabSwitch('vegetables')} className={`py-3.5 text-[14px] font-bold whitespace-nowrap transition-colors ${activeTab === 'vegetables' ? 'text-[#3B0060] border-b-[3px] border-[#3B0060]' : 'text-gray-500 hover:text-gray-900'}`}>🥦 Vegetables</button>
           <button onClick={() => handleTabSwitch('pulses')} className={`py-3.5 text-[14px] font-bold whitespace-nowrap transition-colors ${activeTab === 'pulses' ? 'text-[#3B0060] border-b-[3px] border-[#3B0060]' : 'text-gray-500 hover:text-gray-900'}`}>🌾 Pulses</button>
+          <button onClick={() => handleTabSwitch('oil')} className={`py-3.5 text-[14px] font-bold whitespace-nowrap transition-colors ${activeTab === 'oil' ? 'text-[#3B0060] border-b-[3px] border-[#3B0060]' : 'text-gray-500 hover:text-gray-900'}`}>🪔 Oil</button>
           <button onClick={() => handleTabSwitch('orders')} className={`py-3.5 text-[14px] font-bold whitespace-nowrap flex items-center gap-2 transition-colors ${activeTab === 'orders' ? 'text-[#3B0060] border-b-[3px] border-[#3B0060]' : 'text-gray-500 hover:text-gray-900'}`}>
             🛍️ Orders {pendingOrders > 0 && <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">{pendingOrders}</span>}
           </button>
@@ -150,17 +152,17 @@ export default function Admin() {
             <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center">
               <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Orders</p>
               <p className="text-3xl font-black text-blue-600">{orders.length}</p>
-            </div>
+            </div> 
           </div>
         )}
 
         {/* Content Area based on Tabs */}
-        {['fruits', 'vegetables', 'pulses'].includes(activeTab) && (
+        {['fruits', 'vegetables', 'pulses', 'oil'].includes(activeTab) && (
           selectedProduct ? (
             <div className="bg-white rounded-[2rem] p-6 md:p-10 shadow-sm border border-gray-200 animate-in fade-in zoom-in-95 duration-300">
               <button onClick={() => { setSelectedProductId(null); setIsRefilling(false); setRefillAmount(''); }} className="mb-6 flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">
                 ← Back to Grid
-              </button>
+              </button>   
               <div className="flex flex-col md:flex-row gap-8 lg:gap-12 items-center md:items-start">
                 <div className="w-full md:w-1/3 aspect-square bg-[#F8F8F8] rounded-3xl p-8 flex items-center justify-center relative shadow-inner">
                    {selectedProduct.disabled || selectedProduct.stock <= 0 ? (
@@ -181,14 +183,14 @@ export default function Admin() {
                    <div>
                      <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">{selectedProduct.category}</p>
                      <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight">{selectedProduct.name}</h2>
-                     <p className="text-2xl font-black text-blue-600 mt-3">₹{selectedProduct.price} <span className="text-base text-gray-400 font-medium">/ per kg</span></p>
+                     <p className="text-2xl font-black text-blue-600 mt-3">₹{selectedProduct.price} <span className="text-base text-gray-400 font-medium">/ per {selectedProduct.category === 'Oil' ? 'L' : 'kg'}</span></p>
                    </div>
                    <p className="text-gray-600 font-medium leading-relaxed text-lg max-w-2xl">{selectedProduct.desc}</p>
                    
                    <div className="grid grid-cols-2 gap-4 max-w-lg">
                       <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 shadow-sm">
                         <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Stock Available</p>
-                        <p className="text-2xl font-black text-gray-900">{selectedProduct.stock || 0} kg</p>
+                        <p className="text-2xl font-black text-gray-900">{selectedProduct.stock || 0} {selectedProduct.category === 'Oil' ? 'L' : 'kg'}</p>
                       </div>
                       <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 shadow-sm">
                         <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Status</p>
@@ -203,12 +205,12 @@ export default function Admin() {
                       
                       {isRefilling ? (
                         <div className="flex bg-white rounded-xl overflow-hidden border-2 border-green-500 shadow-sm col-span-1 sm:col-span-2 lg:col-span-1">
-                          <input type="number" min="1" autoFocus value={refillAmount} onChange={e => setRefillAmount(e.target.value)} placeholder="kg" className="w-full px-3 outline-none text-sm font-bold text-gray-800" />
+                          <input type="number" min="1" autoFocus value={refillAmount} onChange={e => setRefillAmount(e.target.value)} placeholder={selectedProduct.category === 'Oil' ? 'L' : 'kg'} className="w-full px-3 outline-none text-sm font-bold text-gray-800" />
                           <button onClick={() => {
                             const amount = parseInt(refillAmount);
                             if (!isNaN(amount) && amount > 0) {
                               editProduct(selectedProduct.id, { stock: (selectedProduct.stock || 0) + amount, disabled: false });
-                              showToast(`✅ ${amount}kg added to ${selectedProduct.name}!`);
+                              showToast(`✅ ${amount}${selectedProduct.category === 'Oil' ? 'L' : 'kg'} added to ${selectedProduct.name}!`);
                             } else {
                               showToast("❌ Enter valid amount!");
                             }
@@ -243,7 +245,7 @@ export default function Admin() {
                   {p.disabled || p.stock <= 0 ? (
                     <span className="absolute top-3 left-3 bg-red-50 text-red-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide z-10 border border-red-100">Out of Stock</span>
                   ) : (
-                    <span className="absolute top-3 left-3 bg-green-50 text-[#0A8745] text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide z-10 border border-green-100">{p.stock} kg Left</span>
+                    <span className="absolute top-3 left-3 bg-green-50 text-[#0A8745] text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide z-10 border border-green-100">{p.stock} {p.category === 'Oil' ? 'L' : 'kg'} Left</span>
                   )}
                   <div className="h-32 w-full bg-[#F8F8F8] rounded-xl flex items-center justify-center p-3 mb-3 relative mt-8 overflow-hidden">
                     <img src={p.image} className="max-w-full max-h-full object-contain mix-blend-multiply transition-transform group-hover:scale-105" onError={(e) => {

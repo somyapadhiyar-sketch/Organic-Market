@@ -1,5 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useState, useEffect, useLayoutEffect } from 'react'
 import { useStore } from '../context/StoreContext'
 import Navbar from '../components/Navbar'
 
@@ -15,11 +15,16 @@ const quantityOptions = [
 export default function Apple() {
   const { addToCart, showToast, products, currentUser } = useStore()
   const navigate = useNavigate()
+  const { pathname } = useLocation();
   
   useEffect(() => {
     if (currentUser?.role === 'admin') navigate('/admin', { replace: true });
     else if (currentUser?.role === 'delivery') navigate('/delivery', { replace: true });
   }, [currentUser, navigate]);
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   const product = products.find(p => p.id === 'f1') || { stock: 150, disabled: false };
   const isOutOfStock = product.disabled || product.stock <= 0;

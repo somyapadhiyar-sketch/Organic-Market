@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useLayoutEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
@@ -8,17 +8,22 @@ import WaveBanner from '../components/WaveBanner';
 
 export default function Pulses() {
   const { products, searchQuery, currentUser } = useStore();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (currentUser?.role === 'admin') navigate('/admin', { replace: true });
     else if (currentUser?.role === 'delivery') navigate('/delivery', { replace: true });
   }, [currentUser, navigate]);
-
-  const categoryData = products.filter(p => p.category === 'Pulses');
+  
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  
+  const categoryData = products.filter(p => String(p.category || '').toLowerCase() === 'pulses');
 
   const filteredData = (searchQuery && searchQuery.trim() !== '')
-    ? categoryData.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())) 
+    ? categoryData.filter(p => (p.name || '').toLowerCase().includes(searchQuery.toLowerCase())) 
     : categoryData;
 
   return (
