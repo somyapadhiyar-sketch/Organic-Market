@@ -30,9 +30,8 @@ export default function Fruits() {
     <div className="min-h-screen bg-[#F4F6F9] font-sans flex flex-col">
       <Navbar />
       
-      {/* 130px pt to clear the Zepto double-header */}
-      <main className="pt-[140px] pb-12 flex-1">
-        <WaveBanner theme="orange" title="Juicy & Fresh Fruits" subtitle="Picked right from the orchards, delivered in 10 mins." />
+      <main className="pb-12 flex-1">
+        <WaveBanner theme="orange" title="Juicy & Fresh Fruits" subtitle="Picked right from the orchards, delivered in 10 mins." className="!h-[350px] md:!h-[400px] pt-[80px]" />
         
         <div className="px-4 sm:px-6 lg:px-10 mt-8 mb-6 flex justify-between items-end">
           <div>

@@ -30,8 +30,8 @@ export default function Vegetables() {
     <div className="min-h-screen bg-[#F4F6F9] font-sans flex flex-col">
       <Navbar />
       
-      <main className="pt-[140px] pb-12 flex-1">
-        <WaveBanner theme="green" title="Crisp & Fresh Veggies" subtitle="Daily harvested, delivered to your kitchen in 10 minutes." />
+      <main className="pb-12 flex-1">
+        <WaveBanner theme="green" title="Crisp & Fresh Veggies" subtitle="Daily harvested, delivered to your kitchen in 10 minutes." className="!h-[350px] md:!h-[400px] pt-[80px]" />
         
         <div className="px-4 sm:px-6 lg:px-10 mt-8 mb-6 flex justify-between items-end border-b border-gray-200 pb-4">
           <div>

@@ -4,6 +4,7 @@ import { useStore } from"../context/StoreContext";
 import Navbar from"../components/Navbar";
 import Footer from"../components/Footer";
 import { Country, State, City } from"country-state-city";
+import { Settings, ShieldCheck, Phone, Home, Briefcase, MapPin } from 'lucide-react';
 import { getFirestore, doc, updateDoc } from"firebase/firestore";
 import { auth } from"../firebase";
 
@@ -189,7 +190,7 @@ export default function Profile() {
       <Navbar />
       
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-[130px] pb-12">
-        <h1 className="text-3xl font-black text-slate-900 mb-8 tracking-tight">Advanced Settings ⚙️</h1>
+        <h1 className="text-3xl font-black text-slate-900 mb-8 tracking-tight flex items-center">Advanced Settings <Settings className="ml-3 text-slate-700" size={32} /></h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
@@ -204,7 +205,7 @@ export default function Profile() {
               <p className="text-slate-500 text-sm font-medium mb-4">{currentUser.email}</p>
 
               <div className="flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold mb-6 border border-green-100">
-                ✓ Verified Account
+                <ShieldCheck size={14} className="mr-1" /> Verified Account
               </div>
 
               <div className="w-full space-y-3 text-left border-t border-slate-100 pt-5">
@@ -346,7 +347,7 @@ export default function Profile() {
                                     {index === 0 && <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border border-green-200">Default</span>}
                                   </div>
                                     <p className="text-slate-600 text-sm font-medium mb-1">{addr.street}, {addr.city}, {displayState}{displayCountry ? `, ${displayCountry}` : ''} - {addr.pincode}</p>
-                                  <p className="text-slate-500 text-xs font-bold mt-2">📞 {addr.phone}</p>
+                                  <p className="text-slate-500 text-xs font-bold mt-2 flex items-center gap-1"><Phone size={12} /> {addr.phone}</p>
                                 </div>
                                 <div className="flex flex-wrap gap-2 sm:shrink-0 w-full sm:w-auto">
                                   <button onClick={() => openEditAddressForm(addr, index)} className="flex-1 sm:flex-none py-2 px-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors font-bold text-xs text-center">Edit</button>

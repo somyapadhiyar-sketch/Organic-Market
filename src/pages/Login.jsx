@@ -2,8 +2,8 @@ import { useState, useEffect, useLayoutEffect } from 'react';
 import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
-import { ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from"firebase/auth";
+import { ArrowRight, Mail, Lock, Eye, EyeOff, Leaf, KeyRound, Hand } from 'lucide-react';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc } from"firebase/firestore";
 import { auth } from '../firebase';
 
@@ -264,7 +264,7 @@ export default function Login() {
       <div className="hidden lg:flex lg:w-1/2 bg-blue-50 relative overflow-hidden items-center justify-center">
         <div className="absolute top-8 left-8 z-10">
            <Link to="/" className="flex items-center gap-2 group">
-            <span className="text-4xl">🌿</span>
+            <Leaf size={32} className="text-green-600" />
             <h1 className="text-3xl font-black text-blue-600 italic tracking-tighter">Zesty</h1>
           </Link>
         </div>
@@ -292,19 +292,18 @@ export default function Login() {
         <div className="max-w-md w-full">
            <div className="lg:hidden mb-10 text-center">
              <Link to="/" className="inline-flex items-center gap-2">
-                <span className="text-4xl">🌿</span>
+                <Leaf size={32} className="text-green-600" />
                 <h1 className="text-3xl font-black text-blue-600 italic tracking-tighter">Zesty</h1>
-             </Link>
+              </Link>
            </div>
 
            {isForgotPassword ? (
              <>
                <div className="mb-10">
-                 <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2">Reset Password 🔐</h2>
+         <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2 flex items-center gap-2">Reset Password <KeyRound className="text-blue-600" size={28} /></h2>
                  <p className="text-slate-500 font-medium">
                    {resetStep === 1 &&"Enter your email to receive an OTP."}
                    {resetStep === 2 && `Enter the OTP sent to ${resetEmail}.`}
-                   {resetStep === 3 &&"Create a new secure password."}
                  </p>
                </div>
 
@@ -401,11 +400,10 @@ export default function Login() {
              <>
                <div className="mb-10">
                  <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2">
-                   {activeRole === 'admin' ? 'Admin Portal' : activeRole === 'delivery' ? 'Delivery Partner' : 'Welcome Back! 👋'}
+           {activeRole === 'admin' ? 'Admin Portal' : activeRole === 'delivery' ? 'Delivery Partner' : <span className="flex items-center gap-2">Welcome Back! <Hand className="text-amber-500" size={28} /></span>}
                  </h2>
                  <p className="text-slate-500 font-medium">Please login to your {activeRole} account to continue.</p>
                </div>
-
                <form onSubmit={handleSubmit} className="space-y-6">
                  <div className="space-y-2">
                    <label className="text-sm font-bold text-slate-700">Email Address</label>

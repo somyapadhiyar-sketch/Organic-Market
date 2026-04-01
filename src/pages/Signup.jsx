@@ -2,7 +2,7 @@ import { useState, useEffect, useLayoutEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
-import { ArrowRight, Mail, Lock, User, Eye, EyeOff, Phone, MapPin, Map } from 'lucide-react';
+import { ArrowRight, Mail, Lock, User, Eye, EyeOff, Phone, MapPin, Map, Leaf, Sparkles } from 'lucide-react';
 import { Country, State, City }  from 'country-state-city';
 import { createUserWithEmailAndPassword, updateProfile } from"firebase/auth";
 import { getFirestore, doc, setDoc } from"firebase/firestore";
@@ -150,7 +150,7 @@ export default function Signup() {
       <div className="hidden lg:flex lg:w-1/2 bg-blue-50 relative overflow-hidden items-center justify-center">
         <div className="absolute top-8 left-8 z-10">
            <Link to="/" className="flex items-center gap-2 group">
-            <span className="text-4xl">🌿</span>
+            <Leaf size={32} className="text-green-600" />
             <h1 className="text-3xl font-black text-blue-600 italic tracking-tighter">Zesty</h1>
           </Link>
         </div>
@@ -178,13 +178,13 @@ export default function Signup() {
         <div className="max-w-md w-full">
            <div className="lg:hidden mb-10 text-center">
              <Link to="/" className="inline-flex items-center gap-2">
-                <span className="text-4xl">🌿</span>
+            <Leaf size={32} className="text-green-600" />
                 <h1 className="text-3xl font-black text-blue-600 italic tracking-tighter">Zesty</h1>
              </Link>
            </div>
 
            <div className="mb-8">
-             <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2">Create Account ✨</h2>
+         <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2 flex items-center gap-2">Create Account <Sparkles className="text-amber-400" size={28} /></h2>
              <p className="text-slate-500 font-medium">Enter your details to register.</p>
            </div>
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import { Plus, Minus, MapPin, CreditCard, Banknote, Building, CheckCircle2, Loader2, ArrowRight, ShoppingCart, Truck, Wallet, Home, Briefcase, Map } from 'lucide-react'
+import { Plus, Minus, MapPin, CreditCard, Banknote, Building, CheckCircle2, Loader2, ArrowRight, ShoppingCart, Truck, Wallet, Home, Briefcase, Map, Zap, Sparkles, Star } from 'lucide-react'
 import { Country, State, City } from 'country-state-city'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -379,7 +379,7 @@ export default function Cart() {
         
         {cart.length === 0 ? (
           <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-12 md:p-20 text-center border border-slate-100 shadow-xl mt-8 max-w-2xl mx-auto">
-            <div className="text-8xl mb-6">🛒</div>
+            <ShoppingCart size={80} className="mx-auto mb-6 text-slate-300" />
             <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-800 mb-3">Your Cart is Empty</h2>
             <p className="text-slate-500 font-medium text-lg mb-8">Looks like you haven't added anything to your cart yet.</p>
             <Link to="/user/fruits">
@@ -400,7 +400,7 @@ export default function Cart() {
                   <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-lg">
                     <div className="flex items-center justify-between gap-3 mb-6 border-b border-slate-100 pb-6">
                       <h2 className="text-lg sm:text-2xl font-extrabold text-slate-800">Your Cart ({cart.length} items)</h2>
-                      <span className="bg-green-100 text-green-700 text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-full w-max">⚡ 10 MINS DELIVERY</span>
+                      <span className="bg-green-100 text-green-700 text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-full w-max flex items-center gap-1"><Zap size={12} /> 10 MINS DELIVERY</span>
                     </div>
 
                     <div className="space-y-6">
@@ -436,7 +436,7 @@ export default function Cart() {
                   {/* ✨ AI Recommendations */}
                   {recommendedProducts.length > 0 && (
                     <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-lg">
-                      <h3 className="font-extrabold text-lg sm:text-xl mb-6 text-slate-800 flex items-center gap-2">✨ Recommended for You</h3>
+                      <h3 className="font-extrabold text-lg sm:text-xl mb-6 text-slate-800 flex items-center gap-2"><Sparkles size={20} className="text-amber-500" /> Recommended for You</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {recommendedProducts.map((product, idx) => (
                       <div key={product.id || idx} className="flex flex-col h-full">
@@ -444,7 +444,7 @@ export default function Cart() {
                         {/* Only display this block if the data successfully came from the AI! */}
                         {product.aiReason && (
                           <div className="mt-2 text-[11px] bg-green-50 p-3 rounded-xl border border-green-200 text-green-800 font-medium shadow-sm">
-                            <span className="font-black text-green-900 block mb-0.5">⭐ AI Score: {product.aiScore}%</span> 
+                            <span className="font-black text-green-900 block mb-0.5 flex items-center gap-1"><Star size={12} className="text-amber-500" /> AI Score: {product.aiScore}%</span> 
                             {product.aiReason}
                           </div>
                         )}
@@ -475,7 +475,7 @@ export default function Cart() {
                               onClick={() => setAddress(addr)}
                               className={`text-left p-3 rounded-xl border transition-all min-w-[140px] h-full ${address.type === addr.type && address.street === addr.street ? 'bg-green-100 border-green-500 ring-1 ring-green-500' : 'bg-white border-slate-200 hover:border-slate-300'}`}
                             >
-                              <div className="font-bold text-slate-800 text-xs mb-1 flex items-center gap-1">{addr.type === 'Home' ? '🏠' : addr.type === 'Work' ? '💼' : '📍'} {addr.type}</div>
+                              <div className="font-bold text-slate-800 text-xs mb-1 flex items-center gap-1">{addr.type === 'Home' ? <Home size={12} className="text-slate-500"/> : addr.type === 'Work' ? <Briefcase size={12} className="text-slate-500"/> : <MapPin size={12} className="text-slate-500"/>} {addr.type}</div>
                               <div className="text-[10px] text-slate-500 font-medium truncate max-w-[120px]">{addr.street}</div>
                               <div className="text-[10px] text-slate-400">{addr.pincode}</div>
                             </button>

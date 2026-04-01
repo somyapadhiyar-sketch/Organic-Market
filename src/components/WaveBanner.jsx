@@ -52,23 +52,13 @@ const colorThemes = {
 export default function WaveBanner({ 
   theme = 'green', 
   title = 'Fresh Deals Every Day!', 
-  subtitle = 'Get up to 50% off on organic fruits and vegetables.' 
+  subtitle = 'Get up to 50% off on organic fruits and vegetables.',
+  className = ''
 }) {
   const colors = colorThemes[theme] || colorThemes.green;
 
   return (
-    <div className={`relative w-full max-w-full m-0 p-0 h-[350px] sm:h-[400px] ${colors.bg} overflow-hidden flex items-center justify-center`}>
-      
-      {/* OUTSIDE TOP WAVE CUTOUT (Makes the top edge of the box wavy) */}
-      <div className="absolute top-0 left-0 w-full h-[50px] sm:h-[70px] md:h-[90px] z-20 pointer-events-none">
-        <svg 
-          className="absolute top-0 left-0 w-[200%] h-full animate-wave fill-white" 
-          style={{ animationDuration: '12s', willChange: 'transform' }}
-          xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"
-        >
-          <path d="M0,0 V50 Q150,10 300,50 T600,50 Q750,10 900,50 T1200,50 V0 H0 Z"></path>
-        </svg>
-      </div>
+    <div className={`relative w-full max-w-full m-0 p-0 h-[350px] sm:h-[400px] ${colors.bg} overflow-hidden flex items-center justify-center ${className}`}>
       
       {/* Animated Wave Backgrounds */}
       <div className="absolute inset-0 w-full h-full overflow-hidden leading-[0] pointer-events-none">

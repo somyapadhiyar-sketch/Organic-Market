@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import { useState, useEffect, useLayoutEffect } from 'react'
+import { MapPin, Banknote, PartyPopper } from 'lucide-react'
 import Footer from '../components/Footer'
 
 export default function Payment() {
@@ -64,7 +65,7 @@ export default function Payment() {
   if (orderPlaced) return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 text-center animate-zoom-in">
       <div className="bg-white p-10 rounded-3xl shadow-xl max-w-md w-full border border-slate-100">
-        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"><span className="text-5xl">🎉</span></div>
+        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"><PartyPopper size={48} className="text-green-600" /></div>
         <h2 className="text-3xl font-black text-slate-800 mb-2">Order Confirmed!</h2>
         <p className="text-slate-500 mb-8">Your organic order is on the way to <b>{userDetails.type}</b>.</p>
         <Link to="/home" className="btn-3d btn-emerald block w-full py-4 font-bold transition">Shop More</Link>
@@ -87,7 +88,7 @@ export default function Payment() {
         <div className="lg:col-span-2 space-y-6">
           {step === 1 && (
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-              <h3 className="font-bold text-lg mb-6 flex items-center gap-2">📍 Enter Details</h3>
+              <h3 className="font-bold text-lg mb-6 flex items-center gap-2"><MapPin size={20} className="text-green-600" /> Enter Details</h3>
               <form onSubmit={handleAddressSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-1"><label className="text-xs font-bold text-slate-500 uppercase ml-1">Name</label><input required value={userDetails.name} onChange={(e) => setUserDetails({...userDetails, name: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-green-500 outline-none" /></div>
                 <div className="md:col-span-1">
@@ -108,7 +109,7 @@ export default function Payment() {
                <div className="border rounded-xl overflow-hidden border-green-500 bg-green-50/30">
                   <label className="flex items-center gap-4 p-4 cursor-pointer">
                     <input type="radio" checked readOnly className="accent-green-600 w-5 h-5" />
-                    <div className="flex-1"><div className="font-bold text-slate-800">Pay on Delivery</div></div><span className="text-2xl">💵</span>
+                    <div className="flex-1"><div className="font-bold text-slate-800">Pay on Delivery</div></div><Banknote size={28} className="text-green-600" />
                   </label>
                </div>
              </div>

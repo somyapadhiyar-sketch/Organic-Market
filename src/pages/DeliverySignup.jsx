@@ -2,7 +2,7 @@ import { useState, useEffect, useLayoutEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
-import { ArrowRight, Mail, Lock, User, Eye, EyeOff, Phone, MapPin, Camera, Upload } from 'lucide-react';
+import { ArrowRight, Mail, Lock, User, Eye, EyeOff, Phone, MapPin, Camera, Upload, Wifi, WifiOff, Leaf, Bike } from 'lucide-react';
 import { Country, State, City } from 'country-state-city';
 import { createUserWithEmailAndPassword, updateProfile } from"firebase/auth";
 import { getFirestore, doc, setDoc } from"firebase/firestore";
@@ -20,6 +20,7 @@ export default function DeliverySignup() {
   const [address, setAddress] = useState('');
   const [photoURL, setPhotoURL] = useState(null);
   
+  const [deliveryMode, setDeliveryMode] = useState('Online');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -93,6 +94,7 @@ export default function DeliverySignup() {
         stateRegion,
         country,
         photoURL,
+        deliveryMode,
         role: 'delivery',
         status: 'Pending',
         createdAt: new Date().toISOString()
@@ -120,7 +122,7 @@ export default function DeliverySignup() {
       <div className="hidden lg:flex lg:w-1/2 bg-orange-50 relative overflow-hidden items-center justify-center">
         <div className="absolute top-8 left-8 z-10">
            <Link to="/" className="flex items-center gap-2 group">
-            <span className="text-4xl">🌿</span>
+            <Leaf size={32} className="text-green-600" />
             <h1 className="text-3xl font-black text-blue-600 italic tracking-tighter">Zesty</h1>
           </Link>
         </div>
@@ -148,13 +150,13 @@ export default function DeliverySignup() {
         <div className="max-w-md w-full">
            <div className="lg:hidden mb-10 text-center">
              <Link to="/" className="inline-flex items-center gap-2">
-                <span className="text-4xl">🌿</span>
+            <Leaf size={32} className="text-green-600" />
                 <h1 className="text-3xl font-black text-blue-600 italic tracking-tighter">Zesty</h1>
              </Link>
            </div>
 
            <div className="mb-8">
-             <h2 className="text-2xl sm:text-3xl font-black text-orange-600 mb-2">Delivery Partner Signup 🛵</h2>
+         <h2 className="text-2xl sm:text-3xl font-black text-orange-600 mb-2 flex items-center gap-2">Delivery Partner Signup <Bike className="text-orange-600" size={28} /></h2>
              <p className="text-slate-500 font-medium">Enter your details to register.</p>
            </div>
 
@@ -172,6 +174,21 @@ export default function DeliverySignup() {
                </label>
              </div>
              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-3">Profile Photo Required *</p>
+           </div>
+
+           <div className="space-y-2 mb-4">
+             <label className="text-sm font-bold text-slate-700">Delivery Mode</label>
+             <div className="grid grid-cols-2 gap-3">
+               <button type="button" onClick={() => setDeliveryMode('Online')} className={`flex items-center justify-center gap-2 p-4 rounded-xl border-2 font-bold transition-all ${deliveryMode === 'Online' ? 'bg-green-50 border-green-500 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300'}`}>
+                 <Wifi size={20} /> Online
+               </button>
+               <button type="button" onClick={() => setDeliveryMode('Offline')} className={`flex items-center justify-center gap-2 p-4 rounded-xl border-2 font-bold transition-all ${deliveryMode === 'Offline' ? 'bg-slate-200 border-slate-400 text-slate-700' : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300'}`}>
+                 <WifiOff size={20} /> Offline
+               </button>
+             </div>
+             <p className="text-xs text-slate-500 font-medium px-1 pt-1">
+               <b>Online:</b> See all available orders. <b>Offline:</b> Only see orders assigned to you by an admin.
+             </p>
            </div>
 
            <form onSubmit={handleSubmit} className="space-y-4">

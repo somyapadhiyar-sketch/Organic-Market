@@ -69,15 +69,15 @@ export default function Home() {
   const y2 = useTransform(scrollY, [0, 500], [0, -150]);
 
   return (
-    <div className="h-screen bg-white font-sans text-slate-900 flex overflow-hidden">
+    <div className="h-screen bg-[#F3F5F7] font-sans text-slate-900 flex overflow-hidden">
       
       <Navbar />
 
       {/* MAIN CONTENT AREA */}
-      <main ref={containerRef} className="flex-1 relative flex flex-col overflow-y-auto custom-scrollbar pt-[130px] md:pt-[140px]">
+      <main ref={containerRef} className="flex-1 relative flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar pt-[100px]">
         
         {/* HERO SECTION - Realistic E-commerce Style */}
-        <section className="relative w-full bg-[#F3F5F7] overflow-hidden min-h-[600px] flex items-center py-20 md:py-0">
+        <section className="relative w-full bg-[#F3F5F7] min-h-[600px] flex items-center py-20 md:py-0">
           
           {/* Decorative Background blob - simpler and positioned better */}
           <motion.div style={{ y: y1 }} className="absolute top-0 right-0 w-[600px] h-[600px] bg-green-200/20 rounded-full blur-3xl translate-x-1/3 -translate-y-1/4"></motion.div>
@@ -140,17 +140,17 @@ export default function Home() {
                   style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
                   className="relative z-10 w-[420px] h-[480px] bg-white rounded-[3rem] border border-slate-200 shadow-[0_45px_100px_-30px_rgba(0,0,0,0.2)] flex flex-col items-center justify-center p-8 overflow-visible"
                 >
-                   {/* CENTRAL 3D FRUIT ELEMENT */}
-                   <div className="relative pointer-events-none mb-12" style={{ transform: "translateZ(75px)" }}>
+               {/* CENTRAL 3D FRUIT ELEMENT */}
+               <div className="relative pointer-events-none mb-12" style={{ transform: "translateZ(75px)" }}>
                     <motion.div 
                       animate={{ y: [0, -10, 0], scale: [1, 1.05, 1] }}
                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                       className="text-[10rem] filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.2)]"
                     >
-                      🧺
+                  🧺
                     </motion.div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <motion.span animate={{ y: [-10, 10, -10] }} transition={{ duration: 3.5, repeat: Infinity }} className="text-6xl -mt-16 ml-1 drop-shadow-lg opacity-90">🍎</motion.span>
+                    <motion.span animate={{ y: [-10, 10, -10] }} transition={{ duration: 3.5, repeat: Infinity }} className="text-6xl -mt-16 ml-1 drop-shadow-lg opacity-90">🍎</motion.span>
                     </div>
                   </div>
 

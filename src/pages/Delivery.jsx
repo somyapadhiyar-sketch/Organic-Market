@@ -1,12 +1,12 @@
 import { useStore } from '../context/StoreContext'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, Camera, Mail, Phone, MapPin, CheckCircle2, Upload, Edit2, Save, X } from 'lucide-react'
+import { Search, Camera, Mail, Phone, MapPin, CheckCircle2, Upload, Edit2, Save, X, Wifi, WifiOff, Package, Truck, Tag, CreditCard, Banknote, Motorbike } from 'lucide-react'
 import { useState, useRef, useLayoutEffect } from 'react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { auth } from '../firebase'
 
 export default function Delivery() {
-  const { orders, updateOrderStatus, logout, currentUser, updateUser } = useStore()
+  const { orders, updateOrderStatus, logout, currentUser, updateUser, updatePartnerStatus } = useStore()
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const handleLogout = () => { logout(); navigate('/home', { replace: true }); };
@@ -18,6 +18,9 @@ export default function Delivery() {
   const [showCamera, setShowCamera] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterOptions = ["All", "Pending", "Out for Delivery", "Delivered"];
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
@@ -100,17 +103,26 @@ export default function Delivery() {
   };
 
   // Filter to only show pending orders OR orders specifically picked up by THIS delivery partner
-  const visibleOrders = orders.filter(o => 
-    o.status === 'Pending' || o.deliveryPartnerEmail === currentUser?.email
-  );
+  const visibleOrders = orders.filter(o => {
+    // 'Offline' status partners only see orders explicitly assigned to them.
+    if (currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline') {
+      return o.deliveryPartnerEmail === currentUser?.email;
+    }
+    // 'Approved' (Online) partners see orders explicitly broadcasted to 'online_broadcast', or orders assigned to them.
+    return (o.status === 'Pending' && o.deliveryPartnerEmail === 'online_broadcast') || (o.deliveryPartnerEmail === currentUser?.email);
+  });
 
-  const filteredOrders = visibleOrders.filter(o => (o.id || '').toLowerCase().includes(searchQuery.toLowerCase()) || (o.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()));
+  const statusWeight = { 'Pending': 1, 'Out for Delivery': 2, 'Delivered': 3 };
+  const filteredOrders = visibleOrders
+    .filter(o => statusFilter === 'All' || o.status === statusFilter)
+    .filter(o => (o.id || '').toLowerCase().includes(searchQuery.toLowerCase()) || (o.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => (statusWeight[a.status] || 99) - (statusWeight[b.status] || 99));
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-4 sm:px-6 py-3 flex justify-between items-center shadow-sm transition-all">
-        <div className="flex items-center gap-2 group shrink-0">
-          <span className="text-2xl sm:text-3xl">🛵</span>
+        <div className="flex items-center gap-2 group shrink-0"> {/* Replaced emoji with Motorbike icon */}
+          <Motorbike size={28} className="text-orange-600 sm:text-3xl" />
           <h1 className="text-lg sm:text-2xl font-black text-slate-900 italic tracking-tighter group-hover:text-orange-600 transition-colors hidden sm:block">Zesty Delivery</h1>
         </div>
         <div className="flex items-center gap-4">
@@ -161,7 +173,11 @@ export default function Delivery() {
               ) : (
                 <h2 className="text-2xl font-black text-slate-900">{currentUser?.name}</h2>
               )}
-              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold mt-2 flex items-center gap-1"><CheckCircle2 size={14}/> {currentUser?.status || 'Active Partner'}</span>
+              <span className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 mt-3 ${
+                (currentUser?.status === 'Approved' && currentUser?.deliveryMode !== 'Offline') ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'
+              }`}>
+                {(currentUser?.status === 'Approved' && currentUser?.deliveryMode !== 'Offline') ? <><Wifi size={14}/> Online Mode</> : <><WifiOff size={14}/> Offline Mode</>}
+              </span>
             </div>
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
@@ -187,16 +203,45 @@ export default function Delivery() {
           </div>
         ) : (
           <>
-            {/* Search Bar */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-orange-100 flex items-center gap-3">
-              <Search className="text-gray-400" size={20}/>
-              <input 
-                type="text" 
-                placeholder="Search orders by ID or Customer Name..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 outline-none text-sm font-medium"
-              />
+            {/* Search Bar and Filter */}
+            <div className="flex flex-col sm:flex-row gap-4 relative z-10">
+              <div className="bg-white p-4 rounded-2xl shadow-sm border border-orange-100 flex items-center gap-3 flex-1">
+                <Search className="text-gray-400" size={20}/>
+                <input 
+                  type="text" 
+                  placeholder="Search orders by ID or Customer Name..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 outline-none text-sm font-medium"
+                />
+              </div>
+
+              <div className="relative w-full sm:w-48 shrink-0 self-center">
+                <button
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  className="w-full flex items-center justify-between px-4 py-4 sm:py-4 bg-white border border-orange-100 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all shadow-sm cursor-pointer"
+                >
+                  <span>{statusFilter === "All" ? "All Orders" : statusFilter}</span>
+                  <span className={`text-[10px] text-slate-400 transition-transform duration-200 ${isFilterOpen ? 'rotate-180' : ''}`}>▼</span>
+                </button>
+                
+                {isFilterOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsFilterOpen(false)}></div>
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-orange-100 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                      {filterOptions.map(option => (
+                        <button
+                          key={option}
+                          onClick={() => { setStatusFilter(option); setIsFilterOpen(false); }}
+                          className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors ${statusFilter === option ? 'bg-orange-50 text-orange-700' : 'text-slate-700 hover:bg-slate-50'}`}
+                        >
+                          {option === "All" ? "All Orders" : option}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
         {filteredOrders.length === 0 ? (
@@ -207,14 +252,14 @@ export default function Delivery() {
               <div className="flex-1">
                 <div className="flex flex-wrap gap-3 mb-4"><span className="bg-orange-100 text-orange-700 font-black px-3 py-1 rounded-lg text-xs">{order.id}</span><span className={`text-xs font-bold px-3 py-1 rounded-lg ${order.status === 'Delivered' ? 'bg-green-100 text-green-700' : order.status === 'Out for Delivery' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>{order.status}</span><span className="text-xs text-slate-400 font-medium py-1">{order.date}</span></div>
                 <h3 className="font-bold text-xl mb-1 text-slate-900">{order.customer?.name || 'Unknown Customer'}</h3>
-                <a href={`tel:${order.customer?.phone}`} className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-bold mb-1 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors w-max">📞 Call {order.customer?.phone}</a>
-                <p className="text-sm text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2">📍 {order.customer?.address} ({order.customer?.type || 'Home'})</p>
+                <a href={`tel:${order.customer?.phone}`} className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-bold mb-1 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors w-max"><Phone size={14} /> Call {order.customer?.phone}</a>
+                <p className="text-sm text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2"><MapPin size={16} className="inline-block mr-1 translate-y-[2px]" /> {order.customer?.address} ({order.customer?.type || 'Home'})</p>
                 <div className="mt-4"><p className="text-xs font-bold text-slate-400 uppercase mb-2">Order Items:</p><div className="flex flex-wrap gap-2">{(order.items || []).map((item, i) => (<div key={i} className="bg-orange-50 border border-orange-100 px-3 py-1 rounded-lg text-xs font-bold text-orange-800">{item.quantity}x {item.name}</div>))}</div></div>
               </div>
               <div className="md:w-64 bg-slate-50 p-6 rounded-3xl border border-slate-100 flex flex-col justify-center text-center">
                 <p className="text-slate-500 font-medium mb-1">To Collect</p><p className="text-4xl font-black text-slate-900 mb-6">₹{order.total}</p>
-                {order.status === 'Pending' && (<button onClick={() => updateOrderStatus(order.id, 'Out for Delivery', currentUser?.email)} className="w-full py-4 bg-orange-500 text-white font-bold rounded-xl shadow-[0px_10px_20px_rgba(249,115,22,0.4)] hover:bg-orange-600 active:scale-95 transition-all">Pick Up Order</button>)}
-                {order.status === 'Out for Delivery' && (<button onClick={() => updateOrderStatus(order.id, 'Delivered')} className="w-full py-4 bg-green-500 text-white font-bold rounded-xl shadow-[0px_10px_20px_rgba(34,197,94,0.4)] hover:bg-green-600 active:scale-95 transition-all">Mark Delivered ✓</button>)}
+                {order.status === 'Pending' && !(currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline') && (<button onClick={() => updateOrderStatus(order.id, 'Out for Delivery', currentUser?.email)} className="w-full py-4 bg-orange-500 text-white font-bold rounded-xl shadow-[0px_10px_20px_rgba(249,115,22,0.4)] hover:bg-orange-600 active:scale-95 transition-all">Pick Up Order</button>)}
+                {(order.status === 'Out for Delivery' || (order.status === 'Pending' && (currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline'))) && (<button onClick={() => updateOrderStatus(order.id, 'Delivered')} className="w-full py-4 bg-green-500 text-white font-bold rounded-xl shadow-[0px_10px_20px_rgba(34,197,94,0.4)] hover:bg-green-600 active:scale-95 transition-all">Mark Delivered ✓</button>)}
                 {order.status === 'Delivered' && (<button disabled className="w-full py-4 bg-slate-200 text-slate-400 font-bold rounded-xl cursor-not-allowed">Order Complete</button>)}
               </div>
             </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useLayoutEffect } from"react";
 import { Link, useNavigate, useLocation } from"react-router-dom";
 import { useStore } from"../context/StoreContext";
 import Navbar from"../components/Navbar";
+import { ShoppingBag, Package, Tag, CreditCard, Motorbike, Search as SearchIcon, Phone } from 'lucide-react'; 
 import Footer from"../components/Footer";
 
 export default function Orders() {
@@ -56,8 +57,7 @@ export default function Orders() {
   if (!currentUser) return null;
 
   // Sorting logic to prioritize active deliveries
-  const statusWeight = {"Out for Delivery": 1,"Pending": 2,"Delivered": 3
-  };
+  const statusWeight = { "Pending": 1, "Out for Delivery": 2, "Delivered": 3 };
 
   const displayOrders = userOrders
     .filter(o => statusFilter ==="All" || o.status === statusFilter)
@@ -69,7 +69,7 @@ export default function Orders() {
       
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 pt-[140px] pb-12">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">📦 My Orders</h1>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight"><Package className="inline-block mr-2 translate-y-[2px]" size={28} /> My Orders</h1>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
             <div className="relative w-full sm:w-48 shrink-0">
               <button
@@ -146,17 +146,17 @@ export default function Orders() {
                     </div>
                     {order.couponCode ? (
                       <div className="flex justify-between items-center text-sm">
-                        <span className="font-bold text-green-600 flex items-center gap-1">🏷️ Offer Applied ({order.couponCode})</span>
+                        <span className="font-bold text-green-600 flex items-center gap-1"><Tag size={14} className="inline" /> Offer Applied ({order.couponCode})</span>
                         <span className="font-bold text-green-600">-₹{order.discountAmount}</span>
                       </div>
                     ) : (
                       <div className="flex justify-between items-center text-sm text-slate-500">
-                        <span className="font-medium flex items-center gap-1">🏷️ Offer Applied</span>
+                        <span className="font-medium flex items-center gap-1"><Tag size={14} className="inline" /> Offer Applied</span>
                         <span className="font-medium italic">No code used</span>
                       </div>
                     )}
                     <div className="flex justify-between items-center text-sm border-b border-slate-100 pb-2">
-                      <span className="font-bold text-slate-500 flex items-center gap-1">💳 Payment Method</span>
+                      <span className="font-bold text-slate-500 flex items-center gap-1"><CreditCard size={14} className="inline" /> Payment Method</span>
                       <span className="font-bold text-slate-700">
                         {order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod === 'NetBanking' ? 'Net Banking' : order.paymentMethod}
                       </span>
@@ -177,7 +177,7 @@ export default function Orders() {
                         <div>
                           <p className="text-sm font-black text-slate-900">{order.deliveryPartner.name}</p>
                           <p className="text-[11px] font-bold text-slate-500 mt-0.5 flex items-center gap-1">
-                            <span>{order.status === 'Delivered' ? '📦 Delivered by' : '🛵 Delivery Partner'}</span>
+                            <span>{order.status === 'Delivered' ? <><Package size={12} className="inline-block mr-1 translate-y-[-1px]" /> Delivered by</> : <><Motorbike size={12} className="inline-block mr-1 translate-y-[-1px]" /> Delivery Partner</>}</span>
                             <span>•</span>
                             <span className="text-slate-700">{order.deliveryPartner.phone}</span>
                           </p>
@@ -185,14 +185,14 @@ export default function Orders() {
                       </div>
                       {order.status !== 'Delivered' && (
                         <a href={`tel:${order.deliveryPartner.phone}`} className="flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 bg-white border border-orange-200 text-orange-700 font-bold text-xs rounded-xl hover:bg-orange-50 transition-colors shadow-sm whitespace-nowrap">
-                          📞 Call {order.deliveryPartner.name.split(' ')[0]}
+                          <Phone size={14} className="inline mr-1" /> Call {order.deliveryPartner.name.split(' ')[0]}
                         </a>
                       )}
                     </div>
                   )}
                   {order.deliveryPartner && order.status === 'Out for Delivery' && (
                     <p className="text-[10px] font-bold text-slate-500 mt-2 text-center bg-slate-100 p-2 rounded-lg leading-relaxed">
-                      🛵 Please be polite and respectful. Our partners brave all weather conditions to deliver your order safely!
+                    <Motorbike size={14} className="inline-block mr-1 translate-y-[-1px]" /> Please be polite and respectful. Our partners brave all weather conditions to deliver your order safely!
                     </p>
                   )}
 
@@ -206,13 +206,13 @@ export default function Orders() {
             </div>
           ) : userOrders.length > 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-              <div className="text-5xl mb-4 opacity-50">🔍</div>
+              <SearchIcon size={64} className="mb-4 text-slate-300" />
               <p className="text-slate-800 font-bold text-lg">No orders found</p>
               <p className="text-slate-500 mt-1">You don't have any orders marked as"{statusFilter}".</p>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-              <div className="text-6xl mb-4 opacity-70">🛍️</div>
+              <ShoppingBag size={80} className="mb-4 text-slate-300" />
               <p className="text-slate-800 font-bold text-lg">No orders yet</p>
               <Link to="/user/fruits" className="btn-3d btn-lime mt-4 px-8 py-3.5 font-bold text-sm">Start Shopping</Link>
             </div>
