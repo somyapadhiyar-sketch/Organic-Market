@@ -375,7 +375,7 @@ export default function Cart() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col">
       <Navbar />
-      <main className="max-w-6xl mx-auto px-4 md:px-6 pt-[140px] pb-20 w-full">
+      <main className="max-w-6xl mx-auto px-4 md:px-6 pt-[140px] w-full flex-1">
         
         {cart.length === 0 ? (
           <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-12 md:p-20 text-center border border-slate-100 shadow-xl mt-8 max-w-2xl mx-auto">

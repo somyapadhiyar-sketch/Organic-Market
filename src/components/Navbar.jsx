@@ -1,11 +1,11 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
-import { Search, ChevronDown, ShoppingCart, User, MapPin, Home, Briefcase, Mic, Mail, Phone, Apple, Carrot, Bean, Amphora, Heart, Package, Settings } from 'lucide-react';
+import { Search, ChevronDown, ShoppingCart, User, MapPin, Home, Briefcase, Mic, Mail, Phone, Apple, Carrot, Bean, Amphora, Heart, Package, Settings, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Country, State } from 'country-state-city';
 
 export default function Navbar() {
-  const { currentUser, cart, logout, userLocation, setUserLocation, searchQuery, setSearchQuery, products, updateUser } = useStore();
+  const { currentUser, cart, logout, clearCart, userLocation, setUserLocation, searchQuery, setSearchQuery, products, updateUser } = useStore();
   const location = useLocation();
   const navigate = useNavigate();
   const [localQuery, setLocalQuery] = useState(searchQuery || '');
@@ -14,6 +14,7 @@ export default function Navbar() {
   const [isListening, setIsListening] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', email: '', phone: '' });
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -97,7 +98,8 @@ export default function Navbar() {
 
         {/* Main Navigation Bar */}
         <div className="flex items-center justify-between bg-white border-gray-100 shadow-lg rounded-2xl h-[68px]">
-          <div className="flex items-center justify-start px-4 md:px-8 gap-6 md:gap-8 overflow-x-auto no-scrollbar">
+          {/* Desktop Links */}
+          <div className="hidden md:flex items-center justify-start px-8 gap-8 overflow-x-auto no-scrollbar">
             <Link to="/home" className={`flex items-center gap-1.5 py-3 text-[14px] font-bold whitespace-nowrap ${location.pathname === '/home' ? 'text-[#3B0060] border-b-[3px] border-[#3B0060]' : 'text-gray-500 hover:text-gray-900'}`}><Home size={18} /> Home</Link>
             <Link to="/user/fruits" className={`flex items-center gap-1.5 py-3 text-[14px] font-bold whitespace-nowrap ${isActive('fruits')}`}><Apple size={18} /> Fresh Fruits</Link>
             <Link to="/user/vegetables" className={`flex items-center gap-1.5 py-3 text-[14px] font-bold whitespace-nowrap ${isActive('vegetables')}`}><Carrot size={18} /> Fresh Vegetables</Link>
@@ -107,11 +109,39 @@ export default function Navbar() {
             <Link to="/user/orders" className={`flex items-center gap-1.5 py-3 text-[14px] font-bold whitespace-nowrap ${isActive('orders')}`}><Package size={18} /> My Orders</Link>
           </div>
 
+          {/* Mobile Links */}
+          <div className="flex md:hidden items-center justify-start px-4 gap-2">
+            <Link to="/home" className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${location.pathname === '/home' ? 'bg-[#3B0060] text-white shadow-md' : 'text-gray-500 hover:bg-gray-100'}`}>
+              <Home size={20} />
+            </Link>
+            
+            <div className="relative">
+              <button onClick={() => setIsCategoryOpen(!isCategoryOpen)} className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${isCategoryOpen || ['/fruits', '/vegetables', '/pulses', '/oil', '/wishlist', '/orders'].some(p => location.pathname.includes(p)) ? 'bg-[#3B0060] text-white shadow-md' : 'text-gray-500 hover:bg-gray-100'}`}>
+                <Menu size={20} />
+              </button>
+              
+              {isCategoryOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsCategoryOpen(false)}></div>
+                  <div className="absolute top-full left-0 mt-4 w-[240px] bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-slate-100 p-3 flex flex-col gap-1.5 z-50 animate-in fade-in zoom-in-95 pointer-events-auto">
+                     <Link to="/user/fruits" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname.includes('fruits') ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Apple size={18} /> Fresh Fruits</Link>
+                     <Link to="/user/vegetables" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname.includes('vegetables') ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Carrot size={18} /> Fresh Vegetables</Link>
+                     <Link to="/user/pulses" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname.includes('pulses') ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Bean size={18} /> Organic Pulses</Link>
+                     <Link to="/user/oil" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname.includes('oil') ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Amphora size={18} /> Cooking Oils</Link>
+                     <div className="h-px bg-slate-100 my-1 mx-2"></div>
+                     <Link to="/user/wishlist" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname.includes('wishlist') ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Heart size={18} /> My Wishlist</Link>
+                     <Link to="/user/orders" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname.includes('orders') ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Package size={18} /> My Orders</Link>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
           {/* Right: Auth & Cart */}
           <div className="flex items-center gap-4 shrink-0 pr-4 md:pr-8">
             
             {/* Cart Button */}
-            <Link to="/user/cart" className="btn-3d btn-lime flex items-center gap-2 px-4 py-2.5 font-bold">
+            <Link to="/user/cart" className="btn-3d btn-lime flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 font-bold">
               <div className="relative">
                 <ShoppingCart size={20} />
                 {cartCount > 0 && <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full border border-white">{cartCount}</span>}
@@ -153,13 +183,13 @@ export default function Navbar() {
                         )}
                       </div>
                       <Link to="/user/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center justify-center gap-2 w-full mt-4 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl text-sm text-center hover:bg-slate-200 transition-colors">Advanced Settings <Settings size={16} /></Link>
-                      <button onClick={() => { logout(); setIsProfileOpen(false); navigate('/login/user', { replace: true }); }} className="w-full mt-6 py-3 bg-red-50 text-red-600 font-bold rounded-xl text-sm hover:bg-red-100 transition-colors">Logout</button>
+                      <button onClick={() => { if (clearCart) clearCart(); logout(); setIsProfileOpen(false); navigate('/login/user', { replace: true }); }} className="w-full mt-6 py-3 bg-red-50 text-red-600 font-bold rounded-xl text-sm hover:bg-red-100 transition-colors">Logout</button>
                     </div>
                   </>
                 )}
               </div>
             ) : (
-              <Link to="/login/user" className="flex items-center gap-2 text-gray-700 font-bold text-[15px] hover:text-blue-600"><User size={22} /> Login</Link>
+              <Link to="/login/user" className="flex items-center gap-2 text-gray-700 font-bold text-[15px] hover:text-blue-600"><User size={22} /> <span className="hidden sm:inline">Login</span></Link>
             )}
           </div>
         </div>

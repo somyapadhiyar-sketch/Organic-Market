@@ -30,10 +30,10 @@ export default function Vegetables() {
     <div className="min-h-screen bg-[#F4F6F9] font-sans flex flex-col">
       <Navbar />
       
-      <main className="pb-12 flex-1">
-        <WaveBanner theme="green" title="Crisp & Fresh Veggies" subtitle="Daily harvested, delivered to your kitchen in 10 minutes." className="!h-[350px] md:!h-[400px] pt-[80px]" />
+      <main className="flex-1">
+        <WaveBanner theme="green" title="Crisp & Fresh Veggies" subtitle="Daily harvested, delivered to your kitchen in 10 minutes." className="!h-[350px] md:!h-[400px] pt-[140px] md:pt-[90px]" bottomColorClass="fill-[#F4F6F9]" />
         
-        <div className="px-4 sm:px-6 lg:px-10 mt-8 mb-6 flex justify-between items-end border-b border-gray-200 pb-4">
+        <div className="px-4 sm:px-6 lg:px-10 mt-8 mb-6 flex justify-between items-end">
           <div>
             <h2 className="text-[24px] font-black text-[#1C1C1C]">Buy Fresh Vegetables Online</h2>
             <p className="text-gray-500 text-[14px] font-medium mt-1">Daily harvested, delivered to your kitchen in 10 minutes.</p>

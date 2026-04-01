@@ -53,7 +53,8 @@ export default function WaveBanner({
   theme = 'green', 
   title = 'Fresh Deals Every Day!', 
   subtitle = 'Get up to 50% off on organic fruits and vegetables.',
-  className = ''
+  className = '',
+  bottomColorClass = 'fill-white'
 }) {
   const colors = colorThemes[theme] || colorThemes.green;
 
@@ -96,7 +97,7 @@ export default function WaveBanner({
       {/* OUTSIDE BOTTOM WAVE CUTOUT (Makes the bottom edge of the box wavy) */}
       <div className="absolute bottom-0 left-0 w-full h-[50px] sm:h-[70px] md:h-[90px] z-20 pointer-events-none rotate-180">
         <svg 
-          className="absolute top-0 left-0 w-[200%] h-full animate-wave fill-white" 
+          className={`absolute top-0 left-0 w-[200%] h-full animate-wave ${bottomColorClass}`} 
           style={{ animationDuration: '10s', willChange: 'transform' }}
           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"
         >

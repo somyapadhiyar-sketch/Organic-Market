@@ -35,7 +35,7 @@ export default function About() {
       
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-6 py-16 pt-[140px] overflow-hidden">
+      <main className="max-w-6xl mx-auto px-6 pt-[140px] overflow-hidden flex-1">
         
         {/* Main Title */}
         <motion.div 

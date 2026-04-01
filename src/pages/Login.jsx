@@ -3,7 +3,7 @@ import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { ArrowRight, Mail, Lock, Eye, EyeOff, Leaf, KeyRound, Hand } from 'lucide-react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc } from"firebase/firestore";
 import { auth } from '../firebase';
 
@@ -19,13 +19,9 @@ export default function Login() {
   
   // Forgot Password State
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [resetStep, setResetStep] = useState(1);
   const [resetEmail, setResetEmail] = useState('');
-  const [resetOtp, setResetOtp] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
-  const { loginUser, showToast, checkEmailExists, resetPassword, setCurrentUser } = useStore();
+  const { loginUser, showToast, setCurrentUser } = useStore();
   const navigate = useNavigate();
 
   useLayoutEffect(() => {
@@ -213,48 +209,32 @@ export default function Login() {
   const handleForgotPasswordSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
-    setLoading(false);
 
-    if (resetStep === 1) {
-      if (activeRole === 'admin') {
-        if (showToast) showToast("Admin password cannot be reset online. Contact Super Admin.");
-        return;
-      }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(resetEmail) || resetEmail.endsWith('.om')) {
-        if (showToast) showToast("Please enter a valid email address.");
-        return;
-      }
+    if (activeRole === 'admin') {
+      if (showToast) showToast("Admin password cannot be reset online. Contact Super Admin.");
+      setLoading(false);
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(resetEmail) || resetEmail.endsWith('.om')) {
+      if (showToast) showToast("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
 
-      const exists = checkEmailExists(resetEmail, activeRole);
-      if (exists) {
-        if (showToast) showToast("OTP sent to your email! (Use 123456)");
-        setResetStep(2);
-      } else {
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      if (showToast) showToast("Password reset link sent! Please check your email inbox/spam folder.");
+      setIsForgotPassword(false);
+      setResetEmail('');
+    } catch (error) {
+      console.error("Reset Password Error:", error);
+      if (error.code === 'auth/user-not-found') {
         if (showToast) showToast("No account found with this email.");
-      }
-    } else if (resetStep === 2) {
-      if (resetOtp === '123456') { // Mock OTP Verification
-        if (showToast) showToast("OTP Verified!");
-        setResetStep(3);
       } else {
-        if (showToast) showToast("Invalid OTP.");
+        if (showToast) showToast("Failed to send reset email. Try again later.");
       }
-    } else if (resetStep === 3) {
-      if (newPassword !== confirmNewPassword) return showToast && showToast("Passwords do not match.");
-      if (newPassword.length < 6) return showToast && showToast("Password must be at least 6 characters.");
-      
-      const res = resetPassword(resetEmail, activeRole, newPassword);
-      if (res.success) {
-        if (showToast) showToast("Password reset successfully! Please login.");
-        setIsForgotPassword(false);
-        setResetStep(1);
-        setEmail(resetEmail);
-        setPassword('');
-        setResetEmail(''); setResetOtp(''); setNewPassword(''); setConfirmNewPassword('');
-      } else {
-        if (showToast) showToast(res.msg);
-      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -302,82 +282,25 @@ export default function Login() {
                <div className="mb-10">
          <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2 flex items-center gap-2">Reset Password <KeyRound className="text-blue-600" size={28} /></h2>
                  <p className="text-slate-500 font-medium">
-                   {resetStep === 1 &&"Enter your email to receive an OTP."}
-                   {resetStep === 2 && `Enter the OTP sent to ${resetEmail}.`}
+                   Enter your registered email to receive a password reset link.
                  </p>
                </div>
 
                <form onSubmit={handleForgotPasswordSubmit} className="space-y-6">
-                 {resetStep === 1 && (
-                   <div className="space-y-2">
-                     <label className="text-sm font-bold text-slate-700">Registered Email</label>
-                     <div className="relative">
-                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                       <input 
-                         type="email" 
-                         required 
-                         placeholder="john@example.com"
-                         value={resetEmail} 
-                         onChange={(e) => setResetEmail(e.target.value)}
-                         className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium"
-                       />
-                     </div>
+                 <div className="space-y-2">
+                   <label className="text-sm font-bold text-slate-700">Registered Email</label>
+                   <div className="relative">
+                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                     <input 
+                       type="email" 
+                       required 
+                       placeholder="john@example.com"
+                       value={resetEmail} 
+                       onChange={(e) => setResetEmail(e.target.value)}
+                       className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium"
+                     />
                    </div>
-                 )}
-
-                 {resetStep === 2 && (
-                   <div className="space-y-2">
-                     <label className="text-sm font-bold text-slate-700">6-Digit OTP</label>
-                     <div className="relative">
-                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                       <input 
-                         type="text" 
-                         maxLength="6"
-                         required 
-                         placeholder="123456"
-                         value={resetOtp} 
-                         onChange={(e) => setResetOtp(e.target.value.replace(/\D/g, ''))}
-                         className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium tracking-widest"
-                       />
-                     </div>
-                   </div>
-                 )}
-
-                 {resetStep === 3 && (
-                   <>
-                     <div className="space-y-2">
-                       <label className="text-sm font-bold text-slate-700">New Password</label>
-                       <div className="relative">
-                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                         <input 
-                           type={showPassword ?"text" :"password"} 
-                           required 
-                           placeholder="••••••••" 
-                           value={newPassword} 
-                           onChange={(e) => setNewPassword(e.target.value)}
-                           className="w-full pl-12 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium"
-                         />
-                         <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                           {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                         </button>
-                       </div>
-                     </div>
-                     <div className="space-y-2">
-                       <label className="text-sm font-bold text-slate-700">Confirm New Password</label>
-                       <div className="relative">
-                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                         <input 
-                           type={showPassword ?"text" :"password"} 
-                           required 
-                           placeholder="••••••••" 
-                           value={confirmNewPassword} 
-                           onChange={(e) => setConfirmNewPassword(e.target.value)}
-                           className="w-full pl-12 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium"
-                         />
-                       </div>
-                     </div>
-                   </>
-                 )}
+                 </div>
 
                  <motion.button 
                    whileTap={{ scale: 0.98 }}
@@ -385,13 +308,13 @@ export default function Login() {
                    disabled={loading}
                    className="btn-3d btn-blue w-full py-4 font-bold flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                  >
-                   {loading ?"Processing..." : resetStep === 1 ?"Send OTP" : resetStep === 2 ?"Verify OTP" :"Update Password"}
+                   {loading ? "Sending Link..." : "Send Reset Link"}
                    {!loading && <ArrowRight size={20} />}
                  </motion.button>
                </form>
 
                <div className="mt-8 text-center">
-                 <button onClick={() => { setIsForgotPassword(false); setResetStep(1); setResetEmail(''); setResetOtp(''); }} className="text-slate-500 font-bold hover:text-slate-800 transition-colors">
+                 <button onClick={() => { setIsForgotPassword(false); setResetEmail(''); }} className="text-slate-500 font-bold hover:text-slate-800 transition-colors">
                    ← Back to Login
                  </button>
                </div>

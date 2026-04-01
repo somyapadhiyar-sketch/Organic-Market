@@ -30,8 +30,8 @@ export default function Fruits() {
     <div className="min-h-screen bg-[#F4F6F9] font-sans flex flex-col">
       <Navbar />
       
-      <main className="pb-12 flex-1">
-        <WaveBanner theme="orange" title="Juicy & Fresh Fruits" subtitle="Picked right from the orchards, delivered in 10 mins." className="!h-[350px] md:!h-[400px] pt-[80px]" />
+      <main className="flex-1">
+        <WaveBanner theme="orange" title="Juicy & Fresh Fruits" subtitle="Picked right from the orchards, delivered in 10 mins." className="!h-[350px] md:!h-[400px] pt-[140px] md:pt-[90px]" bottomColorClass="fill-[#F4F6F9]" />
         
         <div className="px-4 sm:px-6 lg:px-10 mt-8 mb-6 flex justify-between items-end">
           <div>

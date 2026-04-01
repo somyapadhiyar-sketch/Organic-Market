@@ -6,10 +6,10 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { auth } from '../firebase'
 
 export default function Delivery() {
-  const { orders, updateOrderStatus, logout, currentUser, updateUser, updatePartnerStatus } = useStore()
+  const { orders, updateOrderStatus, logout, clearCart, currentUser, updateUser, updatePartnerStatus } = useStore()
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const handleLogout = () => { logout(); navigate('/home', { replace: true }); };
+  const handleLogout = () => { if (clearCart) clearCart(); logout(); navigate('/home', { replace: true }); };
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('orders');
   const [isUploading, setIsUploading] = useState(false);

@@ -84,7 +84,7 @@ export default function Payment() {
           <p className="text-sm font-bold text-slate-400">Step {step} of 2</p>
         </div>
       </header>
-      <main className="max-w-4xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <main className="max-w-4xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
         <div className="lg:col-span-2 space-y-6">
           {step === 1 && (
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">

@@ -8,7 +8,7 @@ const INITIAL_MESSAGES = [
 ];
 
 export default function ChatWidget() {
-  const { currentUser } = useStore();
+  const { currentUser, orders = [] } = useStore();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
@@ -60,11 +60,22 @@ export default function ChatWidget() {
     }
   }, [messages, isOpen]);
 
-  if (location.pathname.startsWith('/login') || location.pathname.startsWith('/signup')) {
+  // Only show on the Orders page
+  if (!location.pathname.includes('/user/orders')) {
     return null;
   }
 
-  if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'delivery')) {
+  // Only show for standard logged-in users
+  if (!currentUser || currentUser.role === 'admin' || currentUser.role === 'delivery') {
+    return null;
+  }
+
+  // Only show if the user has placed at least 1 order
+  const userOrders = orders.filter(
+    o => o.customer?.phone === currentUser.phone || o.customer?.name === currentUser.name
+  );
+  
+  if (userOrders.length === 0) {
     return null;
   }
 

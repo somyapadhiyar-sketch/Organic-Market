@@ -12,6 +12,9 @@ export default function AdminEditProduct() {
   const [product, setProduct] = useState(null)
   const [file, setFile] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false)
+  const [productType, setProductType] = useState('Solid')
+  const [isTypeOpen, setIsTypeOpen] = useState(false)
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
@@ -20,6 +23,7 @@ export default function AdminEditProduct() {
   useEffect(() => {
     const foundProduct = products.find(p => p.id == id)
     if (foundProduct) {
+      setProductType(foundProduct.category === 'Oil' ? 'Liquid' : 'Solid')
       setProduct({ 
         ...foundProduct, 
         whyYouWillLoveThis: Array.isArray(foundProduct.whyYouWillLoveThis) ? foundProduct.whyYouWillLoveThis.join(', ') : (foundProduct.whyYouWillLoveThis ||"100% Organic, Farm Fresh, No Pesticides"), 
@@ -52,6 +56,15 @@ export default function AdminEditProduct() {
       console.error("Cloudinary upload failed:", error);
       return null;
     }
+  };
+
+  const handleTypeChange = (val) => {
+    const newType = typeof val === 'string' ? val : val.target.value;
+    setProductType(newType);
+    setProduct(prev => ({
+      ...prev,
+      category: newType === 'Solid' ? 'Fruits' : 'Oil'
+    }));
   };
 
   const handleEditProduct = async (e) => {
@@ -99,18 +112,75 @@ export default function AdminEditProduct() {
               <input required value={product.name} onChange={e => setProduct({...product, name: e.target.value})} className={inputStyle} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-bold text-slate-500 uppercase ml-2 mb-2 block tracking-wider">Price (₹)</label>
-                <input required type="number" min="0" value={product.price} onChange={e => setProduct({...product, price: e.target.value})} className={inputStyle} />
+                <input required type="number" min="0" step="any" value={product.price} onChange={e => setProduct({...product, price: e.target.value})} className={inputStyle} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase ml-2 mb-2 block tracking-wider">Category</label>
-                <select value={product.category} onChange={e => setProduct({...product, category: e.target.value})} className={inputStyle}>
-                  <option value="Fruits">Fruits</option><option value="Vegetables">Vegetables</option><option value="Pulses">Pulses</option><option value="Oil">Oil</option>
-                </select>
+                <label className="text-xs font-bold text-slate-500 uppercase ml-2 mb-2 block tracking-wider">Type</label>
+                <div className="relative">
+                  <div 
+                    onClick={() => setIsTypeOpen(!isTypeOpen)} 
+                    className={`${inputStyle} pr-10 cursor-pointer flex justify-between items-center`}
+                  >
+                    <span>{productType}</span>
+                    <span className={`text-[10px] text-slate-400 transition-transform duration-200 ${isTypeOpen ? 'rotate-180' : ''}`}>▼</span>
+                  </div>
+                  {isTypeOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setIsTypeOpen(false)}></div>
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        {['Solid', 'Liquid'].map(option => (
+                          <div 
+                            key={option} 
+                            onClick={() => {
+                              handleTypeChange(option);
+                              setIsTypeOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors cursor-pointer ${productType === option ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'}`}
+                          >
+                            {option}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase ml-2 mb-2 block tracking-wider">Category</label>
+              <div className="relative">
+                <div 
+                  onClick={() => setIsCategoryOpen(!isCategoryOpen)} 
+                  className={`${inputStyle} pr-10 cursor-pointer flex justify-between items-center`}
+                >
+                  <span>{product.category}</span>
+                  <span className={`text-[10px] text-slate-400 transition-transform duration-200 ${isCategoryOpen ? 'rotate-180' : ''}`}>▼</span>
+                </div>
+                {isCategoryOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsCategoryOpen(false)}></div>
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                      {(productType === 'Solid' ? ['Fruits', 'Vegetables', 'Pulses'] : ['Oil']).map(option => (
+                        <div 
+                          key={option} 
+                          onClick={() => {
+                            setProduct({...product, category: option});
+                            setIsCategoryOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors cursor-pointer ${product.category === option ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'}`}
+                          >
+                            {option}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
 
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase ml-2 mb-2 block tracking-wider">Short Description</label>

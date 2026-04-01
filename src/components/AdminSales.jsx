@@ -166,76 +166,86 @@ export default function AdminSales() {
   return (
     <div className="space-y-8">
       {/* Date Filter Controls */}
-      <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <button onClick={() => setPresetDateRange('7days')} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition">Last 7 Days</button>
-          <button onClick={() => setPresetDateRange('30days')} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition">1 Month</button>
-          <button onClick={() => setPresetDateRange('1year')} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition">1 Year</button>
-          <button onClick={() => setPresetDateRange('yearly')} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition">This Year</button>
-          <button onClick={() => setDateRange({ startDate: null, endDate: null })} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition">All Time</button>
+      <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col xl:flex-row justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto">
+          <button onClick={() => setPresetDateRange('7days')} className="flex-1 sm:flex-none px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition text-center whitespace-nowrap">Last 7 Days</button>
+          <button onClick={() => setPresetDateRange('30days')} className="flex-1 sm:flex-none px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition text-center whitespace-nowrap">1 Month</button>
+          <button onClick={() => setPresetDateRange('1year')} className="flex-1 sm:flex-none px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition text-center whitespace-nowrap">1 Year</button>
+          <button onClick={() => setPresetDateRange('yearly')} className="flex-1 sm:flex-none px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition text-center whitespace-nowrap">This Year</button>
+          <button onClick={() => setDateRange({ startDate: null, endDate: null })} className="flex-1 sm:flex-none px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition text-center whitespace-nowrap">All Time</button>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-          <span className="text-slate-500">Custom:</span>
-          <input type="date" onChange={e => handleCustomDateChange(e, 'startDate')} value={dateRange.startDate ? dateRange.startDate.toISOString().split('T')[0] : ''} className="p-1.5 border border-gray-300 rounded-lg bg-slate-50" />
-          <span className="text-slate-500">to</span>
-          <input type="date" onChange={e => handleCustomDateChange(e, 'endDate')} value={dateRange.endDate ? dateRange.endDate.toISOString().split('T')[0] : ''} className="p-1.5 border border-gray-300 rounded-lg bg-slate-50" />
-        </div>
-        <div className="flex items-center gap-2">
-            <button onClick={handlePdfDownload} disabled={filteredOrders.length === 0} className="btn-3d btn-danger flex items-center gap-2 px-3 py-1.5 text-xs font-bold transition disabled:opacity-50 disabled:cursor-not-allowed">
-                <Download size={14} /> PDF
-            </button>
-            <button onClick={handleXlsxDownload} disabled={filteredOrders.length === 0} className="btn-3d btn-emerald flex items-center gap-2 px-3 py-1.5 text-xs font-bold transition disabled:opacity-50 disabled:cursor-not-allowed">
-                <Download size={14} /> XLSX
-            </button>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full xl:w-auto">
+          <div className="flex items-center gap-2 text-xs font-bold flex-1">
+            <span className="text-slate-500">Custom:</span>
+            <input type="date" onChange={e => handleCustomDateChange(e, 'startDate')} value={dateRange.startDate ? dateRange.startDate.toISOString().split('T')[0] : ''} className="p-1.5 border border-gray-300 rounded-lg bg-slate-50 flex-1 min-w-[110px]" />
+            <span className="text-slate-500">to</span>
+            <input type="date" onChange={e => handleCustomDateChange(e, 'endDate')} value={dateRange.endDate ? dateRange.endDate.toISOString().split('T')[0] : ''} className="p-1.5 border border-gray-300 rounded-lg bg-slate-50 flex-1 min-w-[110px]" />
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+              <button onClick={handlePdfDownload} disabled={filteredOrders.length === 0} className="flex-1 sm:flex-none btn-3d btn-danger flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold transition disabled:opacity-50 disabled:cursor-not-allowed">
+                  <Download size={14} /> PDF
+              </button>
+              <button onClick={handleXlsxDownload} disabled={filteredOrders.length === 0} className="flex-1 sm:flex-none btn-3d btn-emerald flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold transition disabled:opacity-50 disabled:cursor-not-allowed">
+                  <Download size={14} /> XLSX
+              </button>
+          </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Revenue" value={`₹${totalSales.toFixed(2)}`} />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+        <StatCard title="Total Revenue" value={`₹${totalSales.toFixed(0)}`} />
         <StatCard title="Total Orders" value={totalOrders} />
-        <StatCard title="Average Order Value" value={`₹${(totalSales / totalOrders || 0).toFixed(2)}`} />
+        <StatCard title="Average Order Value" value={`₹${(totalSales / totalOrders || 0).toFixed(0)}`} />
         <StatCard title="Products" value={products.length} />
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+        <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <h3 className="font-bold text-lg mb-4">Sales Over Time</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={monthData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis tickFormatter={(value) => `₹${value}`} />
-              <Tooltip formatter={(value) => `₹${value.toFixed(2)}`} />
-              <Legend />
-              <Bar dataKey="sales" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="w-full overflow-x-auto no-scrollbar">
+            <div className="min-w-[400px]">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={monthData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" fontSize={12} />
+                  <YAxis tickFormatter={(value) => `₹${value}`} fontSize={12} width={60} />
+                  <Tooltip formatter={(value) => `₹${value.toFixed(2)}`} />
+                  <Legend />
+                  <Bar dataKey="sales" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+        <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <h3 className="font-bold text-lg mb-4">Sales by Category</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={categoryData}
-                cx="50%"
-                cy="45%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="sales"
-                nameKey="name"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              >
-                {categoryData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => `₹${value.toFixed(2)}`} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+          <div className="w-full overflow-x-auto no-scrollbar">
+            <div className="min-w-[300px]">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="45%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="sales"
+                    nameKey="name"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `₹${value.toFixed(2)}`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -244,9 +254,9 @@ export default function AdminSales() {
 
 function StatCard({ title, value }) {
   return (
-    <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-      <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</p>
-      <p className="text-3xl font-black text-gray-900">{value}</p>
+    <div className="bg-white p-4 md:p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center">
+      <p className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 line-clamp-1">{title}</p>
+      <p className="text-xl md:text-3xl font-black text-gray-900 truncate">{value}</p>
     </div>
   );
 }

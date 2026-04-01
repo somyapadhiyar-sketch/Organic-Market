@@ -7,11 +7,12 @@ import { Country, State, City } from"country-state-city";
 import { Settings, ShieldCheck, Phone, Home, Briefcase, MapPin } from 'lucide-react';
 import { getFirestore, doc, updateDoc } from"firebase/firestore";
 import { auth } from"../firebase";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, signInWithEmailAndPassword } from "firebase/auth";
 
 export default function Profile() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { currentUser, updateUser, deleteUser, logout, showToast } = useStore();
+  const { currentUser, updateUser, deleteUser, logout, clearCart, showToast } = useStore();
 
   const [showAddresses, setShowAddresses] = useState(false);
   const [addresses, setAddresses] = useState([]);
@@ -94,16 +95,37 @@ export default function Profile() {
   };
 
   // --- Password Management ---
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     if (!passwordData.currentPassword || !passwordData.newPassword) return showToast("Please fill all fields");
     if (passwordData.newPassword.length < 6) return showToast("New password must be at least 6 characters");
     if (passwordData.newPassword !== passwordData.confirmPassword) return showToast("New passwords do not match");
-    if (currentUser.password !== passwordData.currentPassword) return showToast("Current password is incorrect");
 
-    updateUser({ ...currentUser, password: passwordData.newPassword });
-    showToast("Password changed successfully!");
-    setShowPasswordChange(false);
-    setPasswordData({ currentPassword:"", newPassword:"", confirmPassword:"" });
+    try {
+      let user = auth.currentUser;
+      
+      if (!user) {
+        const userCredential = await signInWithEmailAndPassword(auth, currentUser.email, passwordData.currentPassword);
+        user = userCredential.user;
+      } else {
+        const credential = EmailAuthProvider.credential(currentUser.email, passwordData.currentPassword);
+        await reauthenticateWithCredential(user, credential);
+      }
+
+      await updatePassword(user, passwordData.newPassword);
+
+      showToast("Password changed successfully!");
+      setShowPasswordChange(false);
+      setPasswordData({ currentPassword:"", newPassword:"", confirmPassword:"" });
+    } catch (error) {
+      console.error("Password update error:", error);
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+        showToast("Current password is incorrect");
+      } else if (error.code === 'auth/too-many-requests') {
+        showToast("Too many failed attempts. Please wait a few minutes and try again.");
+      } else {
+        showToast(error.message || "Failed to change password. Please try logging out and back in.");
+      }
+    }
   };
 
   // --- Sync to Firebase helper ---
@@ -178,6 +200,7 @@ export default function Profile() {
   const handleDeleteAccount = () => {
     if (window.confirm("⚠️ WARNING: Are you sure you want to delete your account?\n\nThis will permanently erase your data and cannot be undone.")) {
       deleteUser(currentUser.email);
+      if (clearCart) clearCart();
       showToast("Your account has been successfully deleted.");
       navigate("/signup");
     }
@@ -189,7 +212,7 @@ export default function Profile() {
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
       <Navbar />
       
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-[130px] pb-12">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-[130px]">
         <h1 className="text-3xl font-black text-slate-900 mb-8 tracking-tight flex items-center">Advanced Settings <Settings className="ml-3 text-slate-700" size={32} /></h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

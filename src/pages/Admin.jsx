@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react'
 import { useStore } from '../context/StoreContext'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Plus, LogOut, Search, Mic, Edit, Trash2, PackagePlus, PowerOff, MapPin, Menu, Amphora, Apple, Carrot, Bean, ShoppingBag, Motorbike, Store, BarChart3 } from 'lucide-react'
+import { Plus, LogOut, Search, Mic, Edit, Trash2, PackagePlus, PowerOff, MapPin, Menu, Amphora, Apple, Carrot, Bean, ShoppingBag, Motorbike, Store, BarChart3, ChevronDown, Grid } from 'lucide-react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { auth } from '../firebase'
 import PartnerDetailsModal from '../components/PartnerDetailsModal'
 import AdminSales from '../components/AdminSales'
 
 export default function Admin() {
-  const { products, toggleProductStatus, deleteProduct, editProduct, deliveryPartners, approveDelivery, orders, logout, updateOrderStatus, showToast, updatePartnerStatus, assignOrderToPartner, deleteDeliveryPartner } = useStore()
+  const { products, toggleProductStatus, deleteProduct, editProduct, deliveryPartners, approveDelivery, orders, logout, clearCart, updateOrderStatus, showToast, updatePartnerStatus, assignOrderToPartner, deleteDeliveryPartner } = useStore()
   const navigate = useNavigate();
   const location = useLocation();
-  const initialTab = location.pathname.split('/admin/')[1] || 'fruits';
+  const initialTab = location.pathname.split('/admin/')[1] || 'sales';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -24,6 +24,7 @@ export default function Admin() {
   const filterOptions = ["All", "Pending", "Out for Delivery", "Delivered"];
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [assignmentModes, setAssignmentModes] = useState({});
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(['fruits', 'vegetables', 'pulses', 'oil'].includes(initialTab));
 
   const selectedProduct = products.find(p => p.id === selectedProductId);
   const handleTabSwitch = (tab) => { 
@@ -37,7 +38,7 @@ export default function Admin() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setActiveTab(location.pathname.split('/admin/')[1] || 'fruits');
+    setActiveTab(location.pathname.split('/admin/')[1] || 'sales');
     setSelectedProductId(null);
     setIsRefilling(false);
     setRefillAmount('');
@@ -103,24 +104,45 @@ export default function Admin() {
 
         <div className={`flex-1 pt-6 md:pt-12 pb-6 space-y-1.5 overflow-y-auto custom-scrollbar ${isSidebarCollapsed ? 'px-3' : 'px-4'}`}>
           
-          {[
-            {tab: 'fruits', icon: <Apple size={20} />, label: 'Fruits'},
-            {tab: 'vegetables', icon: <Carrot size={20} />, label: 'Vegetables'},
-            {tab: 'pulses', icon: <Bean size={20} />, label: 'Pulses'},
-            {tab: 'oil', icon: <Amphora size={20} />, label: 'Oil'}
-          ].map(item => (
-            <button key={item.tab} onClick={() => handleTabSwitch(item.tab)} className={`w-full flex items-center py-3 rounded-xl text-[14px] font-bold transition-all relative group ${isSidebarCollapsed ? 'px-0 justify-center gap-0' : 'px-4 gap-3'} ${activeTab === item.tab ? 'bg-emerald-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
-              <span className="text-lg">{item.icon}</span>
-              <span className={`transition-all duration-200 whitespace-nowrap overflow-hidden ${isSidebarCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>{item.label}</span>
-              {isSidebarCollapsed && <span className="absolute left-full ml-4 px-3 py-1.5 text-xs font-bold bg-gray-800 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">{item.label}</span>}
-            </button>
-          ))}
+          {/* Sales Tab */}
+          <button onClick={() => handleTabSwitch('sales')} className={`w-full flex items-center py-3 rounded-xl text-[14px] font-bold transition-all relative group ${isSidebarCollapsed ? 'px-0 justify-center gap-0' : 'px-4 gap-3'} ${activeTab === 'sales' ? 'bg-emerald-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
+            <span className="text-lg"><BarChart3 size={20} /></span>
+            <span className={`transition-all duration-200 whitespace-nowrap overflow-hidden ${isSidebarCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>Sales</span>
+            {isSidebarCollapsed && <span className="absolute left-full ml-4 px-3 py-1.5 text-xs font-bold bg-gray-800 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">Sales</span>}
+          </button>
+
+          {/* Categories Dropdown Toggle */}
+          <button onClick={() => setIsCategoriesOpen(!isCategoriesOpen)} className={`w-full flex items-center py-3 rounded-xl text-[14px] font-bold transition-all relative group ${isSidebarCollapsed ? 'px-0 justify-center gap-0' : 'px-4 gap-3'} ${['fruits', 'vegetables', 'pulses', 'oil'].includes(activeTab) ? 'bg-emerald-50 text-emerald-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
+            <span className="text-lg"><Grid size={20} /></span>
+            <div className={`flex items-center justify-between transition-all duration-200 overflow-hidden ${isSidebarCollapsed ? 'w-0 opacity-0' : 'flex-1 opacity-100'}`}>
+              <span className="whitespace-nowrap">Categories</span>
+              <ChevronDown size={16} className={`transition-transform ${isCategoriesOpen ? 'rotate-180' : ''}`} />
+            </div>
+            {isSidebarCollapsed && <span className="absolute left-full ml-4 px-3 py-1.5 text-xs font-bold bg-gray-800 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">Categories</span>}
+          </button>
+
+          {/* Categories List */}
+          {isCategoriesOpen && (
+            <div className={`space-y-1.5 overflow-hidden transition-all ${isSidebarCollapsed ? '' : 'pl-4'}`}>
+              {[
+                {tab: 'fruits', icon: <Apple size={18} />, label: 'Fruits'},
+                {tab: 'vegetables', icon: <Carrot size={18} />, label: 'Vegetables'},
+                {tab: 'pulses', icon: <Bean size={18} />, label: 'Pulses'},
+                {tab: 'oil', icon: <Amphora size={18} />, label: 'Oil'}
+              ].map(item => (
+                <button key={item.tab} onClick={() => handleTabSwitch(item.tab)} className={`w-full flex items-center py-2.5 rounded-xl text-[14px] font-bold transition-all relative group ${isSidebarCollapsed ? 'px-0 justify-center gap-0' : 'px-4 gap-3'} ${activeTab === item.tab ? 'bg-emerald-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
+                  <span className="text-lg">{item.icon}</span>
+                  <span className={`transition-all duration-200 whitespace-nowrap overflow-hidden ${isSidebarCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>{item.label}</span>
+                  {isSidebarCollapsed && <span className="absolute left-full ml-4 px-3 py-1.5 text-xs font-bold bg-gray-800 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">{item.label}</span>}
+                </button>
+              ))}
+            </div>
+          )}
           
           {[
             {tab: 'orders', icon: <ShoppingBag size={20} />, label: 'Orders', badge: pendingOrders}, 
             {tab: 'delivery', icon: <Motorbike size={20} />, label: 'Online Partners'}, 
-            {tab: 'offline-delivery', icon: <Store size={20} />, label: 'Offline Partners'}, 
-            {tab: 'sales', icon: <BarChart3 size={20} />, label: 'Sales'}
+            {tab: 'offline-delivery', icon: <Store size={20} />, label: 'Offline Partners'}
           ].map(item => (
             <button key={item.tab} onClick={() => handleTabSwitch(item.tab)} className={`w-full flex items-center py-3 rounded-xl text-[14px] font-bold transition-all relative group ${isSidebarCollapsed ? 'px-0 justify-center gap-0' : 'px-4 gap-3'} ${activeTab === item.tab ? 'bg-emerald-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
               <span className="text-lg">{item.icon}</span>
@@ -155,7 +177,7 @@ export default function Admin() {
               <Link to="/admin/add-product" className="p-2 px-3 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors rounded-xl shadow-sm">
                 <Plus size={18} />
               </Link>
-              <button onClick={() => { logout(); navigate('/home', { replace: true }); }} className="p-2 px-3 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors rounded-xl shadow-sm">
+              <button onClick={() => { if(clearCart) clearCart(); logout(); navigate('/home', { replace: true }); }} className="p-2 px-3 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors rounded-xl shadow-sm">
                 <LogOut size={18} />
               </button>
             </div>
@@ -183,7 +205,7 @@ export default function Admin() {
             <Link to="/admin/add-product" className="btn-3d btn-emerald px-4 py-2 font-bold text-[13px] gap-2 whitespace-nowrap shadow-sm">
               <Plus size={16} /> Add Product
             </Link>
-            <button onClick={() => { logout(); navigate('/home', { replace: true }); }} className="btn-3d btn-danger px-4 py-2 font-bold text-[13px] gap-2 whitespace-nowrap shadow-sm">
+            <button onClick={() => { if(clearCart) clearCart(); logout(); navigate('/home', { replace: true }); }} className="btn-3d btn-danger px-4 py-2 font-bold text-[13px] gap-2 whitespace-nowrap shadow-sm">
               <LogOut size={16} /> Logout
             </button>
           </div>
@@ -195,22 +217,22 @@ export default function Admin() {
         
         {/* Quick Stats Grid */}
         {activeTab === 'orders' && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center">
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Products</p>
-              <p className="text-3xl font-black text-gray-900">{totalProducts}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+            <div className="bg-white p-4 md:p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center">
+              <p className="text-[10px] md:text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1 line-clamp-1">Total Products</p>
+              <p className="text-2xl md:text-3xl font-black text-gray-900">{totalProducts}</p>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center">
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1">Out of Stock</p>
-              <p className="text-3xl font-black text-red-500">{outOfStock}</p>
+            <div className="bg-white p-4 md:p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center">
+              <p className="text-[10px] md:text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1 line-clamp-1">Out of Stock</p>
+              <p className="text-2xl md:text-3xl font-black text-red-500">{outOfStock}</p>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center">
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1">Pending Orders</p>
-              <p className="text-3xl font-black text-orange-500">{pendingOrders}</p>
+            <div className="bg-white p-4 md:p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center">
+              <p className="text-[10px] md:text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1 line-clamp-1">Pending Orders</p>
+              <p className="text-2xl md:text-3xl font-black text-orange-500">{pendingOrders}</p>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center">
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Orders</p>
-              <p className="text-3xl font-black text-blue-600">{orders.length}</p>
+            <div className="bg-white p-4 md:p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center">
+              <p className="text-[10px] md:text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1 line-clamp-1">Total Orders</p>
+              <p className="text-2xl md:text-3xl font-black text-blue-600">{orders.length}</p>
             </div> 
           </div>
         )}
@@ -360,15 +382,15 @@ export default function Admin() {
         {activeTab === 'orders' && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             {filteredOrders.length === 0 ? (
-              <div className="p-12 text-center text-gray-500 font-medium">No orders found.</div>
+              <div className="p-8 md:p-12 text-center text-gray-500 font-medium">No orders found.</div>
             ) : (
-              <div className="p-6 grid gap-4">
+              <div className="p-3 md:p-6 grid gap-3 md:gap-4">
                 {filteredOrders.map(order => (
-                  <div key={order.id} className="border border-gray-200 rounded-xl p-5 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <p className="font-black text-gray-900">{order.id}</p>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${order.status === 'Pending' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                  <div key={order.id} className="border border-gray-200 rounded-xl p-4 md:p-5 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                    <div className="w-full">
+                      <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+                        <p className="font-black text-gray-900 break-all">{order.id}</p>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide shrink-0 ${order.status === 'Pending' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
                           {order.status}
                         </span>
                         <span className="text-gray-400 font-medium text-xs">{order.date}</span>
@@ -378,7 +400,7 @@ export default function Admin() {
                       
                       <div className="mt-4">
                         {order.status === 'Pending' && !order.deliveryPartnerName && order.deliveryPartnerEmail !== 'online_broadcast' ? (
-                          <div className="flex flex-col gap-2 max-w-xs">
+                          <div className="flex flex-col gap-2 w-full sm:max-w-xs">
                             <select
                               value={assignmentModes[order.id] || ''}
                               onChange={async (e) => {
@@ -447,14 +469,14 @@ export default function Admin() {
                             )}
                           </div>
                         ) : order.deliveryPartnerEmail === 'online_broadcast' && order.status === 'Pending' ? (
-                          <div className="mt-3 inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-100"><span>🟢</span> Broadcasted to Online Partners</div>
+                          <div className="mt-3 inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-100 break-words w-full sm:w-auto"><span>🟢</span> Broadcasted</div>
                         ) : (
-                          (order.deliveryPartnerName || (order.deliveryPartnerEmail && order.deliveryPartnerEmail !== 'online_broadcast')) && <div className="mt-3 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-100"><span>🛵</span> Assigned to: {order.deliveryPartnerName || order.deliveryPartnerEmail}</div>
+                          (order.deliveryPartnerName || (order.deliveryPartnerEmail && order.deliveryPartnerEmail !== 'online_broadcast')) && <div className="mt-3 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold border border-emerald-100 break-all w-full sm:w-auto"><span>🛵</span> Assigned: {order.deliveryPartnerName || order.deliveryPartnerEmail}</div>
                         )}
                       </div>
                     </div>
-                    <div className="text-left md:text-right shrink-0 bg-gray-50 p-4 rounded-xl">
-                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">{order.paymentMethod}</p>
+                    <div className="text-left md:text-right shrink-0 bg-gray-50 p-4 rounded-xl flex md:block items-center justify-between mt-2 md:mt-0">
+                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-0 md:mb-1">{order.paymentMethod}</p>
                       <p className="font-black text-xl text-gray-900">₹{order.total}</p>
                     </div>
                   </div>

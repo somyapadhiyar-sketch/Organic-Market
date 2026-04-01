@@ -52,7 +52,7 @@ function App() {
         <Route path="/user/about" element={<About />} />
         
         {/* Admin Routes */}
-        <Route path="/admin" element={<Navigate to="/admin/fruits" />} />
+        <Route path="/admin" element={<Navigate to="/admin/sales" />} />
         <Route path="/admin/:section" element={<ProtectedRoute allowedRoles={['admin']}><Admin /></ProtectedRoute>} />
         <Route path="/admin/add-product" element={<ProtectedRoute allowedRoles={['admin']}><AdminAddProduct /></ProtectedRoute>} />
         <Route path="/admin/edit-product/:id" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditProduct /></ProtectedRoute>} />

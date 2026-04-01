@@ -12,6 +12,8 @@ export default function AdminAddProduct() {
   const [file, setFile] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
   const [productType, setProductType] = useState('Solid');
+  const [isTypeOpen, setIsTypeOpen] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
@@ -42,8 +44,8 @@ export default function AdminAddProduct() {
     }
   };
 
-  const handleTypeChange = (e) => {
-    const newType = e.target.value;
+  const handleTypeChange = (val) => {
+    const newType = typeof val === 'string' ? val : val.target.value;
     setProductType(newType);
     setNewProduct(prev => ({
       ...prev,
@@ -110,8 +112,8 @@ export default function AdminAddProduct() {
   const inputStyle ="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-colors font-bold text-slate-900 text-base shadow-inner";
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-6 flex items-center justify-center font-sans text-slate-800">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl w-full bg-white p-6 sm:p-10 md:p-12 rounded-[2rem] sm:rounded-[3rem] shadow-xl border border-slate-100 mt-16 md:mt-0">
+    <div className="min-h-screen bg-[#f8fafc] px-4 py-8 sm:py-12 font-sans text-slate-800">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl w-full mx-auto bg-white p-6 sm:p-10 md:p-12 rounded-[2rem] sm:rounded-[3rem] shadow-xl border border-slate-100">
         
         <div className="flex justify-between items-center mb-10 border-b border-slate-100 pb-6">
            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-3"><Package size={32} className="text-blue-600" /> Add New Product</h2>
@@ -121,24 +123,70 @@ export default function AdminAddProduct() {
         <form onSubmit={handleAddProduct} className="grid md:grid-cols-2 gap-8">
           <div className="space-y-5">
             <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Product Name</label><input required value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} className={inputStyle} /></div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Price (₹)</label><input required type="number" min="0" step="any" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} className={inputStyle} /></div>
               <div>
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Type</label>
-                <select value={productType} onChange={handleTypeChange} className={inputStyle}>
-                  <option>Solid</option>
-                  <option>Liquid</option>
-                </select>
+                <div className="relative">
+                  <div 
+                    onClick={() => setIsTypeOpen(!isTypeOpen)} 
+                    className={`${inputStyle} pr-10 cursor-pointer flex justify-between items-center`}
+                  >
+                    <span>{productType}</span>
+                    <span className={`text-[10px] text-slate-400 transition-transform duration-200 ${isTypeOpen ? 'rotate-180' : ''}`}>▼</span>
+                  </div>
+                  {isTypeOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setIsTypeOpen(false)}></div>
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        {['Solid', 'Liquid'].map(option => (
+                          <div 
+                            key={option} 
+                            onClick={() => {
+                              handleTypeChange(option);
+                              setIsTypeOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors cursor-pointer ${productType === option ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'}`}
+                          >
+                            {option}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Category</label>
-              <select value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} className={inputStyle}>
-                {productType === 'Solid' ? (
-                  <><option>Fruits</option><option>Vegetables</option><option>Pulses</option></>
-                ) : (
-                  <option>Oil</option>
+              <div className="relative">
+                <div 
+                  onClick={() => setIsCategoryOpen(!isCategoryOpen)} 
+                  className={`${inputStyle} pr-10 cursor-pointer flex justify-between items-center`}
+                >
+                  <span>{newProduct.category}</span>
+                  <span className={`text-[10px] text-slate-400 transition-transform duration-200 ${isCategoryOpen ? 'rotate-180' : ''}`}>▼</span>
+                </div>
+                {isCategoryOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsCategoryOpen(false)}></div>
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                      {(productType === 'Solid' ? ['Fruits', 'Vegetables', 'Pulses'] : ['Oil']).map(option => (
+                        <div 
+                          key={option} 
+                          onClick={() => {
+                            setNewProduct({...newProduct, category: option});
+                            setIsCategoryOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors cursor-pointer ${newProduct.category === option ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'}`}
+                        >
+                          {option}
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
-              </select></div>
+              </div>
+            </div>
             <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Short Desc</label><textarea required rows="2" value={newProduct.desc} onChange={e => setNewProduct({...newProduct, desc: e.target.value})} className={inputStyle} /></div>
             <div><label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">About</label><textarea required rows="3" value={newProduct.about} onChange={e => setNewProduct({...newProduct, about: e.target.value})} className={inputStyle} /></div>
             <div><label className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2 block">Product Image</label><input required type="file" accept="image/*,.pdf" onChange={e => { setFile(e.target.files[0]); setNewProduct({...newProduct, image: URL.createObjectURL(e.target.files[0])}); }} className="w-full border border-slate-200 p-2 rounded-xl bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />{isUploading && <p className="text-sm font-bold text-blue-500 mt-2 animate-pulse">Uploading...</p>}</div>

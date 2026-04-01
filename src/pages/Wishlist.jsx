@@ -24,7 +24,7 @@ export default function Wishlist() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col">
       <Navbar />
       
-      <main className="max-w-7xl mx-auto px-4 md:px-6 pt-[120px] pb-20 w-full">
+      <main className="max-w-7xl mx-auto px-4 md:px-6 pt-[120px] w-full flex-1">
         <div className="mb-10 text-center">
           <h1 className="text-4xl sm:text-5xl font-black text-slate-800 tracking-tight">My Wishlist</h1>
           <p className="text-lg text-slate-500 mt-3 font-medium max-w-xl mx-auto">Your hand-picked collection of favorite items. Ready to add them to your cart?</p>

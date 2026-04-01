@@ -30,8 +30,8 @@ export default function Oils() {
     <div className="min-h-screen bg-[#F4F6F9] font-sans flex flex-col">
       <Navbar />
       
-      <main className="pb-12 flex-1">
-        <WaveBanner theme="yellow" title="Pure & Healthy Oils" subtitle="Cold-pressed and naturally processed for your well-being." className="!h-[350px] md:!h-[400px] pt-[80px]" />
+      <main className="flex-1">
+        <WaveBanner theme="yellow" title="Pure & Healthy Oils" subtitle="Cold-pressed and naturally processed for your well-being." className="!h-[350px] md:!h-[400px] pt-[140px] md:pt-[90px]" bottomColorClass="fill-[#F4F6F9]" />
         
         <div className="px-4 sm:px-6 lg:px-10 mt-8 mb-6 flex justify-between items-end">
           <div>

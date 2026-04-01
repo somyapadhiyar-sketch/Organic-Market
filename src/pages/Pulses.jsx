@@ -30,10 +30,10 @@ export default function Pulses() {
     <div className="min-h-screen bg-[#F4F6F9] font-sans flex flex-col">
       <Navbar />
       
-      <main className="pb-12 flex-1">
-        <WaveBanner theme="purple" title="Organic Pulses & Grains" subtitle="High protein, unpolished dals directly from the farm." className="!h-[350px] md:!h-[400px] pt-[80px]" />
+      <main className="flex-1">
+        <WaveBanner theme="purple" title="Organic Pulses & Grains" subtitle="High protein, unpolished dals directly from the farm." className="!h-[350px] md:!h-[400px] pt-[140px] md:pt-[90px]" bottomColorClass="fill-[#F4F6F9]" />
         
-        <div className="px-4 sm:px-6 lg:px-10 mt-8 mb-6 flex justify-between items-end border-b border-gray-200 pb-4">
+        <div className="px-4 sm:px-6 lg:px-10 mt-8 mb-6 flex justify-between items-end">
           <div>
             <h2 className="text-[24px] font-black text-[#1C1C1C]">Organic Pulses & Grains</h2>
             <p className="text-gray-500 text-[14px] font-medium mt-1">Unpolished, protein-rich staples for your daily meals.</p>

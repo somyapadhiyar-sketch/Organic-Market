@@ -67,7 +67,7 @@ export default function Orders() {
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
       <Navbar />
       
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 pt-[140px] pb-12">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 pt-[140px]">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <h1 className="text-3xl font-black text-slate-900 tracking-tight"><Package className="inline-block mr-2 translate-y-[2px]" size={28} /> My Orders</h1>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">

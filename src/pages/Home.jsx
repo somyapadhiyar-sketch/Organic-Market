@@ -21,7 +21,6 @@ const FadeIn = ({ children, delay = 0 }) => (
 
 export default function Home() {
   const navigate = useNavigate();
-  const containerRef = useRef(null);
   const { currentUser } = useStore();
   const { pathname } = useLocation();
 
@@ -53,9 +52,7 @@ export default function Home() {
   };
 
   useLayoutEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo(0, 0);
-    }
+    window.scrollTo(0, 0);
   }, [pathname]);
 
   useEffect(() => {
@@ -63,18 +60,18 @@ export default function Home() {
     else if (currentUser?.role === 'delivery') navigate('/delivery', { replace: true });
   }, [currentUser, navigate]);
 
-  const { scrollY } = useScroll({ container: containerRef });
+  const { scrollY } = useScroll();
   
   const y1 = useTransform(scrollY, [0, 500], [0, 200]);
   const y2 = useTransform(scrollY, [0, 500], [0, -150]);
 
   return (
-    <div className="h-screen bg-[#F3F5F7] font-sans text-slate-900 flex overflow-hidden">
+    <div className="min-h-screen bg-[#F3F5F7] font-sans text-slate-900 flex flex-col">
       
       <Navbar />
 
       {/* MAIN CONTENT AREA */}
-      <main ref={containerRef} className="flex-1 relative flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar pt-[100px]">
+      <main className="flex-1 relative flex flex-col overflow-x-hidden pt-[100px]">
         
         {/* HERO SECTION - Realistic E-commerce Style */}
         <section className="relative w-full bg-[#F3F5F7] min-h-[600px] flex items-center py-20 md:py-0">
@@ -258,14 +255,12 @@ export default function Home() {
         {/* CTA BANNER */}
         <section className="w-full m-0 p-0 flex">
           <FadeIn>
-            <WaveBanner theme="green" title="Fresh Deals Every Day!" subtitle="Get up to 50% off on organic fruits and vegetables." />
+            <WaveBanner theme="green" title="Fresh Deals Every Day!" subtitle="Get up to 50% off on organic fruits and vegetables." bottomColorClass="fill-[#F3F5F7]" />
           </FadeIn>
         </section>
 
-        <section className="pb-20">
-           <Footer />
-        </section>
       </main>
+      <Footer />
     </div>
   )
 }
