@@ -179,7 +179,7 @@ export default function Cart() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [pathname]);
+  }, [pathname, step]);
 
   useEffect(() => {
     let interval;
@@ -414,13 +414,20 @@ export default function Cart() {
                             <div className="w-16 h-16 sm:w-24 sm:h-24 bg-slate-50 border border-slate-100 rounded-2xl p-2 flex-shrink-0 flex items-center justify-center">
                               <img src={item.image} className="w-full h-full object-contain mix-blend-multiply" onError={(e) => { e.target.src = `https://placehold.co/100x100/F8F8F8/767676?text=Img` }} />
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 flex flex-col">
                               <h4 className="font-semibold text-base sm:text-lg text-slate-800 leading-tight line-clamp-2">{item.name}</h4>
                               <p className="text-xs sm:text-sm font-medium text-slate-500 mt-0.5 sm:mt-1">1 {unit}</p>
-                              <p className="font-bold text-base sm:text-lg text-slate-900 mt-1 sm:mt-2">₹{item.price}</p>
+                              <div className="flex items-center justify-between mt-2 sm:mt-2 w-full">
+                                <p className="font-bold text-base sm:text-lg text-slate-900">₹{item.price}</p>
+                                <div className="flex sm:hidden items-center bg-slate-100 text-slate-800 rounded-xl h-9 shadow-sm border border-slate-200">
+                                  <button onClick={() => decreaseCartQuantity(item.id, 1)} className="px-2.5 h-full flex items-center justify-center rounded-l-xl hover:bg-slate-200 transition-colors"><Minus size={14} strokeWidth={3}/></button>
+                                  <span className="font-bold text-sm w-7 text-center">{item.quantity}</span>
+                                  <button onClick={() => addToCart(item.name, item.price, 1, item.image, item.id)} className="px-2.5 h-full flex items-center justify-center rounded-r-xl hover:bg-slate-200 transition-colors"><Plus size={14} strokeWidth={3}/></button>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex justify-end w-full sm:w-auto mt-2 sm:mt-0">
+                          <div className="hidden sm:flex justify-end w-full sm:w-auto mt-2 sm:mt-0">
                             <div className="flex items-center bg-slate-100 text-slate-800 rounded-xl h-11 shadow-sm border border-slate-200">
                               <button onClick={() => decreaseCartQuantity(item.id, 1)} className="px-3 h-full flex items-center justify-center rounded-l-xl hover:bg-slate-200 transition-colors"><Minus size={16} strokeWidth={3}/></button>
                               <span className="font-bold text-base w-8 text-center">{item.quantity}</span>
@@ -437,17 +444,10 @@ export default function Cart() {
                   {recommendedProducts.length > 0 && (
                     <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-lg">
                       <h3 className="font-extrabold text-lg sm:text-xl mb-6 text-slate-800 flex items-center gap-2"><Sparkles size={20} className="text-amber-500" /> Recommended for You</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="flex overflow-x-auto pb-4 gap-3 sm:grid sm:grid-cols-2 sm:gap-4 sm:pb-0 custom-scrollbar">
                         {recommendedProducts.map((product, idx) => (
-                      <div key={product.id || idx} className="flex flex-col h-full">
+                      <div key={product.id || idx} className="flex flex-col h-full shrink-0 w-[160px] sm:w-auto sm:shrink">
                         <ProductCard product={product} />
-                        {/* Only display this block if the data successfully came from the AI! */}
-                        {product.aiReason && (
-                          <div className="mt-2 text-[11px] bg-green-50 p-3 rounded-xl border border-green-200 text-green-800 font-medium shadow-sm">
-                            <span className="font-black text-green-900 block mb-0.5 flex items-center gap-1"><Star size={12} className="text-amber-500" /> AI Score: {product.aiScore}%</span> 
-                            {product.aiReason}
-                          </div>
-                        )}
                       </div>
                         ))}
                       </div>
@@ -547,6 +547,15 @@ export default function Cart() {
                       <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="w-4 h-4 mt-0.5 sm:mt-0 rounded border-slate-300 text-green-600 focus:ring-green-600 shrink-0" />
                       <span className="font-bold text-sm text-slate-600 leading-tight">Save this address for future use</span>
                     </label>
+                  </div>
+
+                  <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                    <button onClick={() => setStep(1)} className="w-full sm:w-1/3 py-3.5 sm:py-4 bg-slate-100 text-slate-600 font-bold rounded-xl text-sm sm:text-base hover:bg-slate-200 transition-colors">
+                      ← Back to Cart
+                    </button>
+                    <button onClick={handleProceed} className="btn-3d btn-blue w-full sm:w-2/3 py-3.5 sm:py-4 font-bold text-sm sm:text-base flex items-center justify-center gap-2">
+                      Proceed to Payment <ArrowRight size={20} />
+                    </button>
                   </div>
                 </div>
               )}
@@ -682,9 +691,43 @@ export default function Cart() {
             </div>
 
             {/* RIGHT COLUMN: Bill Details */}
+            {step !== 2 && (
             <div className="w-full lg:w-[380px]">
               <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-lg sticky top-[140px]">
                 <h3 className="font-extrabold text-lg sm:text-xl mb-5 sm:mb-6 text-slate-800 border-b border-slate-100 pb-3 sm:pb-4">Bill Details</h3>
+
+                <div className="mb-6 pb-6 border-b border-dashed border-slate-200">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-bold text-md text-slate-800">Have a coupon?</h3>
+                    <button onClick={() => setShowOffers(!showOffers)} className="text-xs text-green-600 font-bold hover:underline">
+                      {showOffers ?"Hide offers" :"View offers"}
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                  <input type="text" placeholder="ZESTY20" value={couponCode} onChange={(e) => {
+                    setCouponCode(e.target.value);
+                    if (e.target.value.trim() ==="") {
+                      setDiscountPercent(0);
+                      setCouponMessage({ type:"", text:"" });
+                    }
+                  }} className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 font-medium text-sm uppercase"/>
+                    <button onClick={handleApplyCoupon} className="px-4 btn-3d btn-lime font-bold text-xs">APPLY</button>
+                  </div>
+                  {showOffers && (
+                    <div className="mt-3 space-y-2">
+                      {availableOffers.map((offer, idx) => (
+                        <div key={idx} className="border border-dashed border-green-300 bg-green-50 p-3 rounded-lg flex justify-between items-center">
+                          <div><span className="font-bold text-green-700 text-sm block">{offer.code}</span><span className="text-xs text-slate-600">{offer.desc}</span></div>
+                          <button onClick={() => { setCouponCode(offer.code); setShowOffers(false); }} className="bg-white border border-green-200 text-green-600 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-green-100 transition-colors">Use</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {couponMessage.text && (
+                    <p className={`mt-2 text-xs font-bold ${couponMessage.type ==="success" ?"text-green-600" :"text-red-500"}`}>{couponMessage.type ==="success" ?"✓" :"✕"}{couponMessage.text}</p>
+                  )}
+                </div>
+
                 <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-slate-600 font-medium mb-5 sm:mb-6">
                   <div className="flex justify-between"><span>Item Total</span><span className="font-bold text-slate-800">₹{total}</span></div>
                   {discountPercent > 0 && (
@@ -727,45 +770,14 @@ export default function Cart() {
                   </button>
                 )}
                 
-                {step > 1 && (
+                {step === 3 && (
                   <button onClick={() => setStep(s => s - 1)} className="w-full mt-3 py-3 text-slate-500 font-bold text-sm hover:text-slate-800 transition-colors">
                     ← Back
                   </button>
                 )}
-
-                <div className="mt-6 pt-6 border-t border-dashed border-slate-200">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-md text-slate-800">Have a coupon?</h3>
-                    <button onClick={() => setShowOffers(!showOffers)} className="text-xs text-green-600 font-bold hover:underline">
-                      {showOffers ?"Hide offers" :"View offers"}
-                    </button>
-                  </div>
-                  <div className="flex gap-2">
-                  <input type="text" placeholder="ZESTY20" value={couponCode} onChange={(e) => {
-                    setCouponCode(e.target.value);
-                    if (e.target.value.trim() ==="") {
-                      setDiscountPercent(0);
-                      setCouponMessage({ type:"", text:"" });
-                    }
-                  }} className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 font-medium text-sm uppercase"/>
-                    <button onClick={handleApplyCoupon} className="px-4 btn-3d btn-lime font-bold text-xs">APPLY</button>
-                  </div>
-                  {showOffers && (
-                    <div className="mt-3 space-y-2">
-                      {availableOffers.map((offer, idx) => (
-                        <div key={idx} className="border border-dashed border-green-300 bg-green-50 p-3 rounded-lg flex justify-between items-center">
-                          <div><span className="font-bold text-green-700 text-sm block">{offer.code}</span><span className="text-xs text-slate-600">{offer.desc}</span></div>
-                          <button onClick={() => { setCouponCode(offer.code); setShowOffers(false); }} className="bg-white border border-green-200 text-green-600 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-green-100 transition-colors">Use</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {couponMessage.text && (
-                    <p className={`mt-2 text-xs font-bold ${couponMessage.type ==="success" ?"text-green-600" :"text-red-500"}`}>{couponMessage.type ==="success" ?"✓" :"✕"}{couponMessage.text}</p>
-                  )}
-                </div>
               </div>
             </div>
+            )}
 
           </div></>
         )}

@@ -74,7 +74,7 @@ export default function ProductDetails() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 flex flex-col">
       <Navbar />
       
-      <main className="flex-grow max-w-7xl mx-auto px-4 md:px-8 pt-[140px] pb-20 w-full">
+      <main className="flex-grow max-w-7xl mx-auto px-4 md:px-8 pt-[140px] pb-0 -mb-10 lg:-mb-16 w-full">
         
         {/* Breadcrumb / Back Navigation */}
         <motion.div 
@@ -95,9 +95,9 @@ export default function ProductDetails() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="relative"
+            className="relative lg:sticky lg:top-[140px] lg:z-10"
           >
-            <div className="bg-white rounded-[2.5rem] p-12 shadow-2xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group">
+            <div className="bg-white rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group">
                 {/* Ambient Background Blobs */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-green-50/80 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-50/80 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2"></div>
@@ -105,12 +105,12 @@ export default function ProductDetails() {
                 <motion.div 
                     whileHover={{ scale: 1.05, rotate: 2 }}
                     transition={{ type:"spring", stiffness: 300, damping: 20 }}
-                    className="relative z-10 flex items-center justify-center min-h-[400px]"
+                    className="relative z-10 flex items-center justify-center min-h-[250px] md:min-h-[400px]"
                 >
                     <img 
                         src={product.image} 
                         alt={product.name} 
-                        className="max-h-[400px] w-auto object-contain drop-shadow-2xl mix-blend-multiply" 
+                        className="max-h-[250px] md:max-h-[400px] w-auto object-contain drop-shadow-2xl mix-blend-multiply" 
                         onError={(e) => { e.target.src = `https://placehold.co/400x400/F8F8F8/767676?text=${product.name}` }}
                     />
                 </motion.div>
@@ -209,7 +209,7 @@ export default function ProductDetails() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="grid grid-cols-2 gap-4 mb-8"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8"
             >
                 <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
                     <div className="p-3 bg-blue-50 text-blue-600 rounded-xl"><Clock size={24} /></div>
@@ -232,7 +232,7 @@ export default function ProductDetails() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="space-y-8"
+                className="space-y-6"
             >
                 <div>
                     <h3 className="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2">
@@ -254,7 +254,7 @@ export default function ProductDetails() {
                     </div>
                 </div>
               
-                <div className="pt-8 border-t border-slate-200/60">
+                <div className="pt-5 border-t border-slate-200/60">
                     <h3 className="font-bold text-slate-900 text-lg mb-3 flex items-center gap-2">
                         <Info size={20} className="text-blue-600" /> About the Product
                     </h3>

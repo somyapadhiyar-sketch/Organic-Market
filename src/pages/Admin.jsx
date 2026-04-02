@@ -25,6 +25,7 @@ export default function Admin() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [assignmentModes, setAssignmentModes] = useState({});
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(['fruits', 'vegetables', 'pulses', 'oil'].includes(initialTab));
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const selectedProduct = products.find(p => p.id === selectedProductId);
   const handleTabSwitch = (tab) => { 
@@ -85,7 +86,7 @@ export default function Admin() {
     .sort((a, b) => (statusWeight[a.status] || 99) - (statusWeight[b.status] || 99));
   const onlinePartners = deliveryPartners.filter(d => d.deliveryMode !== 'Offline' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
   const offlinePartners = deliveryPartners.filter(d => d.deliveryMode === 'Offline' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
-  
+
   return (
     <div className="h-screen w-full bg-slate-50 font-sans text-[#1C1C1C] flex overflow-hidden">
       
@@ -386,98 +387,149 @@ export default function Admin() {
             ) : (
               <div className="p-3 md:p-6 grid gap-3 md:gap-4">
                 {filteredOrders.map(order => (
-                  <div key={order.id} className="border border-gray-200 rounded-xl p-4 md:p-5 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                    <div className="w-full">
-                      <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
-                        <p className="font-black text-gray-900 break-all">{order.id}</p>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide shrink-0 ${order.status === 'Pending' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                  <div key={order.id} className="border border-gray-200 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:justify-between md:items-center gap-4 hover:border-gray-300 transition-colors bg-white w-full overflow-hidden">
+                    <div className="w-full md:flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <p className="font-black text-gray-900 text-sm md:text-base break-all pr-2">{order.id}</p>
+                          <span className="text-gray-400 font-medium text-xs">{order.date}</span>
+                        </div>
+                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 border ${order.status === 'Pending' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
                           {order.status}
                         </span>
-                        <span className="text-gray-400 font-medium text-xs">{order.date}</span>
                       </div>
-                      <p className="text-sm font-bold text-gray-600">{order.customer?.name || 'Unknown'} • {order.customer?.phone || 'N/A'}</p>
-                      <p className="text-sm text-gray-500 mt-1">{(order.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ')}</p>
                       
-                      <div className="mt-4">
+                      <div className="bg-slate-50 p-3 rounded-xl mb-4 border border-slate-100">
+                        <p className="text-sm font-bold text-gray-700 flex items-center gap-2 mb-1.5">
+                          <span className="w-5 h-5 bg-slate-200 text-slate-500 rounded-full flex items-center justify-center text-[10px] shrink-0">{order.customer?.name?.charAt(0) || '?'}</span>
+                          <span className="truncate">{order.customer?.name || 'Unknown'}</span>
+                          <span className="text-slate-400 shrink-0">•</span>
+                          <span className="shrink-0">{order.customer?.phone || 'N/A'}</span>
+                        </p>
+                        <div className="text-xs text-gray-500 leading-relaxed">
+                          <span className="font-bold text-gray-400 uppercase tracking-widest text-[10px] block mb-0.5">Order Items:</span>
+                          <p className="line-clamp-2 md:line-clamp-none">{(order.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ')}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-2 w-full max-w-full min-w-0">
                         {order.status === 'Pending' && !order.deliveryPartnerName && order.deliveryPartnerEmail !== 'online_broadcast' ? (
-                          <div className="flex flex-col gap-2 w-full sm:max-w-xs">
-                            <select
-                              value={assignmentModes[order.id] || ''}
-                              onChange={async (e) => {
-                                const mode = e.target.value;
-                                setAssignmentModes({ ...assignmentModes, [order.id]: mode });
-                                if (mode === 'Online') {
-                                  try {
-                                    updateOrderStatus(order.id, 'Pending', 'online_broadcast');
-                                    const db = getFirestore(auth.app);
-                                    await updateDoc(doc(db, "orders", order.id), {
-                                      deliveryPartnerEmail: 'online_broadcast',
-                                      status: 'Pending'
-                                    });
-                                    showToast('✅ Order is available to all online partners.');
-                                  } catch (err) {
-                                    console.error(err);
-                                  }
-                                }
-                              }}
-                              onClick={e => e.stopPropagation()}
-                              className="bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5 shadow-sm outline-none"
-                            >
-                              <option value="">Assign Delivery Mode...</option>
-                              <option value="Online">🟢 Online Delivery (Broadcast)</option>
-                              <option value="Offline">📦 Offline Delivery (Manual)</option>
-                            </select>
+                          <div className="flex flex-col sm:flex-row gap-2 w-full max-w-full min-w-0">
+                            <div className="relative w-full sm:w-1/2 min-w-0">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setOpenDropdown(openDropdown === `${order.id}-mode` ? null : `${order.id}-mode`); }}
+                                className="bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl focus:ring-2 focus:ring-blue-500 w-full p-2.5 shadow-sm outline-none flex justify-between items-center"
+                              >
+                                <span className="truncate">{assignmentModes[order.id] === 'Online' ? '🟢 Online (Broadcast)' : assignmentModes[order.id] === 'Offline' ? '📦 Offline (Manual)' : 'Assign Mode...'}</span>
+                                <ChevronDown size={14} className={`shrink-0 ml-1 transition-transform ${openDropdown === `${order.id}-mode` ? 'rotate-180' : ''}`} />
+                              </button>
+                              {openDropdown === `${order.id}-mode` && (
+                                <>
+                                  <div className="fixed inset-0 z-10" onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}></div>
+                                  <div className="absolute top-full left-0 w-full min-w-[180px] mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-20 py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                    <button
+                                      onClick={async (e) => {
+                                        e.stopPropagation();
+                                        setOpenDropdown(null);
+                                        const mode = 'Online';
+                                        setAssignmentModes({ ...assignmentModes, [order.id]: mode });
+                                        try {
+                                          updateOrderStatus(order.id, 'Pending', 'online_broadcast');
+                                          const db = getFirestore(auth.app);
+                                          await updateDoc(doc(db, "orders", order.id), {
+                                            deliveryPartnerEmail: 'online_broadcast',
+                                            status: 'Pending'
+                                          });
+                                          showToast('✅ Order is available to all online partners.');
+                                        } catch (err) {
+                                          console.error(err);
+                                        }
+                                      }}
+                                      className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                    >
+                                      🟢 Online (Broadcast)
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setOpenDropdown(null);
+                                        setAssignmentModes({ ...assignmentModes, [order.id]: 'Offline' });
+                                      }}
+                                      className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                    >
+                                      📦 Offline (Manual)
+                                    </button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
 
                             {assignmentModes[order.id] === 'Offline' && (
-                              <div className="animate-in fade-in slide-in-from-top-1 mt-1">
-                                <select
-                                  onChange={async (e) => {
-                                    const partnerEmail = e.target.value;
-                                    if (partnerEmail) {
-                                      const partner = deliveryPartners.find(p => p.email === partnerEmail);
-                                      try {
-                                        updateOrderStatus(order.id, 'Out for Delivery', partnerEmail);
-                                        const db = getFirestore(auth.app);
-                                        await updateDoc(doc(db, "orders", order.id), {
-                                          status: 'Out for Delivery',
-                                          deliveryPartnerEmail: partnerEmail,
-                                          deliveryPartnerName: partner?.name || 'Partner',
-                                          deliveryPartner: {
-                                            name: partner?.name || 'Partner',
-                                            phone: partner?.phone || '',
-                                            email: partnerEmail
-                                          }
-                                        });
-                                        showToast(`✅ Order assigned to ${partner?.name || 'offline partner'}!`);
-                                        const newModes = {...assignmentModes};
-                                        delete newModes[order.id];
-                                        setAssignmentModes(newModes);
-                                      } catch (err) {
-                                        console.error(err);
-                                      }
-                                    }
-                                  }}
-                                  onClick={e => e.stopPropagation()}
-                                  className="bg-slate-50 border border-slate-200 text-emerald-700 text-xs font-bold rounded-xl focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5 shadow-sm outline-none"
+                              <div className="relative w-full sm:w-1/2 mt-1 sm:mt-0 min-w-0 animate-in fade-in slide-in-from-top-1 sm:slide-in-from-left-2">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setOpenDropdown(openDropdown === `${order.id}-partner` ? null : `${order.id}-partner`); }}
+                                  className="bg-slate-50 border border-slate-200 text-emerald-700 text-xs font-bold rounded-xl focus:ring-2 focus:ring-emerald-500 w-full p-2.5 shadow-sm outline-none flex justify-between items-center"
                                 >
-                                  <option value="">Select Offline Partner...</option>
-                                  {deliveryPartners.filter(p => p.deliveryMode === 'Offline' && p.status === 'Approved').map(p => (
-                                    <option key={p.email} value={p.email}>{p.name}</option>
-                                  ))}
-                                </select>
+                                  <span className="truncate">Select Partner...</span>
+                                  <ChevronDown size={14} className={`shrink-0 ml-1 transition-transform ${openDropdown === `${order.id}-partner` ? 'rotate-180' : ''}`} />
+                                </button>
+                                {openDropdown === `${order.id}-partner` && (
+                                  <>
+                                    <div className="fixed inset-0 z-10" onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}></div>
+                                    <div className="absolute top-full right-0 sm:left-0 w-full min-w-[180px] mt-1 bg-white border border-emerald-100 rounded-xl shadow-xl z-20 py-1.5 overflow-y-auto max-h-48 custom-scrollbar animate-in fade-in zoom-in-95 duration-200">
+                                      {deliveryPartners.filter(p => p.deliveryMode === 'Offline' && p.status === 'Approved').length === 0 ? (
+                                        <div className="px-3 py-2 text-xs font-medium text-gray-500 text-center">No partners available</div>
+                                      ) : (
+                                        deliveryPartners.filter(p => p.deliveryMode === 'Offline' && p.status === 'Approved').map(p => (
+                                          <button
+                                            key={p.email}
+                                            onClick={async (e) => {
+                                              e.stopPropagation();
+                                              setOpenDropdown(null);
+                                              const partnerEmail = p.email;
+                                              try {
+                                                updateOrderStatus(order.id, 'Out for Delivery', partnerEmail);
+                                                const db = getFirestore(auth.app);
+                                                await updateDoc(doc(db, "orders", order.id), {
+                                                  status: 'Out for Delivery',
+                                                  deliveryPartnerEmail: partnerEmail,
+                                                  deliveryPartnerName: p.name || 'Partner',
+                                                  deliveryPartner: {
+                                                    name: p.name || 'Partner',
+                                                    phone: p.phone || '',
+                                                    email: partnerEmail
+                                                  }
+                                                });
+                                                showToast(`✅ Order assigned to ${p.name || 'offline partner'}!`);
+                                                const newModes = {...assignmentModes};
+                                                delete newModes[order.id];
+                                                setAssignmentModes(newModes);
+                                              } catch (err) {
+                                                console.error(err);
+                                              }
+                                            }}
+                                            className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors truncate"
+                                          >
+                                            {p.name}
+                                          </button>
+                                        ))
+                                      )}
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             )}
                           </div>
                         ) : order.deliveryPartnerEmail === 'online_broadcast' && order.status === 'Pending' ? (
-                          <div className="mt-3 inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-100 break-words w-full sm:w-auto"><span>🟢</span> Broadcasted</div>
+                          <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-2 rounded-xl text-xs font-bold border border-blue-100 break-words w-full sm:w-auto shadow-sm"><span>🟢</span> Waiting for partner (Broadcasted)</div>
                         ) : (
-                          (order.deliveryPartnerName || (order.deliveryPartnerEmail && order.deliveryPartnerEmail !== 'online_broadcast')) && <div className="mt-3 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold border border-emerald-100 break-all w-full sm:w-auto"><span>🛵</span> Assigned: {order.deliveryPartnerName || order.deliveryPartnerEmail}</div>
+                          (order.deliveryPartnerName || (order.deliveryPartnerEmail && order.deliveryPartnerEmail !== 'online_broadcast')) && <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold border border-emerald-100 break-all w-full sm:w-auto shadow-sm"><span>🛵</span> Assigned: {order.deliveryPartnerName || order.deliveryPartnerEmail}</div>
                         )}
                       </div>
                     </div>
-                    <div className="text-left md:text-right shrink-0 bg-gray-50 p-4 rounded-xl flex md:block items-center justify-between mt-2 md:mt-0">
-                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-0 md:mb-1">{order.paymentMethod}</p>
-                      <p className="font-black text-xl text-gray-900">₹{order.total}</p>
+                    <div className="text-left md:text-right shrink-0 bg-gray-50 border border-gray-100 p-4 rounded-xl flex md:flex-col items-center md:items-end justify-between md:justify-center mt-2 md:mt-0 min-w-[140px]">
+                      <p className="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-wider mb-0 md:mb-1">{order.paymentMethod}</p>
+                      <p className="font-black text-xl md:text-2xl text-gray-900">₹{order.total}</p>
                     </div>
                   </div>
                 ))}

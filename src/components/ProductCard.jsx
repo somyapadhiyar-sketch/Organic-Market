@@ -57,23 +57,28 @@ export default function ProductCard({ product }) {
       </div>
       <div className="flex-1 flex flex-col">
         <h3 className="font-bold text-gray-800 text-base leading-tight line-clamp-2 flex-1">{product.name}</h3>
-        <p className="text-sm text-gray-500 mt-1">{`1 ${product.unit || 'kg'}`}</p>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-sm text-gray-500">{`1 ${product.unit || 'kg'}`}</p>
+          <p className="font-extrabold text-base text-gray-900 md:hidden">₹{product.price}</p>
+        </div>
       </div>
-      <div className="flex justify-between items-center mt-4">
-        <p className="font-extrabold text-lg text-gray-900">₹{product.price}</p>
-        {isOutOfStock ? (
-          <button disabled className="btn-3d btn-danger px-4 py-2 font-bold text-[13px] opacity-70 cursor-not-allowed">Out of Stock</button>
-        ) : quantity > 0 ? (
-          <div className="flex items-center bg-white border border-gray-200 rounded-full h-10 shadow-sm overflow-hidden z-10 relative">
-            <button onClick={handleDecrease} className="h-full w-9 flex items-center justify-center p-0 rounded-none border-none shadow-none text-slate-500 bg-slate-50 hover:bg-slate-200 transition-colors"><Minus size={14} strokeWidth={3}/></button>
-            <span className="font-bold text-[13px] w-8 text-center bg-white text-gray-800 z-10">{quantity}</span>
-            <button onClick={handleIncrease} className="h-full w-9 flex items-center justify-center p-0 rounded-none border-none shadow-none text-green-700 bg-green-50 hover:bg-green-100 transition-colors"><Plus size={14} strokeWidth={3}/></button>
-          </div>
-        ) : (
-          <button onClick={handleAddToCart} className="btn-3d btn-emerald px-4 py-2 flex items-center gap-2 font-bold text-[13px]">
-            <Plus size={14} strokeWidth={3}/> Add
-          </button>
-        )}
+      <div className="flex justify-end md:justify-between items-center mt-3 md:mt-4 w-full">
+        <p className="font-extrabold text-lg text-gray-900 hidden md:block">₹{product.price}</p>
+        <div className="w-full md:w-auto">
+          {isOutOfStock ? (
+            <button disabled className="btn-3d btn-danger w-full md:w-auto px-4 py-2 font-bold text-[13px] opacity-70 cursor-not-allowed">Out of Stock</button>
+          ) : quantity > 0 ? (
+            <div className="flex items-center justify-between md:justify-center w-full md:w-auto bg-white border border-gray-200 rounded-full h-10 shadow-sm overflow-hidden z-10 relative">
+              <button onClick={handleDecrease} className="h-full w-10 md:w-9 flex items-center justify-center p-0 rounded-none border-none shadow-none text-slate-500 bg-slate-50 hover:bg-slate-200 transition-colors"><Minus size={14} strokeWidth={3}/></button>
+              <span className="font-bold text-[13px] flex-1 md:flex-none md:w-8 text-center bg-white text-gray-800 z-10">{quantity}</span>
+              <button onClick={handleIncrease} className="h-full w-10 md:w-9 flex items-center justify-center p-0 rounded-none border-none shadow-none text-green-700 bg-green-50 hover:bg-green-100 transition-colors"><Plus size={14} strokeWidth={3}/></button>
+            </div>
+          ) : (
+            <button onClick={handleAddToCart} className="btn-3d btn-emerald w-full md:w-auto px-4 py-2 flex items-center justify-center gap-2 font-bold text-[13px]">
+              <Plus size={14} strokeWidth={3}/> Add
+            </button>
+          )}
+        </div>
       </div>
     </Link>
   );

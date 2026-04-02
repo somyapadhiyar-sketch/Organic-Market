@@ -85,7 +85,7 @@ export default function AdminEditProduct() {
     };
     editProduct(product.id, formattedProduct)
     showToast("Product Updated Successfully!")
-    navigate('/admin') 
+    navigate(`/admin/${product.category.toLowerCase()}`)
   }
 
   if (!product) return <div className="min-h-screen bg-slate-50 text-slate-800 flex justify-center items-center font-black text-2xl">Loading Editor...</div>

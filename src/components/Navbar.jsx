@@ -111,12 +111,8 @@ export default function Navbar() {
 
           {/* Mobile Links */}
           <div className="flex md:hidden items-center justify-start px-4 gap-2">
-            <Link to="/home" className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${location.pathname === '/home' ? 'bg-[#3B0060] text-white shadow-md' : 'text-gray-500 hover:bg-gray-100'}`}>
-              <Home size={20} />
-            </Link>
-            
             <div className="relative">
-              <button onClick={() => setIsCategoryOpen(!isCategoryOpen)} className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${isCategoryOpen || ['/fruits', '/vegetables', '/pulses', '/oil', '/wishlist', '/orders'].some(p => location.pathname.includes(p)) ? 'bg-[#3B0060] text-white shadow-md' : 'text-gray-500 hover:bg-gray-100'}`}>
+              <button onClick={() => setIsCategoryOpen(!isCategoryOpen)} className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${isCategoryOpen || ['/home', '/fruits', '/vegetables', '/pulses', '/oil', '/wishlist', '/orders'].some(p => location.pathname.includes(p)) ? 'bg-[#3B0060] text-white shadow-md' : 'text-gray-500 hover:bg-gray-100'}`}>
                 <Menu size={20} />
               </button>
               
@@ -124,6 +120,7 @@ export default function Navbar() {
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsCategoryOpen(false)}></div>
                   <div className="absolute top-full left-0 mt-4 w-[240px] bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-slate-100 p-3 flex flex-col gap-1.5 z-50 animate-in fade-in zoom-in-95 pointer-events-auto">
+                     <Link to="/home" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname === '/home' ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Home size={18} /> Home</Link>
                      <Link to="/user/fruits" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname.includes('fruits') ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Apple size={18} /> Fresh Fruits</Link>
                      <Link to="/user/vegetables" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname.includes('vegetables') ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Carrot size={18} /> Fresh Vegetables</Link>
                      <Link to="/user/pulses" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname.includes('pulses') ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Bean size={18} /> Organic Pulses</Link>

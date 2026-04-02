@@ -106,7 +106,8 @@ export default function AdminAddProduct() {
       console.error("n8n webhook failed to sync:", error);
     }
 
-    addNewProduct(formattedProduct); showToast("Product Added!"); navigate('/admin');
+    addNewProduct(formattedProduct); showToast("Product Added!");
+    navigate(`/admin/${newProduct.category.toLowerCase()}`);
   }
 
   const inputStyle ="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-colors font-bold text-slate-900 text-base shadow-inner";

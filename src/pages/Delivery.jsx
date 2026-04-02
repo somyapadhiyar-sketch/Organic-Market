@@ -1,6 +1,6 @@
 import { useStore } from '../context/StoreContext'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, Camera, Mail, Phone, MapPin, CheckCircle2, Upload, Edit2, Save, X, Wifi, WifiOff, Package, Truck, Tag, CreditCard, Banknote, Motorbike } from 'lucide-react'
+import { Search, Camera, Mail, Phone, MapPin, CheckCircle2, Upload, Edit2, Save, X, Wifi, WifiOff, Package, Truck, Tag, CreditCard, Banknote, Motorbike, LogOut } from 'lucide-react'
 import { useState, useRef, useLayoutEffect } from 'react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { auth } from '../firebase'
@@ -24,7 +24,7 @@ export default function Delivery() {
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
-  }, [pathname]);
+  }, [pathname, activeTab]);
 
   const handleEditToggle = async () => {
     if (isEditing) {
@@ -121,22 +121,25 @@ export default function Delivery() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-4 sm:px-6 py-3 flex justify-between items-center shadow-sm transition-all">
-        <div className="flex items-center gap-2 group shrink-0"> {/* Replaced emoji with Motorbike icon */}
+        <div onClick={() => setActiveTab('orders')} className="flex items-center gap-2 group shrink-0 cursor-pointer"> {/* Replaced emoji with Motorbike icon */}
           <Motorbike size={28} className="text-orange-600 sm:text-3xl" />
           <h1 className="text-lg sm:text-2xl font-black text-slate-900 italic tracking-tighter group-hover:text-orange-600 transition-colors hidden sm:block">Zesty Delivery</h1>
         </div>
         <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3">
-            <button onClick={() => setActiveTab(activeTab === 'orders' ? 'profile' : 'orders')} className="text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl transition-colors mr-1 sm:mr-2">
+        <div className="flex items-center gap-2 sm:gap-3">
+            <button onClick={() => setActiveTab(activeTab === 'orders' ? 'profile' : 'orders')} className="text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl transition-colors mr-1">
               {activeTab === 'orders' ? 'My Profile' : 'Back to Orders'}
             </button>
-            <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm overflow-hidden">
+            <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm overflow-hidden shrink-0">
               {currentUser?.photoURL ? <img src={currentUser.photoURL} alt="Profile" className="w-full h-full object-cover" /> : (currentUser?.name?.charAt(0) || 'D')}
             </div>
-            <div className="text-right hidden lg:block">
-              <p className="text-sm font-black text-slate-900 leading-none">{currentUser?.name || 'Partner'}</p>
-              <button onClick={handleLogout} className="text-xs font-bold text-red-500 hover:text-red-600">Logout</button>
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-black text-slate-900 leading-none mb-1">{currentUser?.name || 'Partner'}</p>
+              <button onClick={handleLogout} className="text-xs font-bold text-red-500 hover:text-red-600 flex items-center justify-end w-full gap-1"><LogOut size={12}/> Logout</button>
             </div>
+            <button onClick={handleLogout} className="sm:hidden p-2 bg-red-50 text-red-500 rounded-full hover:bg-red-100 transition-colors shrink-0">
+               <LogOut size={18} />
+            </button>
           </div>
         </div>
       </header>
@@ -245,25 +248,82 @@ export default function Delivery() {
             </div>
 
         {filteredOrders.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-orange-100"><h2 className="text-2xl font-bold text-slate-400">No orders found.</h2></div>
+          <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-slate-200"><h2 className="text-2xl font-bold text-slate-400">No orders found.</h2></div>
         ) : (
-          filteredOrders.map(order => (
-            <div key={order.id} className="bg-white p-6 rounded-[2rem] shadow-lg border border-orange-100 flex flex-col md:flex-row justify-between gap-6">
-              <div className="flex-1">
-                <div className="flex flex-wrap gap-3 mb-4"><span className="bg-orange-100 text-orange-700 font-black px-3 py-1 rounded-lg text-xs">{order.id}</span><span className={`text-xs font-bold px-3 py-1 rounded-lg ${order.status === 'Delivered' ? 'bg-green-100 text-green-700' : order.status === 'Out for Delivery' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>{order.status}</span><span className="text-xs text-slate-400 font-medium py-1">{order.date}</span></div>
-                <h3 className="font-bold text-xl mb-1 text-slate-900">{order.customer?.name || 'Unknown Customer'}</h3>
-                <a href={`tel:${order.customer?.phone}`} className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-bold mb-1 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors w-max"><Phone size={14} /> Call {order.customer?.phone}</a>
-                <p className="text-sm text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2"><MapPin size={16} className="inline-block mr-1 translate-y-[2px]" /> {order.customer?.address} ({order.customer?.type || 'Home'})</p>
-                <div className="mt-4"><p className="text-xs font-bold text-slate-400 uppercase mb-2">Order Items:</p><div className="flex flex-wrap gap-2">{(order.items || []).map((item, i) => (<div key={i} className="bg-orange-50 border border-orange-100 px-3 py-1 rounded-lg text-xs font-bold text-orange-800">{item.quantity}x {item.name}</div>))}</div></div>
+          <div className="space-y-6">
+            {filteredOrders.map(order => (
+              <div key={order.id} className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                
+                {/* Header */}
+                <div className="bg-slate-50 border-b border-slate-100 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="font-black text-slate-900 block text-lg">{order.id}</span>
+                    <span className="text-xs font-bold text-slate-400">{order.date}</span>
+                  </div>
+                  <span className={`px-3 py-1.5 rounded-lg text-xs font-bold w-max ${order.status === 'Delivered' ? 'bg-green-100 text-green-700 border border-green-200' : order.status === 'Out for Delivery' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-orange-100 text-orange-700 border border-orange-200'}`}>
+                    {order.status}
+                  </span>
+                </div>
+
+                {/* Body */}
+                <div className="p-4 sm:p-6 flex flex-col md:flex-row gap-6">
+                  {/* Left Column - Customer & Items */}
+                  <div className="flex-1 space-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <h3 className="font-bold text-xl text-slate-800">{order.customer?.name || 'Unknown Customer'}</h3>
+                      <a href={`tel:${order.customer?.phone}`} className="inline-flex items-center justify-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-bold bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors w-full sm:w-auto border border-blue-100">
+                        <Phone size={16} /> Call {order.customer?.phone}
+                      </a>
+                    </div>
+                    
+                    <div className="flex items-start gap-2.5 text-sm text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                      <MapPin size={18} className="shrink-0 mt-0.5 text-slate-400" /> 
+                      <p className="leading-relaxed">
+                        <span className="font-bold text-slate-700">{order.customer?.type || 'Home'}: </span>
+                        {order.customer?.street ? `${order.customer.street}, ${order.customer.city} - ${order.customer.pincode}` : order.customer?.address || 'Address not provided'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Order Items</p>
+                      <div className="flex flex-wrap gap-2">
+                        {(order.items || []).map((item, i) => (
+                          <div key={i} className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 shadow-sm flex items-center gap-1.5">
+                            <span className="text-orange-500">{item.quantity}x</span> {item.name}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Right Column - Payment & Actions */}
+                  <div className="md:w-[280px] shrink-0 flex flex-col bg-slate-50 p-5 sm:p-6 rounded-3xl border border-slate-100">
+                    <div className="text-center mb-6">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">To Collect</p>
+                      <p className="text-4xl font-black text-slate-900">₹{order.total}</p>
+                      <div className="inline-flex items-center gap-1 mt-2 bg-white px-3 py-1 rounded-md border border-slate-200 shadow-sm">
+                        <CreditCard size={12} className="text-slate-400" />
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{order.paymentMethod}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-auto space-y-3">
+                      {order.status === 'Pending' && !(currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline') && (
+                        <button onClick={() => updateOrderStatus(order.id, 'Out for Delivery', currentUser?.email)} className="w-full py-3.5 bg-blue-600 text-white font-bold text-sm rounded-xl shadow-[0px_8px_16px_rgba(37,99,235,0.2)] hover:bg-blue-700 active:scale-95 transition-all">Pick Up Order</button>
+                      )}
+                      {(order.status === 'Out for Delivery' || (order.status === 'Pending' && (currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline'))) && (
+                        <button onClick={() => updateOrderStatus(order.id, 'Delivered')} className="w-full py-3.5 bg-green-500 text-white font-bold text-sm rounded-xl shadow-[0px_8px_16px_rgba(34,197,94,0.2)] hover:bg-green-600 active:scale-95 transition-all flex items-center justify-center gap-2"><CheckCircle2 size={18}/> Mark Delivered</button>
+                      )}
+                      {order.status === 'Delivered' && (
+                        <button disabled className="w-full py-3.5 bg-slate-200 text-slate-400 font-bold text-sm rounded-xl cursor-not-allowed flex items-center justify-center gap-2"><CheckCircle2 size={18}/> Order Complete</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
               </div>
-              <div className="md:w-64 bg-slate-50 p-6 rounded-3xl border border-slate-100 flex flex-col justify-center text-center">
-                <p className="text-slate-500 font-medium mb-1">To Collect</p><p className="text-4xl font-black text-slate-900 mb-6">₹{order.total}</p>
-                {order.status === 'Pending' && !(currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline') && (<button onClick={() => updateOrderStatus(order.id, 'Out for Delivery', currentUser?.email)} className="w-full py-4 bg-orange-500 text-white font-bold rounded-xl shadow-[0px_10px_20px_rgba(249,115,22,0.4)] hover:bg-orange-600 active:scale-95 transition-all">Pick Up Order</button>)}
-                {(order.status === 'Out for Delivery' || (order.status === 'Pending' && (currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline'))) && (<button onClick={() => updateOrderStatus(order.id, 'Delivered')} className="w-full py-4 bg-green-500 text-white font-bold rounded-xl shadow-[0px_10px_20px_rgba(34,197,94,0.4)] hover:bg-green-600 active:scale-95 transition-all">Mark Delivered ✓</button>)}
-                {order.status === 'Delivered' && (<button disabled className="w-full py-4 bg-slate-200 text-slate-400 font-bold rounded-xl cursor-not-allowed">Order Complete</button>)}
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
           </>
         )}

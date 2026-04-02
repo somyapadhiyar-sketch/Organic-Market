@@ -74,7 +74,7 @@ export default function Home() {
       <main className="flex-1 relative flex flex-col overflow-x-hidden pt-[100px]">
         
         {/* HERO SECTION - Realistic E-commerce Style */}
-        <section className="relative w-full bg-[#F3F5F7] min-h-[600px] flex items-center py-20 md:py-0">
+        <section className="relative w-full bg-[#F3F5F7] min-h-[400px] md:min-h-[600px] flex items-center py-10 md:py-0">
           
           {/* Decorative Background blob - simpler and positioned better */}
           <motion.div style={{ y: y1 }} className="absolute top-0 right-0 w-[600px] h-[600px] bg-green-200/20 rounded-full blur-3xl translate-x-1/3 -translate-y-1/4"></motion.div>
@@ -218,15 +218,15 @@ export default function Home() {
         {/* EXTRA PROMO BANNER */}
         <section className="w-full m-0 p-0 flex">
           <FadeIn>
-            <WaveBanner theme="orange" title="Summer Fruit Sale!" subtitle="Juicy mangoes and citrus are here." />
+            <WaveBanner theme="orange" title="Summer Fruit Sale!" subtitle="Juicy mangoes and citrus are here." className="!h-[260px] md:!h-[320px] !pt-0 flex flex-col justify-center" />
           </FadeIn>
         </section>
 
         {/* FEATURES SECTION - Cleaner Look */}
-        <section className="py-24 bg-white">
+        <section className="py-12 md:py-24 bg-white">
           <div className="max-w-7xl mx-auto px-6">
             <FadeIn>
-              <div className="text-center mb-16">
+              <div className="text-center mb-10 md:mb-16">
                 <h2 className="text-3xl md:text-4xl font-black text-blue-600 mb-4">Why Shop With Zesty?</h2>
                 <p className="text-slate-500 max-w-2xl mx-auto text-lg">We bring the season's best produce from the farm directly to your table, ensuring maximum freshness and nutrition.</p>
               </div>
@@ -255,7 +255,7 @@ export default function Home() {
         {/* CTA BANNER */}
         <section className="w-full m-0 p-0 flex">
           <FadeIn>
-            <WaveBanner theme="green" title="Fresh Deals Every Day!" subtitle="Get up to 50% off on organic fruits and vegetables." bottomColorClass="fill-[#F3F5F7]" />
+            <WaveBanner theme="green" title="Fresh Deals Every Day!" subtitle="Get up to 50% off on organic fruits and vegetables." bottomColorClass="fill-white" className="!h-[260px] md:!h-[320px] !pt-0 flex flex-col justify-center" />
           </FadeIn>
         </section>
 

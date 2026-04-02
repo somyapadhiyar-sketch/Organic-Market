@@ -7,7 +7,6 @@ import { Country, State, City } from"country-state-city";
 import { Settings, ShieldCheck, Phone, Home, Briefcase, MapPin } from 'lucide-react';
 import { getFirestore, doc, updateDoc } from"firebase/firestore";
 import { auth } from"../firebase";
-import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, signInWithEmailAndPassword } from "firebase/auth";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -38,12 +37,6 @@ export default function Profile() {
   const [showSupport, setShowSupport] = useState(false);
   const [activeSupportSection, setActiveSupportSection] = useState(null);
   const [editName, setEditName] = useState("");
-
-  // Password change modal state
-  const [showPasswordChange, setShowPasswordChange] = useState(false);
-  const [passwordData, setPasswordData] = useState({
-    currentPassword:"", newPassword:"", confirmPassword:"",
-  });
 
   // Account info
   const [memberSince, setMemberSince] = useState("");
@@ -100,17 +93,23 @@ export default function Profile() {
     if (passwordData.newPassword.length < 6) return showToast("New password must be at least 6 characters");
     if (passwordData.newPassword !== passwordData.confirmPassword) return showToast("New passwords do not match");
 
-    try {
-      let user = auth.currentUser;
-      
-      if (!user) {
-        const userCredential = await signInWithEmailAndPassword(auth, currentUser.email, passwordData.currentPassword);
-        user = userCredential.user;
-      } else {
-        const credential = EmailAuthProvider.credential(currentUser.email, passwordData.currentPassword);
-        await reauthenticateWithCredential(user, credential);
-      }
+    const user = auth.currentUser;
+    // Add a strong fallback for the user's email 
+    const email = user?.email || currentUser?.email;
 
+    if (!user || !email) {
+      showToast("Authentication error. Please log out and log back in to change your password.");
+      return;
+    }
+
+    try {
+      // Create a credential using the safely extracted email
+      const credential = EmailAuthProvider.credential(email, passwordData.currentPassword);
+      
+      // Re-authenticate the user to confirm their identity. This is a security measure.
+      await reauthenticateWithCredential(user, credential);
+
+      // If re-authentication is successful, you can now update the password.
       await updatePassword(user, passwordData.newPassword);
 
       showToast("Password changed successfully!");
@@ -118,12 +117,15 @@ export default function Profile() {
       setPasswordData({ currentPassword:"", newPassword:"", confirmPassword:"" });
     } catch (error) {
       console.error("Password update error:", error);
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-        showToast("Current password is incorrect");
+      // Catch all modern variations of wrong-password errors
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-login-credentials') {
+        showToast("The current password you entered is incorrect.");
       } else if (error.code === 'auth/too-many-requests') {
-        showToast("Too many failed attempts. Please wait a few minutes and try again.");
+        showToast("Too many failed attempts. Please try again later.");
+      } else if (error.code === 'auth/user-mismatch') {
+        showToast("There was an error verifying your identity. Please log out and log back in.");
       } else {
-        showToast(error.message || "Failed to change password. Please try logging out and back in.");
+        showToast(error.message || "Failed to change password. Please try again.");
       }
     }
   };
@@ -272,22 +274,6 @@ export default function Profile() {
                         <input type="email" value={currentUser.email} disabled className="w-full p-3 bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 cursor-not-allowed" />
                         <p className="text-[11px] font-bold text-slate-400 mt-2">Email address cannot be changed for security reasons.</p>
                       </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* 2. Change Password */}
-                <div className="border-b border-slate-100 pb-6">
-                  <div className="flex justify-between items-center cursor-pointer group" onClick={() => setShowPasswordChange(!showPasswordChange)}>
-                    <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Change Password</span>
-                    <span className="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1.5 rounded-lg">{showPasswordChange ?"Close ↑" :"Update →"}</span>
-                  </div>
-                  {showPasswordChange && (
-                    <div className="mt-5 space-y-4 animate-in fade-in slide-in-from-top-2">
-                      <input type="password" value={passwordData.currentPassword} onChange={e => setPasswordData({...passwordData, currentPassword: e.target.value})} placeholder="Current Password" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800" />
-                      <input type="password" value={passwordData.newPassword} onChange={e => setPasswordData({...passwordData, newPassword: e.target.value})} placeholder="New Password" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800" />
-                      <input type="password" value={passwordData.confirmPassword} onChange={e => setPasswordData({...passwordData, confirmPassword: e.target.value})} placeholder="Confirm New Password" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800" />
-                      <button onClick={handlePasswordChange} className="btn-3d btn-lime w-full py-3.5 font-bold text-sm">Update Password</button>
                     </div>
                   )}
                 </div>
