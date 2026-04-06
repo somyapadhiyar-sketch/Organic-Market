@@ -67,7 +67,7 @@ export default function Admin() {
         const transcript = Array.from(event.results)
           .map(result => result[0].transcript)
           .join('');
-        setSearchQuery(transcript);
+        setSearchQuery(transcript.replace(/[.?!]+$/, ''));
       };
       recognition.start();
   };
