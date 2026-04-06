@@ -16,8 +16,10 @@ export default function Payment() {
   }, [pathname]);
 
   useEffect(() => {
-    if (currentUser?.role === 'admin') navigate('/admin', { replace: true });
-    else if (currentUser?.role === 'delivery') navigate('/delivery', { replace: true });
+    if (!currentUser) {
+      navigate('/login/user', { state: { from: '/user/payment' } });
+    } else if (currentUser.role === 'admin') navigate('/admin', { replace: true });
+    else if (currentUser.role === 'delivery') navigate('/delivery', { replace: true });
   }, [currentUser, navigate]);
 
   const [paymentMethod, setPaymentMethod] = useState('upi')

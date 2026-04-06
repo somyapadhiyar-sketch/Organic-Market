@@ -17,7 +17,7 @@ export default function Orders() {
 
   useEffect(() => {
     if (!currentUser) {
-      navigate("/login/user");
+      navigate("/login/user", { state: { from: '/user/orders' } });
       return;
     }
     if (currentUser.role === 'admin') {

@@ -221,7 +221,11 @@ export default function Cart() {
   };
 
   const handleProceed = () => {
-    if (!currentUser) return showToast("Please login to place an order!");
+    if (!currentUser) {
+      showToast("Please login to place an order!");
+      navigate('/login/user', { state: { from: '/user/cart' } });
+      return;
+    }
     if (step === 2) { // Validate address before moving to payment
       if (!address.name || !address.phone || !address.street || !address.country || !address.state || !address.city || !address.pincode) {
         return showToast("Please fill all delivery details!");

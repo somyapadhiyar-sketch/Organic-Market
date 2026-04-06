@@ -10,7 +10,8 @@ import { auth } from '../firebase';
 export default function Login() {
   const { role } = useParams();
   const activeRole = ['admin', 'delivery'].includes(role) ? role : 'user';
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -108,7 +109,8 @@ export default function Login() {
         user: '/home'
       };
       
-      navigate(paths[activeRole] || '/home', { replace: true });
+      const redirectPath = (activeRole === 'user' && location.state?.from) ? location.state.from : (paths[activeRole] || '/home');
+      navigate(redirectPath, { replace: true });
     } catch (error) {
       console.error("Login Error:", error);
       
@@ -195,7 +197,8 @@ export default function Login() {
         user: '/home'
       };
       
-      navigate(paths[activeRole] || '/home', { replace: true });
+      const redirectPath = (activeRole === 'user' && location.state?.from) ? location.state.from : (paths[activeRole] || '/home');
+      navigate(redirectPath, { replace: true });
     } catch (error) {
       console.error("Google Login Error:", error);
       if (error.code !== 'auth/popup-closed-by-user' && showToast) {
@@ -382,7 +385,7 @@ export default function Login() {
                {activeRole === 'user' && (
                  <div className="mt-8 text-center">
                    <p className="text-slate-500 font-medium">
-                     New to Zesty? <Link to="/signup" className="text-green-600 font-bold hover:underline">Create an Account</Link>
+                     New to Zesty? <Link to="/signup" state={{ from: location.state?.from }} className="text-green-600 font-bold hover:underline">Create an Account</Link>
                    </p>
                  </div>
                )}

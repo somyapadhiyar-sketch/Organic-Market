@@ -43,7 +43,7 @@ export default function Footer() {
             <h4 className="font-bold text-slate-800 mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-slate-500">
               <li>Email: <a href="mailto:somyapadhiyar@gmail.com" className="hover:text-blue-600 transition-colors">somyapadhiyar@gmail.com</a></li>
-              <li>Phone: +91 12345 67890</li>
+              <li>Phone: +91 7990360899</li>
               <li>Ahmedabad, Gujarat, India</li>
             </ul>
           </div>

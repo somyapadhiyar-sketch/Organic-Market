@@ -387,7 +387,7 @@ export default function Admin() {
             ) : (
               <div className="p-3 md:p-6 grid gap-3 md:gap-4">
                 {filteredOrders.map(order => (
-                  <div key={order.id} className="border border-gray-200 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:justify-between md:items-center gap-4 hover:border-gray-300 transition-colors bg-white w-full overflow-hidden">
+                  <div key={order.id} className={`border border-gray-200 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:justify-between md:items-center gap-4 hover:border-gray-300 transition-colors bg-white w-full relative ${openDropdown?.startsWith(order.id) ? 'z-50' : 'z-10'}`}>
                     <div className="w-full md:flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-3">
                         <div>

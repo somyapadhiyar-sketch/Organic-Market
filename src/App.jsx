@@ -39,13 +39,13 @@ function App() {
         <Route path="/" element={<Navigate to="/home" />} />
         
         <Route path="/home" element={<Home />} />
-        <Route path="/user/fruits" element={<ProtectedRoute><Fruits /></ProtectedRoute>} />
-        <Route path="/user/vegetables" element={<ProtectedRoute><Vegetables /></ProtectedRoute>} />
-        <Route path="/user/pulses" element={<ProtectedRoute><Pulses /></ProtectedRoute>} />
-        <Route path="/user/oil" element={<ProtectedRoute><Oils /></ProtectedRoute>} />
-        <Route path="/user/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-        <Route path="/user/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
-        <Route path="/user/product/:name" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
+        <Route path="/user/fruits" element={<Fruits />} />
+        <Route path="/user/vegetables" element={<Vegetables />} />
+        <Route path="/user/pulses" element={<Pulses />} />
+        <Route path="/user/oil" element={<Oils />} />
+        <Route path="/user/cart" element={<Cart />} />
+        <Route path="/user/wishlist" element={<Wishlist />} />
+        <Route path="/user/product/:name" element={<ProductDetails />} />
         <Route path="/user/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
         <Route path="/user/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
         <Route path="/user/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

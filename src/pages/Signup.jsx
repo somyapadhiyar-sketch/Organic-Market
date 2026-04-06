@@ -37,7 +37,8 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const { setCurrentUser, showToast } = useStore();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
 
   // Derived state for dropdowns
   const countries = Country.getAllCountries();
@@ -126,7 +127,8 @@ export default function Signup() {
 
       if (user) {
         if (showToast) showToast("Account created successfully! Welcome" + name);
-        navigate('/home', { replace: true });
+        const redirectPath = location.state?.from ? location.state.from : '/home';
+        navigate(redirectPath, { replace: true });
       } else {
         if (showToast) showToast("Signup failed. Please try again.");
       }
@@ -291,7 +293,7 @@ export default function Signup() {
 
            <div className="mt-8 text-center">
              <p className="text-slate-500 font-medium">
-               Already have an account? <Link to="/login/user" className="text-green-600 font-bold hover:underline">Login</Link>
+               Already have an account? <Link to="/login/user" state={{ from: location.state?.from }} className="text-green-600 font-bold hover:underline">Login</Link>
              </p>
            </div>
         </div>

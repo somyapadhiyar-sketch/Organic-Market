@@ -44,7 +44,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (!currentUser) {
-      navigate("/login/user");
+      navigate("/login/user", { state: { from: '/user/profile' } });
       return;
     }
     if (currentUser.role === 'admin') {

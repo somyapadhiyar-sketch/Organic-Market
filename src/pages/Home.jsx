@@ -158,7 +158,7 @@ export default function Home() {
                       <p className="text-[11px] font-bold text-green-600 uppercase tracking-widest">100% Organic Farm</p>
                     </div>
                     <button 
-                      onClick={() => navigate(currentUser ? '/user/fruits' : '/login/user')} 
+                      onClick={() => navigate('/user/fruits')} 
                       className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all text-white"
                     >
                       <ShoppingBag size={24} strokeWidth={2.5} />

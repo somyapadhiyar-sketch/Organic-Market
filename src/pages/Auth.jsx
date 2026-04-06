@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { motion } from 'framer-motion';
 
 export default function Auth() {
   const { role = 'user' } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { loginUser, showToast } = useStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,7 +18,10 @@ export default function Auth() {
       return;
     }
     const res = loginUser(email, password, role);
-    if (res?.success) navigate(role === 'admin' ? '/admin' : '/user/home', { replace: true });
+    if (res?.success) {
+      const redirectPath = (role === 'user' && location.state?.from) ? location.state.from : (role === 'admin' ? '/admin' : '/user/home');
+      navigate(redirectPath, { replace: true });
+    }
     else showToast(res?.msg ||"Login failed");
   };
 
