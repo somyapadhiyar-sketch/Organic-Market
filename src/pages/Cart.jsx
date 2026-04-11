@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import { Plus, Minus, MapPin, CreditCard, Banknote, Building, CheckCircle2, Loader2, ArrowRight, ShoppingCart, Truck, Wallet, Home, Briefcase, Map, Zap, Sparkles, Star } from 'lucide-react'
+import { Plus, Minus, MapPin, CreditCard, Banknote, Building, CheckCircle2, Loader2, ArrowRight, ShoppingCart, Truck, Wallet, Home, Briefcase, Map, Zap, Sparkles, Star, Tag } from 'lucide-react'
 import { Country, State, City } from 'country-state-city'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import { getFirestore, doc, updateDoc, collection, addDoc } from"firebase/firestore";
+import { getFirestore, doc, updateDoc, collection, addDoc, getDocs, query, where, arrayUnion } from"firebase/firestore";
 import { auth } from"../firebase";
 import ProductCard from '../components/ProductCard';
 
@@ -60,12 +60,14 @@ export default function Cart() {
   const states = address.country ? State.getStatesOfCountry(address.country) : [];
   const cities = address.country && address.state ? City.getCitiesOfState(address.country, address.state) : [];
 
-  // Coupon & OTP States
+  // Coupon States
+  const [availableCoupons, setAvailableCoupons] = useState([]);
   const [couponCode, setCouponCode] = useState("");
-  const [discountPercent, setDiscountPercent] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponMessage, setCouponMessage] = useState({ type:"", text:"" });
   const [showOffers, setShowOffers] = useState(false);
 
+  // OTP States
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
@@ -194,20 +196,68 @@ export default function Cart() {
     else if (currentUser?.role === 'delivery') navigate('/delivery', { replace: true });
   }, [currentUser, navigate]);
 
-  const availableOffers = [
-    { code:"ZESTY20", desc:"Get 20% OFF on your entire order." },
-    { code:"WELCOME50", desc:"Flat 50% OFF for new users!" },
-  ];
+  useEffect(() => {
+    if (!currentUser) return;
+    
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          const db = getFirestore(auth.app);
+          const q = query(collection(db, "coupons"), where("active", "==", true));
+          const querySnapshot = await getDocs(q);
+          const coupons = [];
+          const userId = user.uid || currentUser?.email;
+          const now = new Date().getTime();
+          
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            let isValidNow = true;
+            
+            if (data.validFrom) {
+               const fromTime = new Date(data.validFrom).getTime();
+               if (!isNaN(fromTime) && now < fromTime) isValidNow = false;
+            }
+            if (data.validUntil) {
+               const untilTime = new Date(data.validUntil).getTime();
+               if (!isNaN(untilTime) && now > untilTime) isValidNow = false;
+            } else if (data.expiryDate) {
+               // Fallback for old coupons
+               const expDate = new Date(data.expiryDate);
+               if (!isNaN(expDate.getTime()) && expDate.setHours(23, 59, 59, 999) < now) {
+                   isValidNow = false;
+               }
+            }
+            
+            if (isValidNow && !(data.usedBy || []).includes(userId)) {
+               coupons.push({ id: doc.id, ...data });
+            }
+          });
+          setAvailableCoupons(coupons);
+        } catch (e) { console.error("Error fetching coupons", e); }
+      }
+    });
+    return () => unsubscribe();
+  }, [currentUser]);
 
   const handleApplyCoupon = () => {
     const code = couponCode.trim().toUpperCase();
-    if (code ==="ZESTY20") { setDiscountPercent(0.2); setCouponMessage({ type:"success", text:"Coupon applied! 20% OFF" }); }
-    else if (code ==="WELCOME50") { setDiscountPercent(0.5); setCouponMessage({ type:"success", text:"Coupon applied! 50% OFF" }); }
-    else if (code ==="") { setDiscountPercent(0); setCouponMessage({ type:"error", text:"Please enter a code." }); }
-    else { setDiscountPercent(0); setCouponMessage({ type:"error", text:"Invalid or expired coupon." }); }
+    if (code === "") { setAppliedCoupon(null); setCouponMessage({ type: "error", text: "Please enter a code." }); return; }
+    const found = availableCoupons.find(c => c.code === code);
+    if (found) {
+        setAppliedCoupon(found);
+        setCouponMessage({ type: "success", text: `Coupon applied! ${found.discountPercent}% OFF` });
+    } else {
+        setAppliedCoupon(null);
+        setCouponMessage({ type: "error", text: "Invalid, expired, or already used coupon." });
+    }
   };
 
-  const discountAmount = Math.round(total * discountPercent);
+  const handleApplyCouponDirect = (offer) => {
+    setCouponCode(offer.code); setAppliedCoupon(offer); setShowOffers(false);
+    setCouponMessage({ type: "success", text: `Coupon applied! ${offer.discountPercent}% OFF` });
+  };
+
+  const discountAmount = appliedCoupon ? Math.round(total * (appliedCoupon.discountPercent / 100)) : 0;
   const discountedSubtotal = total - discountAmount;
   const deliveryFee = discountedSubtotal > 500 ? 0 : 30;
   const handlingCharge = 5;
@@ -304,10 +354,11 @@ export default function Cart() {
         date: new Date().toLocaleString(),
         createdAt: new Date().toISOString(),
         status: 'Pending',
-        couponCode: discountPercent > 0 ? couponCode : null,
+        couponCode: appliedCoupon ? appliedCoupon.code : null,
         discountAmount: discountAmount || 0,
         userId: currentUser?.uid || null,
         userEmail: currentUser?.email || null,
+        deliveryOtp: Math.floor(1000 + Math.random() * 9000).toString(),
         paymentDetails: paymentMethod === 'UPI' ? { upiId: paymentDetails.upiId } : paymentMethod === 'Card' ? { cardName: paymentDetails.cardName, cardNumber: paymentDetails.cardNumber.slice(-4) } : paymentMethod === 'NetBanking' ? { bankName: paymentDetails.bankName } : null
       };
 
@@ -318,6 +369,17 @@ export default function Cart() {
         return showToast(result.msg ||"Payment failed. Please try again.");
       }
       
+      // Mark coupon as used exclusively for this user
+      if (result && result.success && appliedCoupon) {
+        try {
+          const userId = auth.currentUser?.uid || currentUser?.uid || currentUser?.email;
+          if (userId) {
+            const db = getFirestore(auth.app);
+            await updateDoc(doc(db, "coupons", appliedCoupon.id), { usedBy: arrayUnion(userId) });
+          }
+        } catch (err) { console.error("Failed to update coupon usage:", err); }
+      }
+
       setIsProcessing(false);
       setOrderSuccess(true);
       
@@ -700,43 +762,40 @@ export default function Cart() {
               <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-lg sticky top-[140px]">
                 <h3 className="font-extrabold text-lg sm:text-xl mb-5 sm:mb-6 text-slate-800 border-b border-slate-100 pb-3 sm:pb-4">Bill Details</h3>
 
+                {/* Coupon Code Section */}
                 <div className="mb-6 pb-6 border-b border-dashed border-slate-200">
                   <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-md text-slate-800">Have a coupon?</h3>
-                    <button onClick={() => setShowOffers(!showOffers)} className="text-xs text-green-600 font-bold hover:underline">
+                    <h3 className="font-bold text-md text-slate-800 flex items-center gap-1.5"><Tag size={16} className="text-green-600"/> Have a coupon?</h3>
+                    <button type="button" onClick={() => setShowOffers(!showOffers)} className="text-xs text-green-600 font-bold hover:underline">
                       {showOffers ?"Hide offers" :"View offers"}
                     </button>
                   </div>
                   <div className="flex gap-2">
-                  <input type="text" placeholder="ZESTY20" value={couponCode} onChange={(e) => {
+                  <input type="text" placeholder="ENTER CODE" value={couponCode} onChange={(e) => {
                     setCouponCode(e.target.value);
-                    if (e.target.value.trim() ==="") {
-                      setDiscountPercent(0);
-                      setCouponMessage({ type:"", text:"" });
-                    }
+                    if (e.target.value.trim() ==="") { setAppliedCoupon(null); setCouponMessage({ type:"", text:"" }); }
                   }} className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 font-medium text-sm uppercase"/>
-                    <button onClick={handleApplyCoupon} className="px-4 btn-3d btn-lime font-bold text-xs">APPLY</button>
+                    <button type="button" onClick={handleApplyCoupon} className="px-4 btn-3d btn-lime font-bold text-xs">APPLY</button>
                   </div>
-                  {showOffers && (
-                    <div className="mt-3 space-y-2">
-                      {availableOffers.map((offer, idx) => (
+                  {showOffers && availableCoupons.length > 0 && (
+                    <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-1">
+                      {availableCoupons.map((offer, idx) => (
                         <div key={idx} className="border border-dashed border-green-300 bg-green-50 p-3 rounded-lg flex justify-between items-center">
-                          <div><span className="font-bold text-green-700 text-sm block">{offer.code}</span><span className="text-xs text-slate-600">{offer.desc}</span></div>
-                          <button onClick={() => { setCouponCode(offer.code); setShowOffers(false); }} className="bg-white border border-green-200 text-green-600 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-green-100 transition-colors">Use</button>
+                          <div><span className="font-bold text-green-700 text-sm block">{offer.code}</span><span className="text-xs text-slate-600">Get {offer.discountPercent}% OFF. {offer.validUntil ? `Valid till ${new Date(offer.validUntil).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : `Valid till ${new Date(offer.expiryDate).toLocaleDateString()}`}</span></div>
+                          <button type="button" onClick={() => handleApplyCouponDirect(offer)} className="bg-white border border-green-200 text-green-600 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-green-100 transition-colors shadow-sm">Use</button>
                         </div>
                       ))}
                     </div>
                   )}
-                  {couponMessage.text && (
-                    <p className={`mt-2 text-xs font-bold ${couponMessage.type ==="success" ?"text-green-600" :"text-red-500"}`}>{couponMessage.type ==="success" ?"✓" :"✕"}{couponMessage.text}</p>
-                  )}
+                  {showOffers && availableCoupons.length === 0 && <div className="mt-3 text-xs text-slate-500 italic font-medium bg-slate-50 p-3 rounded-lg text-center">No offers available currently.</div>}
+                  {couponMessage.text && <p className={`mt-2 text-xs font-bold ${couponMessage.type ==="success" ?"text-green-600" :"text-red-500"}`}>{couponMessage.type ==="success" ?"✓" :"✕"} {couponMessage.text}</p>}
                 </div>
 
                 <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-slate-600 font-medium mb-5 sm:mb-6">
                   <div className="flex justify-between"><span>Item Total</span><span className="font-bold text-slate-800">₹{total}</span></div>
-                  {discountPercent > 0 && (
+                  {appliedCoupon && (
                     <div className="flex justify-between text-green-600">
-                      <span>Discount ({discountPercent * 100}%)</span>
+                      <span>Discount ({appliedCoupon.discountPercent}%)</span>
                       <span className="font-bold">-₹{discountAmount}</span>
                     </div>
                   )}

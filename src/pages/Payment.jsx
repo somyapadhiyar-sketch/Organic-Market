@@ -51,7 +51,8 @@ export default function Payment() {
         createdAt: new Date().toISOString(),
         status: 'Pending',
         userId: currentUser?.uid || null,
-        userEmail: currentUser?.email || null
+        userEmail: currentUser?.email || null,
+        deliveryOtp: Math.floor(1000 + Math.random() * 9000).toString()
       };
       const result = await placeOrder(orderData);
       if (result && !result.success) {

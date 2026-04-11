@@ -1,7 +1,7 @@
 import { useStore } from '../context/StoreContext'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Search, Camera, Mail, Phone, MapPin, CheckCircle2, Upload, Edit2, Save, X, Wifi, WifiOff, Package, Truck, Tag, CreditCard, Banknote, Motorbike, LogOut } from 'lucide-react'
-import { useState, useRef, useLayoutEffect } from 'react'
+import { useState, useRef, useLayoutEffect, useEffect } from 'react'
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'
 import { auth } from '../firebase'
 
@@ -14,31 +14,38 @@ export default function Delivery() {
   const [activeTab, setActiveTab] = useState('orders');
   const [isUploading, setIsUploading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({ name: '', phone: '' });
+  const [editData, setEditData] = useState({ name: '', phone: '', email: '', address: '' });
   const [showCamera, setShowCamera] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const filterOptions = ["All", "Pending", "Out for Delivery", "Delivered"];
+  const isOfflineMode = currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline';
+  const [subTab, setSubTab] = useState(isOfflineMode ? 'active' : 'new');
+  const [otpInputVisible, setOtpInputVisible] = useState(null);
+  const [otpInput, setOtpInput] = useState('');
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname, activeTab]);
 
+  useEffect(() => {
+    if (isOfflineMode && subTab === 'new') {
+      setSubTab('active');
+    }
+  }, [isOfflineMode, subTab]);
+
   const handleEditToggle = async () => {
     if (isEditing) {
       try {
-        const updatedUser = { ...currentUser, name: editData.name, phone: editData.phone };
+        const updatedUser = { ...currentUser, name: editData.name, phone: editData.phone, email: editData.email, address: editData.address };
         updateUser(updatedUser);
         if (currentUser?.uid) {
           const db = getFirestore(auth.app);
-          await updateDoc(doc(db,"users", currentUser.uid), { name: editData.name, phone: editData.phone });
+          await updateDoc(doc(db,"users", currentUser.uid), { name: editData.name, phone: editData.phone, email: editData.email, address: editData.address });
         }
         setIsEditing(false);
       } catch(e) { console.error(e); alert("Failed to update profile"); }
     } else {
-      setEditData({ name: currentUser?.name || '', phone: currentUser?.phone || '' });
+      setEditData({ name: currentUser?.name || '', phone: currentUser?.phone || '', email: currentUser?.email || '', address: currentUser?.address || '' });
       setIsEditing(true);
     }
   };
@@ -102,21 +109,23 @@ export default function Delivery() {
     setShowCamera(false);
   };
 
-  // Filter to only show pending orders OR orders specifically picked up by THIS delivery partner
-  const visibleOrders = orders.filter(o => {
-    // 'Offline' status partners only see orders explicitly assigned to them.
-    if (currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline') {
-      return o.deliveryPartnerEmail === currentUser?.email;
-    }
-    // 'Approved' (Online) partners see orders explicitly broadcasted to 'online_broadcast', or orders assigned to them.
-    return (o.status === 'Pending' && o.deliveryPartnerEmail === 'online_broadcast') || (o.deliveryPartnerEmail === currentUser?.email);
-  });
-
-  const statusWeight = { 'Pending': 1, 'Out for Delivery': 2, 'Delivered': 3 };
-  const filteredOrders = visibleOrders
-    .filter(o => statusFilter === 'All' || o.status === statusFilter)
-    .filter(o => (o.id || '').toLowerCase().includes(searchQuery.toLowerCase()) || (o.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
-    .sort((a, b) => (statusWeight[a.status] || 99) - (statusWeight[b.status] || 99));
+  const filteredOrders = orders
+    .filter(o => {
+      if (searchQuery && !((o.id || '').toLowerCase().includes(searchQuery.toLowerCase()) || (o.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()))) {
+        return false;
+      }
+      if (subTab === 'new') {
+        return !isOfflineMode && o.status === 'Pending' && o.deliveryPartnerEmail === 'online_broadcast';
+      }
+      if (subTab === 'active') {
+        return o.deliveryPartnerEmail === currentUser?.email && o.status !== 'Delivered';
+      }
+      if (subTab === 'delivered') {
+        return o.deliveryPartnerEmail === currentUser?.email && o.status === 'Delivered';
+      }
+      return false;
+    })
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
@@ -185,7 +194,14 @@ export default function Delivery() {
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center shrink-0"><Mail size={20}/></div>
-                <div className="flex-1"><p className="text-xs font-bold text-slate-400 uppercase">Email Address</p><p className="font-bold text-slate-700">{currentUser?.email}</p></div>
+            <div className="flex-1">
+              <p className="text-xs font-bold text-slate-400 uppercase">Email Address</p>
+              {isEditing ? (
+                <input type="email" value={editData.email} onChange={e => setEditData({...editData, email: e.target.value})} className="w-full mt-1 bg-white border border-slate-200 rounded-lg px-3 py-1 outline-none focus:border-orange-400 font-bold text-slate-700" />
+              ) : (
+                <p className="font-bold text-slate-700">{currentUser?.email}</p>
+              )}
+            </div>
               </div>
               <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center shrink-0"><Phone size={20}/></div>
@@ -200,7 +216,14 @@ export default function Delivery() {
               </div>
               <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center shrink-0"><MapPin size={20}/></div>
-                <div className="flex-1"><p className="text-xs font-bold text-slate-400 uppercase">Service Area</p><p className="font-bold text-slate-700">{currentUser?.address}</p></div>
+            <div className="flex-1">
+              <p className="text-xs font-bold text-slate-400 uppercase">Service Area</p>
+              {isEditing ? (
+                <textarea value={editData.address} onChange={e => setEditData({...editData, address: e.target.value})} rows="2" className="w-full mt-1 bg-white border border-slate-200 rounded-lg px-3 py-1 outline-none focus:border-orange-400 font-bold text-slate-700 resize-none" />
+              ) : (
+                <p className="font-bold text-slate-700">{currentUser?.address}</p>
+              )}
+            </div>
               </div>
             </div>
           </div>
@@ -219,31 +242,27 @@ export default function Delivery() {
                 />
               </div>
 
-              <div className="relative w-full sm:w-48 shrink-0 self-center">
-                <button
-                  onClick={() => setIsFilterOpen(!isFilterOpen)}
-                  className="w-full flex items-center justify-between px-4 py-4 sm:py-4 bg-white border border-orange-100 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all shadow-sm cursor-pointer"
-                >
-                  <span>{statusFilter === "All" ? "All Orders" : statusFilter}</span>
-                  <span className={`text-[10px] text-slate-400 transition-transform duration-200 ${isFilterOpen ? 'rotate-180' : ''}`}>▼</span>
-                </button>
-                
-                {isFilterOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsFilterOpen(false)}></div>
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-orange-100 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                      {filterOptions.map(option => (
-                        <button
-                          key={option}
-                          onClick={() => { setStatusFilter(option); setIsFilterOpen(false); }}
-                          className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors ${statusFilter === option ? 'bg-orange-50 text-orange-700' : 'text-slate-700 hover:bg-slate-50'}`}
-                        >
-                          {option === "All" ? "All Orders" : option}
-                        </button>
-                      ))}
-                    </div>
-                  </>
+              <div className="bg-slate-100 p-1.5 rounded-2xl flex w-full sm:w-auto shrink-0 shadow-inner overflow-x-auto">
+                {!isOfflineMode && (
+                  <button
+                    onClick={() => setSubTab('new')}
+                    className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap ${subTab === 'new' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    New Orders
+                  </button>
                 )}
+                <button
+                  onClick={() => setSubTab('active')}
+                  className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap ${subTab === 'active' ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  {isOfflineMode ? 'Assigned' : 'Active Delivery'}
+                </button>
+                <button
+                  onClick={() => setSubTab('delivered')}
+                  className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap ${subTab === 'delivered' ? 'bg-white text-green-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  Completed
+                </button>
               </div>
             </div>
 
@@ -254,42 +273,57 @@ export default function Delivery() {
             {filteredOrders.map(order => (
               <div key={order.id} className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
                 
-                {/* Header */}
-                <div className="bg-slate-50 border-b border-slate-100 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                {/* Header Area */}
+                <div className="bg-slate-50/80 border-b border-slate-100 p-4 sm:px-6 sm:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 rounded-t-3xl">
                   <div>
-                    <span className="font-black text-slate-900 block text-lg">{order.id}</span>
-                    <span className="text-xs font-bold text-slate-400">{order.date}</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-black text-slate-800 uppercase tracking-wide">Order ID: {order.id}</span>
+                      <span className="text-xs font-bold text-slate-500 bg-slate-200/50 px-2.5 py-0.5 rounded-md">{order.date}</span>
+                    </div>
                   </div>
-                  <span className={`px-3 py-1.5 rounded-lg text-xs font-bold w-max ${order.status === 'Delivered' ? 'bg-green-100 text-green-700 border border-green-200' : order.status === 'Out for Delivery' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-orange-100 text-orange-700 border border-orange-200'}`}>
+                  <span className={`px-3 py-1.5 rounded-full text-xs font-bold w-max border ${order.status === 'Delivered' ? 'bg-green-50 text-green-600 border-green-200' : order.status === 'Out for Delivery' ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-orange-50 text-orange-600 border-orange-200'}`}>
                     {order.status}
                   </span>
                 </div>
 
-                {/* Body */}
-                <div className="p-4 sm:p-6 flex flex-col md:flex-row gap-6">
+                {/* Body Content Area */}
+                <div className="p-4 sm:p-6 flex flex-col lg:flex-row gap-6 lg:gap-8">
+                  
                   {/* Left Column - Customer & Items */}
                   <div className="flex-1 space-y-5">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <h3 className="font-bold text-xl text-slate-800">{order.customer?.name || 'Unknown Customer'}</h3>
-                      <a href={`tel:${order.customer?.phone}`} className="inline-flex items-center justify-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-bold bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors w-full sm:w-auto border border-blue-100">
-                        <Phone size={16} /> Call {order.customer?.phone}
+                    
+                    {/* Customer Info */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-blue-50 text-blue-600 border border-blue-100 rounded-full flex items-center justify-center font-black text-lg uppercase shrink-0 shadow-sm">
+                        {order.customer?.name?.charAt(0) || '?'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-lg text-slate-800 truncate">{order.customer?.name || 'Unknown Customer'}</h3>
+                        <p className="text-[11px] font-bold text-slate-500 mt-0.5 flex items-center gap-1"><Phone size={12} /> {order.customer?.phone || 'N/A'}</p>
+                      </div>
+                      <a href={`tel:${order.customer?.phone}`} className="w-10 h-10 bg-green-50 hover:bg-green-100 border border-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors shrink-0 shadow-sm">
+                        <Phone size={16} />
                       </a>
                     </div>
                     
-                    <div className="flex items-start gap-2.5 text-sm text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                      <MapPin size={18} className="shrink-0 mt-0.5 text-slate-400" /> 
-                      <p className="leading-relaxed">
-                        <span className="font-bold text-slate-700">{order.customer?.type || 'Home'}: </span>
-                        {order.customer?.street ? `${order.customer.street}, ${order.customer.city} - ${order.customer.pincode}` : order.customer?.address || 'Address not provided'}
-                      </p>
+                    {/* Address Info */}
+                    <div className="bg-orange-50/50 p-4 rounded-2xl border border-orange-100 flex items-start gap-3">
+                      <div className="mt-0.5 text-orange-500 bg-white p-1.5 rounded-full shadow-sm border border-orange-100"><MapPin size={16} /></div>
+                      <div>
+                        <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-0.5">{order.customer?.type || 'Delivery Address'}</p>
+                        <p className="text-sm font-bold text-slate-700 leading-snug">
+                          {order.customer?.street ? `${order.customer.street}, ${order.customer.city} - ${order.customer.pincode}` : order.customer?.address || 'Address not provided'}
+                        </p>
+                      </div>
                     </div>
 
+                    {/* Order Items */}
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Order Items</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Order Items ({order.items?.length || 0})</p>
                       <div className="flex flex-wrap gap-2">
                         {(order.items || []).map((item, i) => (
                           <div key={i} className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 shadow-sm flex items-center gap-1.5">
-                            <span className="text-orange-500">{item.quantity}x</span> {item.name}
+                            <span className="text-orange-500">{item.quantity}x</span> <span className="truncate max-w-[150px]">{item.name}</span>
                           </div>
                         ))}
                       </div>
@@ -297,24 +331,66 @@ export default function Delivery() {
                   </div>
                   
                   {/* Right Column - Payment & Actions */}
-                  <div className="md:w-[280px] shrink-0 flex flex-col bg-slate-50 p-5 sm:p-6 rounded-3xl border border-slate-100">
-                    <div className="text-center mb-6">
+                  <div className="lg:w-[280px] shrink-0 flex flex-col gap-4 border-t lg:border-t-0 lg:border-l border-slate-100 pt-5 lg:pt-0 lg:pl-8">
+                    <div>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">To Collect</p>
                       <p className="text-4xl font-black text-slate-900">₹{order.total}</p>
-                      <div className="inline-flex items-center gap-1 mt-2 bg-white px-3 py-1 rounded-md border border-slate-200 shadow-sm">
-                        <CreditCard size={12} className="text-slate-400" />
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{order.paymentMethod}</p>
-                      </div>
+                      <p className="text-xs font-bold text-slate-500 mt-1.5 flex items-center gap-1.5">
+                        <CreditCard size={14} className="text-slate-400" /> 
+                        {order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod === 'NetBanking' ? 'Net Banking' : order.paymentMethod}
+                      </p>
                     </div>
                     
-                    <div className="mt-auto space-y-3">
-                      {order.status === 'Pending' && !(currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline') && (
-                        <button onClick={() => updateOrderStatus(order.id, 'Out for Delivery', currentUser?.email)} className="w-full py-3.5 bg-blue-600 text-white font-bold text-sm rounded-xl shadow-[0px_8px_16px_rgba(37,99,235,0.2)] hover:bg-blue-700 active:scale-95 transition-all">Pick Up Order</button>
+                    <div className="mt-auto space-y-3 pt-4">
+                      {subTab === 'new' && (
+                        <button onClick={async () => {
+                          updateOrderStatus(order.id, 'Out for Delivery', currentUser?.email);
+                          try {
+                            const db = getFirestore(auth.app);
+                            await updateDoc(doc(db, "orders", order.id), {
+                              status: 'Out for Delivery',
+                              deliveryPartnerEmail: currentUser?.email,
+                              deliveryPartnerName: currentUser?.name || 'Partner',
+                              deliveryPartner: {
+                                name: currentUser?.name || 'Partner',
+                                phone: currentUser?.phone || '',
+                                email: currentUser?.email || ''
+                              }
+                            });
+                          } catch (err) {
+                            console.error("Error updating order with partner details:", err);
+                          }
+                        }} className="w-full py-3.5 bg-blue-600 text-white font-bold text-sm rounded-xl shadow-[0px_8px_16px_rgba(37,99,235,0.2)] hover:bg-blue-700 active:scale-95 transition-all">Pick Up Order</button>
                       )}
-                      {(order.status === 'Out for Delivery' || (order.status === 'Pending' && (currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline'))) && (
-                        <button onClick={() => updateOrderStatus(order.id, 'Delivered')} className="w-full py-3.5 bg-green-500 text-white font-bold text-sm rounded-xl shadow-[0px_8px_16px_rgba(34,197,94,0.2)] hover:bg-green-600 active:scale-95 transition-all flex items-center justify-center gap-2"><CheckCircle2 size={18}/> Mark Delivered</button>
+                      {subTab === 'active' && (
+                        otpInputVisible === order.id ? (
+                          <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-1">
+                            <input type="text" placeholder="Ask customer for 4-digit OTP" value={otpInput} onChange={e => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 4))} className="w-full text-center tracking-widest font-black text-lg py-2.5 bg-white border-2 border-green-500 rounded-xl outline-none text-slate-700 placeholder:text-[11px] placeholder:font-bold placeholder:tracking-normal" autoFocus/>
+                            <div className="flex gap-2">
+                               <button onClick={() => {
+                                 if (order.deliveryOtp && otpInput !== order.deliveryOtp) {
+                                   alert("Invalid OTP! Please ask the customer for the correct 4-digit code.");
+                                   return;
+                                 }
+                                 updateOrderStatus(order.id, 'Delivered');
+                                 setOtpInputVisible(null);
+                                 setOtpInput('');
+                               }} className="flex-1 py-2.5 bg-green-500 text-white font-bold text-sm rounded-xl shadow-sm hover:bg-green-600 transition-all flex items-center justify-center gap-1"><CheckCircle2 size={16}/> Confirm</button>
+                               <button onClick={() => {setOtpInputVisible(null); setOtpInput('');}} className="w-10 flex items-center justify-center bg-slate-200 text-slate-600 font-bold text-sm rounded-xl hover:bg-slate-300 transition-all"><X size={16}/></button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button onClick={() => {
+                            if (!order.deliveryOtp) {
+                               updateOrderStatus(order.id, 'Delivered');
+                            } else {
+                               setOtpInputVisible(order.id);
+                               setOtpInput('');
+                            }
+                          }} className="w-full py-3.5 bg-green-500 text-white font-bold text-sm rounded-xl shadow-[0px_8px_16px_rgba(34,197,94,0.2)] hover:bg-green-600 active:scale-95 transition-all flex items-center justify-center gap-2"><CheckCircle2 size={18}/> Mark Delivered</button>
+                        )
                       )}
-                      {order.status === 'Delivered' && (
+                      {subTab === 'delivered' && (
                         <button disabled className="w-full py-3.5 bg-slate-200 text-slate-400 font-bold text-sm rounded-xl cursor-not-allowed flex items-center justify-center gap-2"><CheckCircle2 size={18}/> Order Complete</button>
                       )}
                     </div>

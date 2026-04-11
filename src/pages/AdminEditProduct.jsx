@@ -85,7 +85,7 @@ export default function AdminEditProduct() {
     };
     editProduct(product.id, formattedProduct)
     showToast("Product Updated Successfully!")
-    navigate(`/admin/${product.category.toLowerCase()}`)
+    navigate(-1)
   }
 
   if (!product) return <div className="min-h-screen bg-slate-50 text-slate-800 flex justify-center items-center font-black text-2xl">Loading Editor...</div>
@@ -100,9 +100,7 @@ export default function AdminEditProduct() {
       >
         <div className="flex justify-between items-center mb-10 pb-6 border-b border-slate-100">
            <h2 className="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-3"><Edit size={32} className="text-blue-600" /> Edit Product</h2>
-           <Link to="/admin">
-             <motion.div whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }} className="p-3 bg-slate-100 hover:bg-red-100 hover:text-red-600 rounded-full transition-colors text-slate-500 font-black flex items-center justify-center w-10 h-10">✕</motion.div>
-           </Link>
+       <motion.button type="button" onClick={() => navigate(-1)} whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }} className="p-3 bg-slate-100 hover:bg-red-100 hover:text-red-600 rounded-full transition-colors text-slate-500 font-black flex items-center justify-center w-10 h-10 border-none cursor-pointer outline-none">✕</motion.button>
         </div>
 
         <form onSubmit={handleEditProduct} className="grid md:grid-cols-2 gap-x-8 gap-y-6">

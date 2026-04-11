@@ -47,6 +47,10 @@ export default function Oils() {
                 <ProductCard key={item.id} product={item} />
               ))}
             </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-100">
+              <h2 className="text-2xl font-bold text-slate-500">Loading products...</h2>
+            </div>
           ) : (
             <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-100"><h2 className="text-2xl font-bold text-slate-500">No such item in this section found.</h2></div>
           )}

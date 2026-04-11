@@ -8,8 +8,9 @@ import { getFirestore, doc, getDoc, setDoc } from"firebase/firestore";
 import { auth } from '../firebase';
 
 export default function Login() {
-  const { role } = useParams();
-  const activeRole = ['admin', 'delivery'].includes(role) ? role : 'user';
+  const { role = '' } = useParams();
+  const normalizedRole = role.toLowerCase();
+  const activeRole = ['admin', 'delivery'].includes(normalizedRole) ? normalizedRole : 'user';
   const location = useLocation();
   const { pathname } = location;
 
@@ -22,12 +23,18 @@ export default function Login() {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
 
-  const { loginUser, showToast, setCurrentUser } = useStore();
+  const store = useStore();
   const navigate = useNavigate();
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  // Prevent crashing if the store is not yet available during initial render.
+  if (!store) {
+    return null; // Or a loading spinner
+  }
+  const { showToast, setCurrentUser } = store;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

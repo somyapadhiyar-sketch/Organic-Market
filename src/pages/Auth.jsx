@@ -4,7 +4,8 @@ import { useStore } from '../context/StoreContext';
 import { motion } from 'framer-motion';
 
 export default function Auth() {
-  const { role = 'user' } = useParams();
+  const params = useParams();
+  const role = (params.role || 'user').toLowerCase();
   const navigate = useNavigate();
   const location = useLocation();
   const { loginUser, showToast } = useStore();
@@ -52,7 +53,7 @@ export default function Auth() {
         <div className="mt-10 text-center border-t border-slate-100 pt-8">
           <p className="text-xs font-black text-slate-400 mb-4 uppercase tracking-widest">Or login as</p>
           <div className="flex justify-center gap-3">
-             {['user', 'admin', 'delivery'].filter(r => r !== role).map(r => (
+             {['user', 'delivery'].filter(r => r !== role).map(r => (
                <button key={r} type="button" onClick={() => navigate(`/login/${r}`, { replace: true })} className="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs hover:bg-slate-200 capitalize transition-colors">{r}</button>
              ))}
           </div>
