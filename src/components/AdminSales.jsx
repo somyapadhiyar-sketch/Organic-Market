@@ -107,40 +107,92 @@ export default function AdminSales() {
   const monthData = salesOverTime;
 
   const handlePdfDownload = () => {
-    const doc = new jsPDF();
-    const dateString = dateRange.startDate && dateRange.endDate 
-      ? `${dateRange.startDate.toLocaleDateString()} to ${dateRange.endDate.toLocaleDateString()}`
-      : 'All Time';
+    try {
+      if (filteredOrders.length === 0) {
+        showToast?.('No orders available for report.');
+        return;
+      }
 
-    doc.setFontSize(18);
-    doc.text(`Sales Report - Zesty`, 14, 22);
-    doc.setFontSize(11);
-    doc.text(`Date Range: ${dateString}`, 14, 30);
-    doc.text(`Total Revenue: Rs. ${totalSales.toFixed(2)}`, 14, 36);
-    doc.text(`Total Orders: ${totalOrders}`, 14, 42);
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const dateString = dateRange.startDate && dateRange.endDate 
+        ? `${dateRange.startDate.toLocaleDateString('en-IN')} to ${dateRange.endDate.toLocaleDateString('en-IN')}`
+        : 'All Time';
 
-    const tableColumn = ["Order ID","Customer","Date","Items","Payment","Total"];
-    const tableRows = [];
+      let y = 20;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.setTextColor(39, 163, 234);
+      doc.text('Zesty Sales Report', 14, y);
+      y += 15;
 
-    filteredOrders.forEach(order => {
-      const orderData = [
-        order.id,
-        order.customer.name,
-        new Date(order.createdAt).toLocaleDateString(),
-        order.items.length,
-        order.paymentMethod,
-        `Rs. ${order.total.toFixed(2)}`
-      ];
-      tableRows.push(orderData);
-    });
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(75, 85, 99);
+      doc.text(`Period: ${dateString}`, 14, y);
+      y += 8;
+      doc.text(`Total Revenue: ₹${totalSales.toLocaleString('en-IN')}`, 14, y);
+      y += 8;
+      doc.text(`Total Orders: ${totalOrders.toLocaleString()}`, 14, y);
+      y += 15;
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 50,
-    });
-    
-    doc.save(`zesty-sales-report-${dateString.replace(/ /g, '_')}.pdf`);
+      doc.setLineWidth(1.5);
+      doc.setDrawColor(39, 163, 234);
+      doc.line(14, y, doc.internal.pageSize.getWidth() - 14, y);
+      y += 20;
+
+      // Orders table
+      const safeOrders = filteredOrders.map(order => ({
+        id: order.id,
+        customer: order.customer?.name || 'N/A',
+        date: order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN') : 'N/A',
+        items: order.items?.length || 0,
+        payment: order.paymentMethod || 'N/A',
+        total: Number(order.total || 0)
+      })).slice(0, 200); // Limit rows
+
+      const columns = ['Order ID', 'Customer', 'Date', 'Items', 'Payment', 'Total ₹'];
+      const rows = safeOrders.map(o => [
+        o.id,
+        o.customer,
+        o.date,
+        o.items,
+        o.payment,
+        o.total.toLocaleString('en-IN')
+      ]);
+
+      autoTable(doc, {
+        head: [columns],
+        body: rows,
+        startY: y,
+        theme: 'grid',
+        headStyles: { fillColor: [39, 163, 234], textColor: 255, fontSize: 11 },
+        styles: { fontSize: 9, cellPadding: 3 },
+        columnStyles: {
+          0: { cellWidth: 35 },
+          1: { cellWidth: 50 },
+          2: { cellWidth: 30 },
+          3: { cellWidth: 20 },
+          4: { cellWidth: 40 },
+          5: { cellWidth: 35, halign: 'right' }
+        },
+        margin: { left: 14, right: 14 },
+        pageBreak: 'auto',
+        didDrawPage: (data) => {
+          // Page footer
+          doc.setFontSize(9);
+          doc.setTextColor(149, 165, 166);
+          doc.text(`Page ${data.pageCount}`, data.settings.margin.left, doc.internal.pageSize.getHeight() - 10);
+        }
+      });
+
+      const safeDateString = dateString.replace(/[^\w\s-]/g, '').replace(/ /g, '_').substring(0, 50);
+      const filename = `Zesty_Sales_Report_${safeDateString || 'AllTime'}.pdf`;
+      doc.save(filename);
+      
+    } catch (error) {
+      console.error('Sales PDF error:', error);
+      // No showToast here as not in scope; use console
+    }
   };
 
   const handleXlsxDownload = () => {

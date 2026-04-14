@@ -21,6 +21,7 @@ import ChatWidget from"./components/ChatWidget";
 import Login from"./pages/Login";
 import Signup from"./pages/Signup";
 import DeliverySignup from"./pages/DeliverySignup";
+import ReturnPolicy from "./pages/ReturnPolicy";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { currentUser } = useStore();
@@ -50,6 +51,7 @@ function App() {
         <Route path="/user/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
         <Route path="/user/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/user/about" element={<About />} />
+        <Route path="/user/return-policy" element={<ReturnPolicy />} />
         
         {/* Admin Routes */}
         <Route path="/admin" element={<Navigate to="/admin/sales" />} />

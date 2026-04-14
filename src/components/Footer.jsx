@@ -3,7 +3,7 @@ import { ChevronRight } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10 mt-auto">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-10 mt-auto">
       <footer className="bg-blue-50 pt-12 pb-8 px-6 md:px-12 border border-blue-100 shadow-lg rounded-3xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           
@@ -34,6 +34,7 @@ export default function Footer() {
               <li><Link to="/user/about" className="text-slate-500 hover:text-blue-600 transition-colors">About Us</Link></li>
               <li><Link to="/login/delivery" className="text-slate-500 hover:text-blue-600 transition-colors">Delivery</Link></li>
               <li><Link to="/login/user" className="text-slate-500 hover:text-blue-600 transition-colors">User Login</Link></li>
+              <li><Link to="/user/return-policy" className="text-slate-500 hover:text-blue-600 transition-colors">Return Policy</Link></li>
             </ul>
           </div>
 

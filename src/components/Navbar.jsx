@@ -1,8 +1,9 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
-import { Search, ChevronDown, ShoppingCart, User, MapPin, Home, Briefcase, Mic, Mail, Phone, Apple, Carrot, Bean, Amphora, Heart, Package, Settings, Menu } from 'lucide-react';
+import { Search, ChevronDown, ShoppingCart, User, MapPin, Home, Briefcase, Mic, Mail, Phone, Apple, Carrot, Bean, Amphora, Heart, Package, Settings, Menu, Bot } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Country, State } from 'country-state-city';
+import AIChatbot from './AIChatbot';
 
 export default function Navbar() {
   const { currentUser, cart, logout, clearCart, userLocation, setUserLocation, searchQuery, setSearchQuery, products, updateUser } = useStore();
@@ -15,6 +16,7 @@ export default function Navbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', email: '', phone: '' });
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -94,10 +96,10 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 font-sans pt-4 pointer-events-none">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-auto">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 pointer-events-auto">
 
         {/* Main Navigation Bar */}
-        <div className="flex items-center justify-between bg-white border-gray-100 shadow-lg rounded-2xl h-[68px]">
+        <div className="flex items-center justify-between bg-white border-gray-100 shadow-lg rounded-2xl h-[76px]">
           {/* Desktop Links */}
           <div className="hidden md:flex items-center justify-start px-8 gap-8 overflow-x-auto no-scrollbar">
             <Link to="/home" className={`flex items-center gap-1.5 py-3 text-[14px] font-bold whitespace-nowrap ${location.pathname === '/home' ? 'text-[#3B0060] border-b-[3px] border-[#3B0060]' : 'text-gray-500 hover:text-gray-900'}`}><Home size={18} /> Home</Link>
@@ -107,6 +109,11 @@ export default function Navbar() {
             <Link to="/user/oil" className={`flex items-center gap-1.5 py-3 text-[14px] font-bold whitespace-nowrap ${isActive('oil')}`}><Amphora size={18} /> Cooking Oils</Link>
             <Link to="/user/wishlist" className={`flex items-center gap-1.5 py-3 text-[14px] font-bold whitespace-nowrap ${isActive('wishlist')}`}><Heart size={18} /> My Wishlist</Link>
             <Link to="/user/orders" className={`flex items-center gap-1.5 py-3 text-[14px] font-bold whitespace-nowrap ${isActive('orders')}`}><Package size={18} /> My Orders</Link>
+            {currentUser && (
+              <button onClick={() => setIsChatOpen(true)} className="flex items-center gap-1.5 px-4 py-2 text-[14px] font-black whitespace-nowrap bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-200 rounded-xl transition-colors shrink-0 shadow-sm ml-1 xl:ml-2">
+                <Bot size={18} /> Zesty AI
+              </button>
+            )}
           </div>
 
           {/* Mobile Links */}
@@ -128,6 +135,12 @@ export default function Navbar() {
                      <div className="h-px bg-slate-100 my-1 mx-2"></div>
                      <Link to="/user/wishlist" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname.includes('wishlist') ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Heart size={18} /> My Wishlist</Link>
                      <Link to="/user/orders" onClick={() => setIsCategoryOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-bold transition-colors ${location.pathname.includes('orders') ? 'bg-purple-50 text-[#3B0060]' : 'text-gray-600 hover:bg-gray-50'}`}><Package size={18} /> My Orders</Link>
+                     {currentUser && (
+                       <>
+                         <div className="h-px bg-slate-100 my-1 mx-2"></div>
+                         <button onClick={() => { setIsCategoryOpen(false); setIsChatOpen(true); }} className="flex items-center w-full gap-3 px-4 py-3 rounded-xl text-[15px] font-black transition-colors text-violet-600 hover:bg-violet-50"><Bot size={18} /> Zesty AI</button>
+                       </>
+                     )}
                   </div>
                 </>
               )}
@@ -135,7 +148,7 @@ export default function Navbar() {
           </div>
 
           {/* Right: Auth & Cart */}
-          <div className="flex items-center gap-4 shrink-0 pr-4 md:pr-8">
+          <div className="flex items-center gap-4 shrink-0 pr-4 xl:pr-8">
             
             {/* Cart Button */}
             <Link to="/user/cart" className="btn-3d btn-lime flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 font-bold">
@@ -204,6 +217,8 @@ export default function Navbar() {
           </div>
         )}
       </div>
+      
+      <AIChatbot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </header>
   );
 }

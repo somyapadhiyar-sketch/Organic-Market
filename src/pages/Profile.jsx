@@ -392,16 +392,6 @@ export default function Profile() {
                           <p>Hours: Mon-Sat, 9:00 AM - 8:00 PM</p>
                         </div>
                       )}
-
-                      <div onClick={() => setActiveSupportSection(activeSupportSection ==="faq" ? null :"faq")} className="p-4 rounded-xl text-sm cursor-pointer font-bold flex justify-between bg-slate-50 hover:bg-blue-50 text-slate-700 transition-colors border border-slate-100">
-                        Frequently Asked Questions <span>{activeSupportSection ==="faq" ?"−" :"+"}</span>
-                      </div>
-                      {activeSupportSection ==="faq" && (
-                        <div className="p-5 bg-white border border-slate-100 rounded-xl text-sm text-slate-600 font-medium ml-4 space-y-4">
-                          <div><p className="font-black text-slate-900 mb-1">How do I track my order?</p><p>Check the"Recent Orders" section above.</p></div>
-                          <div><p className="font-black text-slate-900 mb-1">Can I cancel my order?</p><p>Cancellations are allowed if the order hasn't been picked up.</p></div>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
