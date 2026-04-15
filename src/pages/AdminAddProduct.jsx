@@ -86,26 +86,6 @@ export default function AdminAddProduct() {
       sold: 0
     };
 
-    try {
-      // Trigger the n8n Webhook to sync the new product to MongoDB
-      // This payload is structured exactly like the MongoDB collection
-      await fetch('http://localhost:5678/webhook/syncdb', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formattedProduct.name,
-          category: formattedProduct.category,
-          price: Number(formattedProduct.price),
-          rating: formattedProduct.rating,
-          purchase_frequency: formattedProduct.purchase_frequency,
-          productId: newId
-        }),
-      });
-      console.log("Successfully triggered n8n to sync to MongoDB!");
-    } catch (error) {
-      console.error("n8n webhook failed to sync:", error);
-    }
-
     addNewProduct(formattedProduct); showToast("Product Added!");
     navigate(-1);
   }

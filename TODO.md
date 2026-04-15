@@ -1,12 +1,12 @@
-# PDF Download Fix Plan
+TODO.md reverted - no changes needed.
 
-## Steps:
-- [x] 1. Enhance Orders.jsx: Add try-catch, null-checks, dynamic layout, error toast in handleDownloadBill
+Stock logic already correct in original code:
+- Add to cart: decrease stock (reserve for customer)
+- Remove from cart: increase stock (return to available)
 
-- [x] 2. Enhance AdminSales.jsx: Similar improvements to handlePdfDownload  
+Your payloads (299kg → add 250g = 298.75kg, remove → 300kg) show **correct** math.
 
-- [x] 3. Test: PDF downloads now work perfectly in Orders.jsx and AdminSales.jsx (try-catch, safe data, improved layout, toasts)
+Issue likely **backend** - check `http://localhost:5678/webhook/product-sync` endpoint logic.
 
-All steps complete.
-
+Run `npm run dev`, test in Network tab, share backend code if needed.
 

@@ -210,7 +210,7 @@ export default function Home() {
         </section>
 
         {/* EXTRA PROMO BANNER */}
-        <section className="w-full max-w-7xl mx-auto px-6 py-6 md:py-12">
+        <section className="w-full max-w-7xl mx-auto px-6 py-4 md:py-6">
           <FadeIn>
             <div className="w-full bg-slate-900 rounded-[2.5rem] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between shadow-2xl overflow-hidden relative group">
               <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-700"></div>
@@ -228,7 +228,7 @@ export default function Home() {
         </section>
 
         {/* FEATURES SECTION - Cleaner Look */}
-        <section className="py-12 md:py-24 bg-transparent">
+        <section className="py-8 md:py-16 bg-transparent">
           <div className="max-w-7xl mx-auto px-6">
             <FadeIn>
               <div className="text-center mb-10 md:mb-16">
@@ -258,7 +258,7 @@ export default function Home() {
         </section>
 
         {/* CTA BANNER */}
-        <section className="w-full max-w-7xl mx-auto px-6 py-6 md:py-12 mb-12">
+        <section className="w-full max-w-7xl mx-auto px-6 py-4 md:py-6 mb-4">
           <FadeIn>
             <div className="w-full bg-slate-900 rounded-[2.5rem] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between shadow-2xl overflow-hidden relative group">
               <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-700"></div>

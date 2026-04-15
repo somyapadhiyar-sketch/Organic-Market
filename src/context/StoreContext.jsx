@@ -207,14 +207,30 @@ export function StoreProvider({ children }) {
   };
 
   const toggleProductStatus = async (id) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, disabled: !p.disabled } : p));
-    const product = products.find(p => p.id === id);
-    if (product) {
-      try {
-        const db = getFirestore(auth.app);
-        await setDoc(doc(db,"products", id), { disabled: !product.disabled }, { merge: true });
-      } catch(e) { console.error(e); }
-    }
+    let isDisabled;
+    setProducts(prev => prev.map(p => {
+      if (p.id === id) {
+        isDisabled = !p.disabled;
+        return { ...p, disabled: isDisabled };
+      }
+      return p;
+    }));
+
+    if (typeof isDisabled === 'undefined') return; // Product not found
+
+    try {
+      const db = getFirestore(auth.app);
+      await setDoc(doc(db,"products", id), { disabled: isDisabled }, { merge: true });
+      // Webhook for disable/enable
+      await fetch('http://localhost:5678/webhook/product-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          product: { id: id, disabled: isDisabled }
+        }),
+      });
+    } catch(e) { console.error("Error toggling product status:", e); }
   };
 
   const deleteProduct = async (id) => {
@@ -224,7 +240,16 @@ export function StoreProvider({ children }) {
       try {
         const db = getFirestore(auth.app);
         await deleteDoc(doc(db,"products", id));
-      } catch(e) { console.error(e); }
+        // Webhook for delete
+        await fetch('http://localhost:5678/webhook/product-sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete',
+            product: { id: id }
+          }),
+        });
+      } catch(e) { console.error("Error deleting product:", e); }
     }
   };
 
@@ -235,7 +260,16 @@ export function StoreProvider({ children }) {
     try {
       const db = getFirestore(auth.app);
       await setDoc(doc(db,"products", product.id), product);
-    } catch(e) { console.error(e); }
+      // Webhook for add
+      await fetch('http://localhost:5678/webhook/product-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          product: product
+        }),
+      });
+    } catch(e) { console.error("Error adding new product:", e); }
   };
 
   const editProduct = async (id, updatedData) => {
@@ -243,7 +277,32 @@ export function StoreProvider({ children }) {
     try {
       const db = getFirestore(auth.app);
       await setDoc(doc(db,"products", id), updatedData, { merge: true });
-    } catch(e) { console.error(e); }
+
+      const keys = Object.keys(updatedData);
+      const isStockUpdate = keys.includes('stock') && (keys.length === 1 || (keys.length === 2 && keys.includes('disabled')));
+
+      if (isStockUpdate) {
+        // Webhook for admin stock update
+        await fetch('http://localhost:5678/webhook/product-sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'stock_change',
+            product: { id: id, stock: updatedData.stock }
+          }),
+        });
+      } else {
+        // Webhook for general edit
+        await fetch('http://localhost:5678/webhook/product-sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'update',
+            product: { ...updatedData, id: id }
+          }),
+        });
+      }
+    } catch(e) { console.error("Error editing product:", e); }
   };
 
   const isPlacingOrder = useRef(false);
@@ -289,6 +348,16 @@ export function StoreProvider({ children }) {
         if (product) {
           const newStock = Math.max(0, (product.stock || 0) - cartItem.quantity);
           setDoc(doc(db,"products", product.id), { stock: newStock }, { merge: true }).catch(console.error);
+
+          // Webhook for user-side stock update
+          fetch('http://localhost:5678/webhook/product-sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+            action: 'stock_change',
+              product: { id: cartItem.id, stock: newStock }
+            }),
+          }).catch(error => console.error('Webhook failed for stock update during order placement:', error));
         }
       });
 
@@ -365,7 +434,7 @@ export function StoreProvider({ children }) {
     setCart(prev => {
       const existing = prev.find(item => item.id === variantId);
       const currentQty = existing ? existing.quantity : 0;
-      const newQty = currentQty + qtyToAdd;
+      const newQty = Math.round((currentQty + qtyToAdd) * 100) / 100;
       
       if (product && newQty > (product.stock || 0)) {
         showToast(`Only ${product.stock || 0} kg available in stock.`);
@@ -373,7 +442,7 @@ export function StoreProvider({ children }) {
       }
       if (newQty > 20) { showToast("Max 20 packs allowed."); return prev; }
       
-      const newTotal = packPrice * newQty;
+      const newTotal = Math.round(packPrice * newQty * 100) / 100;
       
       if (existing) {
         return prev.map(i => i.id === variantId ? {...i, quantity: newQty, total: newTotal} : i);
@@ -386,9 +455,9 @@ export function StoreProvider({ children }) {
     setCart(prev => {
       const existing = prev.find(item => item.id === variantId);
       if (existing) {
-        const newQty = existing.quantity - qtyToSubtract;
+        const newQty = Math.round((existing.quantity - qtyToSubtract) * 100) / 100;
         if (newQty > 0) {
-          return prev.map(i => i.id === variantId ? {...i, quantity: newQty, total: existing.price * newQty} : i);
+          return prev.map(i => i.id === variantId ? {...i, quantity: newQty, total: Math.round(existing.price * newQty * 100) / 100} : i);
         }
         return prev.filter(i => i.id !== variantId);
       }
@@ -400,13 +469,66 @@ export function StoreProvider({ children }) {
   const getCartTotal = () => cart.reduce((s, i) => s + i.total, 0);
   const toggleWishlist = (product) => setWishlist(prev => prev.some(i => i.id === product.id) ? prev.filter(i => i.id !== product.id) : [...prev, product]);
 
+  // Perfect stock calculation util - fetches latest from Firebase, applies delta, syncs everywhere
+  const updateStock = async (productId, deltaQty) => {
+    if (deltaQty === 0) return;
+    
+    try {
+      const db = getFirestore(auth.app);
+      // Atomic transaction for latest stock
+      const newStock = await runTransaction(db, async (transaction) => {
+        const productRef = doc(db, "products", productId);
+        const productSnap = await transaction.get(productRef);
+        
+        if (!productSnap.exists()) {
+          throw new Error('Product not found');
+        }
+        
+        const currentStock = productSnap.data().stock || 0;
+        let computedStock;
+        
+        if (deltaQty > 0) { // add to cart: decrease available stock
+          computedStock = Math.max(0, currentStock - deltaQty);
+        } else { // remove from cart: increase available stock
+          computedStock = currentStock + Math.abs(deltaQty);
+        }
+        computedStock = Math.round(computedStock * 100) / 100;
+        
+        // Optimistic Firebase update
+        transaction.update(productRef, { stock: computedStock });
+        return computedStock;
+      });
+
+      // Optimistic local update
+      setProducts(prev => prev.map(p => 
+        p.id === productId ? { ...p, stock: newStock } : p
+      ));
+
+      // Sync webhook with absolute new stock
+      await fetch('http://localhost:5678/webhook/product-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'stock_change',
+          product: { id: productId, stock: newStock }
+        }),
+      }).catch(console.error);
+
+      return { success: true, newStock };
+    } catch (error) {
+      console.error('Stock update failed:', error);
+      showToast('Stock sync failed - please retry');
+      return { success: false, error: error.message };
+    }
+  };
+
   return (
     <StoreContext.Provider value={{ 
       currentUser, setCurrentUser, updateUser, deleteUser, logout, deliveryPartners, approveDelivery,
       userLocation, setUserLocation, searchQuery, setSearchQuery,
       products, toggleProductStatus, addNewProduct, deleteProduct, editProduct,
       orders, pendingOrderId, placeOrder, updateOrderStatus, salesHistory, showToast,
-      cart, addToCart, removeFromCart, getCartTotal, decreaseCartQuantity, wishlist, toggleWishlist,
+      cart, addToCart, removeFromCart, getCartTotal, decreaseCartQuantity, updateStock, wishlist, toggleWishlist,
     }}>
       {children}
       <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none">
