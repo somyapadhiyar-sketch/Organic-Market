@@ -38,9 +38,12 @@ export default function AIChatbot({ isOpen, onClose }) {
     setIsTyping(true);
 
     try {
-      const response = await fetch('http://localhost:5678/webhook/AI_chatbot', {
+      const response = await fetch(import.meta.env.VITE_WEBHOOK_AI_CHATBOT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-org-key': import.meta.env.VITE_AI_CHATBOT_ORG_KEY
+        },
         body: JSON.stringify({ message: userMsg, userId: currentUser?.uid, sessionId: currentUser?.uid })
       });
       
@@ -119,7 +122,7 @@ export default function AIChatbot({ isOpen, onClose }) {
                     <Sparkles size={14} className="text-[#3B0060]" />
                   </div>
                 )}
-                <div className={`p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm ${
+                <div className={`p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm whitespace-pre-wrap ${
                   msg.sender === 'user' 
                     ? 'bg-[#3B0060] text-white rounded-tr-none font-medium' 
                     : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none font-medium'

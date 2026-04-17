@@ -64,8 +64,7 @@ export default function ProductDetails() {
     }
   }, [product.stock]);
 
-  const handleAddToCart = async () => {
-      await updateStock(product.id, quantity); // add qty → decrease stock
+  const handleAddToCart = () => {
       addToCart(product.name, product.price, quantity, product.image, product.id);
       setIsAdded(true);
       setTimeout(() => setIsAdded(false), 2000);

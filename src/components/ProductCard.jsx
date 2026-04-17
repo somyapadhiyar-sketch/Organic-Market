@@ -5,7 +5,7 @@ import { Plus, Minus, Heart, ShoppingBag } from 'lucide-react';
 import { useEffect } from 'react';
 
 export default function ProductCard({ product }) {
-  const { cart, addToCart, decreaseCartQuantity, wishlist, toggleWishlist, showToast, updateStock } = useStore();
+  const { cart, addToCart, decreaseCartQuantity, wishlist, toggleWishlist, showToast } = useStore();
 
   if (!product) return null;
 
@@ -21,25 +21,22 @@ export default function ProductCard({ product }) {
     showToast(isInWishlist ? `${product.name} removed from wishlist` : `${product.name} added to wishlist`);
   };
 
-  const handleAddToCart = async (e) => {
+  const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    await updateStock(product.id, 1); // add → decrease stock
     addToCart(product.name, product.price, 1, product.image, product.id);
   };
 
-  const handleIncrease = async (e) => {
+  const handleIncrease = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    await updateStock(product.id, 1); // increase qty → decrease stock
     addToCart(product.name, product.price, 1, product.image, product.id);
   };
 
-  const handleDecrease = async (e) => {
+  const handleDecrease = (e) => {
     e.preventDefault();
     e.stopPropagation();
     const qtyToRemove = quantity >= 1 ? 1 : quantity;
-    await updateStock(product.id, -qtyToRemove); // decrease qty → increase stock
     decreaseCartQuantity(product.id, qtyToRemove);
   };
 
@@ -51,7 +48,7 @@ export default function ProductCard({ product }) {
             src={product.image} 
             alt={product.name} 
             className="max-w-full max-h-full object-contain mix-blend-multiply transition-transform group-hover:scale-105" 
-            onError={(e) => { e.target.src = `https://placehold.co/150x150/F8F8F8/767676?text=${product.name}` }}
+            onError={(e) => { e.target.src = `${import.meta.env.VITE_PLACEHOLDER_IMAGE_URL}/150x150/F8F8F8/767676?text=${product.name}` }}
           />
         </div>
         {isOutOfStock && (

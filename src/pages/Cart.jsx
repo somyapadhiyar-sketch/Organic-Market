@@ -17,7 +17,7 @@ const MOCK_PINCODE_DATA = {"India": {"Gujarat": {"Ahmedabad": ["380001","380006"
 };
 
 export default function Cart() {
-  const { cart, addToCart, decreaseCartQuantity, getCartTotal, placeOrder, clearCart, currentUser, showToast, updateUser, setUserLocation, products, pendingOrderId, updateStock } = useStore()
+  const { cart, addToCart, decreaseCartQuantity, getCartTotal, placeOrder, clearCart, currentUser, showToast, updateUser, setUserLocation, products, pendingOrderId } = useStore()
   const total = getCartTotal()
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -486,15 +486,13 @@ export default function Cart() {
                               <div className="flex items-center justify-between mt-2 sm:mt-2 w-full">
                                 <p className="font-bold text-base sm:text-lg text-slate-900">₹{item.price}</p>
                                 <div className="flex sm:hidden items-center bg-slate-100 text-slate-800 rounded-xl h-9 shadow-sm border border-slate-200">
-                                  <button onClick={async () => {
+                                <button onClick={() => {
                                     const qtyToRemove = item.quantity >= 1 ? 1 : item.quantity;
                                     decreaseCartQuantity(item.id, qtyToRemove);
-                                    await updateStock(product.id, -qtyToRemove); // remove qty → increase stock
                                   }} className="px-2.5 h-full flex items-center justify-center rounded-l-xl hover:bg-slate-200 transition-colors"><Minus size={14} strokeWidth={3}/></button>
                                   <span className="font-bold text-sm w-7 text-center">{item.quantity}</span>
-                                  <button onClick={async () => {
+                                <button onClick={() => {
                                     addToCart(item.name, item.price, 1, item.image, item.id);
-                                    await updateStock(product.id, 1);
                                   }} className="px-2.5 h-full flex items-center justify-center rounded-r-xl hover:bg-slate-200 transition-colors"><Plus size={14} strokeWidth={3}/></button>
                                 </div>
                               </div>
@@ -502,15 +500,13 @@ export default function Cart() {
                           </div>
                           <div className="hidden sm:flex justify-end w-full sm:w-auto mt-2 sm:mt-0">
                             <div className="flex items-center bg-slate-100 text-slate-800 rounded-xl h-11 shadow-sm border border-slate-200">
-                                <button onClick={async () => {
+                              <button onClick={() => {
                                   const qtyToRemove = item.quantity >= 1 ? 1 : item.quantity;
                                   decreaseCartQuantity(item.id, qtyToRemove);
-                                  await updateStock(product.id, -qtyToRemove);
                                 }} className="px-3 h-full flex items-center justify-center rounded-l-xl hover:bg-slate-200 transition-colors"><Minus size={16} strokeWidth={3}/></button>
                               <span className="font-bold text-base w-8 text-center">{item.quantity}</span>
-                                <button onClick={async () => {
+                              <button onClick={() => {
                                 addToCart(item.name, item.price, 1, item.image, item.id);
-                                  await updateStock(product.id, 1);
                                 }} className="px-3 h-full flex items-center justify-center rounded-r-xl hover:bg-slate-200 transition-colors"><Plus size={16} strokeWidth={3}/></button>
                             </div>
                           </div>

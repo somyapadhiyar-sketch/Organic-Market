@@ -222,14 +222,14 @@ export function StoreProvider({ children }) {
       const db = getFirestore(auth.app);
       await setDoc(doc(db,"products", id), { disabled: isDisabled }, { merge: true });
       // Webhook for disable/enable
-      await fetch('http://localhost:5678/webhook/product-sync', {
+      fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'update',
           product: { id: id, disabled: isDisabled }
         }),
-      });
+      }).catch(e => console.error("Webhook failed for product status toggle:", e));
     } catch(e) { console.error("Error toggling product status:", e); }
   };
 
@@ -241,14 +241,14 @@ export function StoreProvider({ children }) {
         const db = getFirestore(auth.app);
         await deleteDoc(doc(db,"products", id));
         // Webhook for delete
-        await fetch('http://localhost:5678/webhook/product-sync', {
+        fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'delete',
             product: { id: id }
           }),
-        });
+        }).catch(e => console.error("Webhook failed for delete product:", e));
       } catch(e) { console.error("Error deleting product:", e); }
     }
   };
@@ -261,14 +261,14 @@ export function StoreProvider({ children }) {
       const db = getFirestore(auth.app);
       await setDoc(doc(db,"products", product.id), product);
       // Webhook for add
-      await fetch('http://localhost:5678/webhook/product-sync', {
+      fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'create',
           product: product
         }),
-      });
+      }).catch(e => console.error("Webhook failed for add product:", e));
     } catch(e) { console.error("Error adding new product:", e); }
   };
 
@@ -283,24 +283,24 @@ export function StoreProvider({ children }) {
 
       if (isStockUpdate) {
         // Webhook for admin stock update
-        await fetch('http://localhost:5678/webhook/product-sync', {
+          fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'stock_change',
-            product: { id: id, stock: updatedData.stock }
+              product: { id: id, stock: Math.round(updatedData.stock * 100) / 100 }
           }),
-        });
+          }).catch(error => console.error("Webhook failed for admin stock refill:", error));
       } else {
         // Webhook for general edit
-        await fetch('http://localhost:5678/webhook/product-sync', {
+        fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'update',
             product: { ...updatedData, id: id }
           }),
-        });
+        }).catch(error => console.error("Webhook failed for general edit:", error));
       }
     } catch(e) { console.error("Error editing product:", e); }
   };
@@ -338,7 +338,7 @@ export function StoreProvider({ children }) {
       setProducts(prev => prev.map(p => {
         const cartItem = details.items.find(i => i.id === p.id);
         if (cartItem) {
-          return { ...p, stock: Math.max(0, (p.stock || 0) - cartItem.quantity) };
+          return { ...p, stock: Math.round(Math.max(0, (p.stock || 0) - cartItem.quantity) * 100) / 100 };
         }
         return p;
       }));
@@ -346,15 +346,15 @@ export function StoreProvider({ children }) {
       details.items.forEach(cartItem => {
         const product = products.find(p => p.id === cartItem.id);
         if (product) {
-          const newStock = Math.max(0, (product.stock || 0) - cartItem.quantity);
+          const newStock = Math.round(Math.max(0, (product.stock || 0) - cartItem.quantity) * 100) / 100;
           setDoc(doc(db,"products", product.id), { stock: newStock }, { merge: true }).catch(console.error);
 
           // Webhook for user-side stock update
-          fetch('http://localhost:5678/webhook/product-sync', {
+          fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-            action: 'stock_change',
+              action: 'stock_change',
               product: { id: cartItem.id, stock: newStock }
             }),
           }).catch(error => console.error('Webhook failed for stock update during order placement:', error));
@@ -469,66 +469,13 @@ export function StoreProvider({ children }) {
   const getCartTotal = () => cart.reduce((s, i) => s + i.total, 0);
   const toggleWishlist = (product) => setWishlist(prev => prev.some(i => i.id === product.id) ? prev.filter(i => i.id !== product.id) : [...prev, product]);
 
-  // Perfect stock calculation util - fetches latest from Firebase, applies delta, syncs everywhere
-  const updateStock = async (productId, deltaQty) => {
-    if (deltaQty === 0) return;
-    
-    try {
-      const db = getFirestore(auth.app);
-      // Atomic transaction for latest stock
-      const newStock = await runTransaction(db, async (transaction) => {
-        const productRef = doc(db, "products", productId);
-        const productSnap = await transaction.get(productRef);
-        
-        if (!productSnap.exists()) {
-          throw new Error('Product not found');
-        }
-        
-        const currentStock = productSnap.data().stock || 0;
-        let computedStock;
-        
-        if (deltaQty > 0) { // add to cart: decrease available stock
-          computedStock = Math.max(0, currentStock - deltaQty);
-        } else { // remove from cart: increase available stock
-          computedStock = currentStock + Math.abs(deltaQty);
-        }
-        computedStock = Math.round(computedStock * 100) / 100;
-        
-        // Optimistic Firebase update
-        transaction.update(productRef, { stock: computedStock });
-        return computedStock;
-      });
-
-      // Optimistic local update
-      setProducts(prev => prev.map(p => 
-        p.id === productId ? { ...p, stock: newStock } : p
-      ));
-
-      // Sync webhook with absolute new stock
-      await fetch('http://localhost:5678/webhook/product-sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'stock_change',
-          product: { id: productId, stock: newStock }
-        }),
-      }).catch(console.error);
-
-      return { success: true, newStock };
-    } catch (error) {
-      console.error('Stock update failed:', error);
-      showToast('Stock sync failed - please retry');
-      return { success: false, error: error.message };
-    }
-  };
-
   return (
     <StoreContext.Provider value={{ 
       currentUser, setCurrentUser, updateUser, deleteUser, logout, deliveryPartners, approveDelivery,
       userLocation, setUserLocation, searchQuery, setSearchQuery,
       products, toggleProductStatus, addNewProduct, deleteProduct, editProduct,
       orders, pendingOrderId, placeOrder, updateOrderStatus, salesHistory, showToast,
-      cart, addToCart, removeFromCart, getCartTotal, decreaseCartQuantity, updateStock, wishlist, toggleWishlist,
+      cart, addToCart, removeFromCart, getCartTotal, decreaseCartQuantity, wishlist, toggleWishlist,
     }}>
       {children}
       <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none">
