@@ -331,6 +331,22 @@ export function StoreProvider({ children }) {
       // 2. Create the order document in Firebase
       await setDoc(doc(db,"orders", orderId), newOrder);
 
+      // Hit the n8n webhook to sync order to MongoDB & deduct stock
+      try {
+        await fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "order",
+            ...newOrder
+          })
+        });
+      } catch (error) {
+        console.error("Error sending order to n8n webhook:", error);
+      }
+
       // 3. Clear the cart AFTER the order is confirmed
       setCart([]);
 
@@ -348,16 +364,6 @@ export function StoreProvider({ children }) {
         if (product) {
           const newStock = Math.round(Math.max(0, (product.stock || 0) - cartItem.quantity) * 100) / 100;
           setDoc(doc(db,"products", product.id), { stock: newStock }, { merge: true }).catch(console.error);
-
-          // Webhook for user-side stock update
-          fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'stock_change',
-              product: { id: cartItem.id, stock: newStock }
-            }),
-          }).catch(error => console.error('Webhook failed for stock update during order placement:', error));
         }
       });
 
@@ -399,6 +405,45 @@ export function StoreProvider({ children }) {
     try {
       const db = getFirestore(auth.app);
       await updateDoc(doc(db,"orders", id), updatedFields);
+
+      // Webhook trigger for when order goes Out for Delivery (n8n will generate OTP & handle updates)
+      if (status === 'Out for Delivery') {
+        fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'order',
+            ...orderToUpdate,
+            ...updatedFields
+          })
+        })
+        .then(async (res) => {
+          const text = await res.text();
+          if (!text) return;
+          try {
+            const data = JSON.parse(text);
+            // Dynamically extract OTP from n8n response payload
+            const otp = data?.deliveryOtp || data?.otp || data?.[0]?.deliveryOtp || data?.output?.deliveryOtp || data?.body?.deliveryOtp;
+            if (otp) {
+              updateDoc(doc(db,"orders", id), { deliveryOtp: String(otp) }).catch(console.error);
+            }
+          } catch(err) { console.error("Could not parse n8n response for OTP", err); }
+        })
+        .catch(e => console.error("Webhook failed for out_for_delivery:", e));
+      }
+
+      // Webhook trigger for when order is Delivered
+      if (status === 'Delivered') {
+        fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'order',
+            ...orderToUpdate,
+            ...updatedFields
+          })
+        }).catch(e => console.error("Webhook failed for delivered:", e));
+      }
 
       // If order is cancelled, and it was not cancelled before, decrement sales
       if (status === 'Cancelled' && orderToUpdate.status !== 'Cancelled') {

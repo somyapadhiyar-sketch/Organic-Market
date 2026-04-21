@@ -40,6 +40,7 @@ export default function AIChatbot({ isOpen, onClose }) {
     try {
       const response = await fetch(import.meta.env.VITE_WEBHOOK_AI_CHATBOT_URL, {
         method: 'POST',
+        mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
           'x-org-key': import.meta.env.VITE_AI_CHATBOT_ORG_KEY

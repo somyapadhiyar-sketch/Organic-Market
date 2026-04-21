@@ -71,6 +71,34 @@ export default function Orders() {
       try {
         const db = getFirestore(auth.app);
         await updateDoc(doc(db, "orders", order.id), { status: 'Cancelled' });
+        
+        // Hit the n8n webhook to restock the products in MongoDB/Admin
+        try {
+          await fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action: "order",
+              id: order.id,
+              items: order.items,
+              status: "Cancelled"
+            })
+          });
+        } catch (error) {
+          console.error("Error sending cancel order to n8n webhook:", error);
+        }
+
+        // Restock products in Firebase to update Admin panel immediately
+        (order.items || []).forEach(item => {
+          const product = products.find(p => p.id === item.id);
+          if (product) {
+            const newStock = Math.round(((product.stock || 0) + item.quantity) * 100) / 100;
+            updateDoc(doc(db, "products", product.id), { stock: newStock }).catch(console.error);
+          }
+        });
+
         showToast("Order cancelled successfully!");
       } catch (error) {
         console.error("Error cancelling order:", error);

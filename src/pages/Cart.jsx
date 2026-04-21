@@ -94,7 +94,7 @@ export default function Cart() {
       setLoadingRecommendations(true);
       setRecommendedProducts([]); // Clear UI immediately so the loading pulse is visible!
       try {
-        const response = await fetch('http://localhost:5678/webhook/recommendation_system', {
+        const response = await fetch(import.meta.env.VITE_WEBHOOK_RECOMMENDATION_URL, {
           method: 'POST',
           mode: 'cors',
           signal: abortController.signal, // Prevents double-fetching in React StrictMode
@@ -103,7 +103,7 @@ export default function Cart() {
             'Accept': 'application/json'
           },
           body: JSON.stringify({ 
-            productId: targetProductId
+            id: targetProductId
           })
         });
 
@@ -358,7 +358,6 @@ export default function Cart() {
         discountAmount: discountAmount || 0,
         userId: currentUser?.uid || null,
         userEmail: currentUser?.email || null,
-        deliveryOtp: Math.floor(1000 + Math.random() * 9000).toString(),
         paymentDetails: paymentMethod === 'UPI' ? { upiId: paymentDetails.upiId } : paymentMethod === 'Card' ? { cardName: paymentDetails.cardName, cardNumber: paymentDetails.cardNumber.slice(-4) } : paymentMethod === 'NetBanking' ? { bankName: paymentDetails.bankName } : null
       };
 

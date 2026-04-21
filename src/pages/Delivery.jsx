@@ -365,11 +365,11 @@ export default function Delivery() {
                       {subTab === 'active' && (
                         otpInputVisible === order.id ? (
                           <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-1">
-                            <input type="text" placeholder="Ask customer for 4-digit OTP" value={otpInput} onChange={e => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 4))} className="w-full text-center tracking-widest font-black text-lg py-2.5 bg-white border-2 border-green-500 rounded-xl outline-none text-slate-700 placeholder:text-[11px] placeholder:font-bold placeholder:tracking-normal" autoFocus/>
+                            <input type="text" placeholder="Ask customer for 6-digit OTP" value={otpInput} onChange={e => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))} className="w-full text-center tracking-widest font-black text-lg py-2.5 bg-white border-2 border-green-500 rounded-xl outline-none text-slate-700 placeholder:text-[11px] placeholder:font-bold placeholder:tracking-normal" autoFocus/>
                             <div className="flex gap-2">
                                <button onClick={() => {
                                  if (order.deliveryOtp && otpInput !== order.deliveryOtp) {
-                                   alert("Invalid OTP! Please ask the customer for the correct 4-digit code.");
+                                   alert("Invalid OTP! Please ask the customer for the correct 6-digit code.");
                                    return;
                                  }
                                  updateOrderStatus(order.id, 'Delivered');
