@@ -89,76 +89,86 @@ export default function AIChatbot({ isOpen, onClose }) {
   if (!currentUser || !isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-[#FDFCFE] z-[120] flex flex-col animate-in slide-in-from-bottom-8 duration-300 pointer-events-auto">
+    <div className="fixed inset-0 bg-slate-50 z-[120] flex flex-col animate-in slide-in-from-bottom-8 duration-500 pointer-events-auto">
         
-      {/* Header */}
-      <div className="bg-white border-b border-slate-100 p-4 sm:px-8 flex justify-between items-center shadow-sm shrink-0">
-        <div className="flex items-center gap-3">
-          <button onClick={onClose} className="p-2 sm:p-3 -ml-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500 hover:text-[#3B0060]">
-            <ArrowLeft size={24} />
-          </button>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center border border-purple-100 shrink-0 shadow-sm">
-              <Sparkles size={24} className="text-[#3B0060]" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 leading-tight">Zesty Support</h3>
-              <p className="text-[11px] text-emerald-600 flex items-center gap-1.5 font-bold mt-0.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span> Always Online</p>
+        {/* Header */}
+        <div className="bg-white border-b border-slate-200 px-4 py-4 sm:px-8 flex justify-between items-center shadow-sm shrink-0 relative z-10">
+          <div className="flex items-center gap-4">
+            <button onClick={onClose} className="p-2.5 -ml-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors text-slate-600">
+              <ArrowLeft size={20} strokeWidth={2.5} />
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center shrink-0 shadow-md">
+                <Sparkles size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="font-black text-slate-900 leading-tight text-lg tracking-tight">Zesty AI</h3>
+                <p className="text-[11px] text-emerald-600 flex items-center gap-1.5 font-bold uppercase tracking-widest"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span> Online</p>
+              </div>
             </div>
           </div>
+          <button onClick={handleClearChat} title="Clear Chat" className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-red-50 hover:text-red-600 rounded-xl border border-slate-200 transition-colors text-xs font-bold text-slate-500 shadow-sm">
+            <Trash2 size={14} /> <span className="hidden sm:inline">Clear</span>
+          </button>
         </div>
-        <button onClick={handleClearChat} title="Clear Chat" className="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-red-50 hover:text-red-600 rounded-lg border border-slate-200 transition-colors text-xs font-bold text-slate-400">
-          <Trash2 size={16} /> <span className="hidden sm:inline">Clear Chat</span>
-        </button>
-      </div>
 
-      {/* Messages Body */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar">
-        <div className="max-w-4xl mx-auto w-full space-y-6">
-          {chatMessages.map((msg, idx) => (
-            <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`flex gap-3 max-w-[90%] sm:max-w-[80%] ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                {msg.sender === 'bot' && (
-                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0 border border-purple-200">
-                    <Sparkles size={14} className="text-[#3B0060]" />
+        {/* Messages Body */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar relative">
+          {/* Subtle Background Logo */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
+            <Sparkles size={250} />
+          </div>
+          
+          <div className="max-w-4xl mx-auto w-full space-y-6 relative z-10">
+            {chatMessages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
+                <div className={`flex gap-2 sm:gap-3 max-w-[90%] sm:max-w-[80%] ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} items-end`}>
+                  {msg.sender === 'bot' && (
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shrink-0 shadow-sm mb-1">
+                      <Sparkles size={16} className="text-white" />
+                    </div>
+                  )}
+                  <div className={`p-4 sm:p-5 rounded-2xl text-[15px] leading-relaxed whitespace-pre-wrap ${
+                    msg.sender === 'user' 
+                      ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-br-sm shadow-md font-medium' 
+                      : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm shadow-sm font-medium'
+                  }`}>
+                    {msg.text}
                   </div>
-                )}
-                <div className={`p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm whitespace-pre-wrap ${
-                  msg.sender === 'user' 
-                    ? 'bg-[#3B0060] text-white rounded-tr-none font-medium' 
-                    : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none font-medium'
-                }`}>
-                  {msg.text}
                 </div>
               </div>
-            </div>
-          ))}
-          {isTyping && (
-            <div className="flex justify-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center shrink-0 border border-purple-100">
-                <Sparkles size={14} className="text-[#3B0060] animate-pulse" />
+            ))}
+            {isTyping && (
+              <div className="flex justify-start gap-2 sm:gap-3 animate-in fade-in">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shrink-0 shadow-sm mb-1">
+                  <Sparkles size={16} className="text-white animate-pulse" />
+                </div>
+                <div className="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl rounded-bl-sm shadow-sm flex items-center gap-1.5 w-max h-[48px] sm:h-[56px]">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce"></span>
+                  <span className="w-2 h-2 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                </div>
               </div>
-              <div className="bg-white border border-slate-100 p-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1.5 w-max">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-300 animate-bounce"></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-300 animate-bounce" style={{ animationDelay: '300ms' }}></span>
-              </div>
-            </div>
-          )}
-          <div ref={chatEndRef} className="h-4" />
+            )}
+            <div ref={chatEndRef} className="h-4" />
+          </div>
         </div>
-      </div>
 
-      {/* Input Footer */}
-      <div className="bg-white border-t border-slate-100 p-4 sm:p-6 shrink-0">
-        <div className="max-w-4xl mx-auto w-full">
-          <form onSubmit={handleSendMessage} className="flex items-center gap-3 relative">
-            <input ref={inputRef} type="text" value={chatInput} onChange={e => setChatInput(e.target.value)} placeholder="How can I help you?" disabled={isTyping} className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl pl-6 pr-16 py-4 outline-none focus:border-[#3B0060] focus:ring-4 focus:ring-purple-500/5 text-[15px] font-medium text-slate-800 transition-all disabled:opacity-50 shadow-inner placeholder:text-slate-400" />
-            <button type="submit" disabled={!chatInput.trim() || isTyping} className="absolute right-2 w-11 h-11 bg-[#3B0060] text-white rounded-xl hover:bg-[#2A0045] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shrink-0 shadow-md active:scale-95"><Send size={18} /></button>
-          </form>
-          <p className="text-center text-[10px] font-bold text-slate-400 mt-3 uppercase tracking-widest">Zesty AI Intelligence • Cultivating a Smarter, Fresher Way to Shop</p>
+        {/* Input Footer */}
+        <div className="bg-white border-t border-slate-200 p-4 sm:p-6 shrink-0 relative z-10 shadow-[0_-10px_40px_rgba(0,0,0,0.03)]">
+          <div className="max-w-4xl mx-auto w-full">
+            <form onSubmit={handleSendMessage} className="flex items-center gap-3 relative">
+              <input ref={inputRef} type="text" value={chatInput} onChange={e => setChatInput(e.target.value)} placeholder="Ask Zesty AI for recommendations..." disabled={isTyping} className="flex-1 bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 rounded-2xl pl-6 pr-16 py-4 sm:py-5 outline-none text-[15px] font-bold text-slate-800 transition-all shadow-inner placeholder:text-slate-400 disabled:opacity-50" />
+              <button type="submit" disabled={!chatInput.trim() || isTyping} className="absolute right-2 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center shrink-0 shadow-md active:scale-95">
+                <Send size={20} className="-translate-x-[1px] translate-y-[1px]" />
+              </button>
+            </form>
+            <p className="text-center text-[11px] font-bold text-slate-400 mt-4 flex items-center justify-center gap-1.5 uppercase tracking-widest">
+              <Sparkles size={12} className="text-emerald-500" />
+              Zesty AI Intelligence • Cultivating a Smarter Way to Shop
+            </p>
+          </div>
         </div>
-      </div>
     </div>
   );
 }

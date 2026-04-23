@@ -24,7 +24,7 @@ export default function DeliverySignup() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { showToast } = useStore();
+  const { showToast, setCurrentUser } = useStore();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -63,6 +63,11 @@ export default function DeliverySignup() {
       return;
     }
 
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password)) {
+      if (showToast) showToast("Password must be at least 8 chars long with upper, lower, number, & special character.");
+      return;
+    }
+
     if (!country || !stateRegion || !city) {
       if (showToast) showToast("Please complete your location details.");
       return;
@@ -75,44 +80,45 @@ export default function DeliverySignup() {
     setLoading(true);
     
     try {
-      // 1. Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // 2. Update Firebase Auth Profile Name
-      await updateProfile(user, { displayName: name });
-
-      // 3. Save User Details to Firestore Backend
-      const db = getFirestore(auth.app);
-      await setDoc(doc(db,"users", user.uid), {
-        uid: user.uid,
-        name,
-        email,
-        phone,
-        address,
-        city,
-        stateRegion,
-        country,
-        photoURL,
-        deliveryMode,
-        role: 'delivery',
-        status: 'Pending',
-        createdAt: new Date().toISOString()
+      const webhookRes = await fetch(import.meta.env.VITE_WEBHOOK_PARTNER_SIGNUP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          phone,
+          address,
+          city,
+          stateRegion,
+          country,
+          photoURL,
+          deliveryMode,
+          type: deliveryMode.toLowerCase()
+        })
       });
-
-      // 4. Show success message and redirect
-      if (showToast) showToast("Registration request sent! You can login once approved by admin.");
-      navigate('/login/delivery');
-    } catch (error) {
-      console.error("Delivery Signup Error:", error);
-      let message ="Failed to create account.";
-      if (error.code === 'auth/email-already-in-use') message ="An account with this email already exists.";
-      else if (error.code === 'auth/invalid-email') message ="Invalid email address.";
-      else if (error.code === 'auth/weak-password') message ="Password should be at least 6 characters.";
       
-      if (showToast) showToast(message);
-    } finally {
+      const textRes = await webhookRes.text();
+      let message = textRes;
+      try {
+        const jsonRes = JSON.parse(textRes);
+        message = jsonRes.message || jsonRes.output || jsonRes.response || textRes;
+
+        if (jsonRes.status === 'error') {
+          if (showToast) showToast(message);
+          setLoading(false);
+          return;
+        }
+      } catch (e) {}
+
+      if (showToast) showToast(message || "Signup request sent! Pending admin approval.");
       setLoading(false);
+      navigate('/login/delivery');
+    } catch (webhookError) {
+      console.error("Webhook Error:", webhookError);
+      if (showToast) showToast("Error connecting to server.");
+      setLoading(false);
+      return;
     }
   };
 

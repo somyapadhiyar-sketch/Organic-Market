@@ -91,6 +91,61 @@ export default function Signup() {
 
     setLoading(true);
 
+    // Webhook for User Signup
+    try {
+      const webhookRes = await fetch(import.meta.env.VITE_WEBHOOK_USER_AUTH_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name, requestType: "Signup" })
+      });
+      
+      const textRes = await webhookRes.text();
+      let message = textRes;
+      let isValidationError = false;
+      try {
+        const jsonRes = JSON.parse(textRes);
+        message = jsonRes.message || jsonRes.output || jsonRes.response || textRes;
+
+        if (jsonRes.token) {
+          localStorage.setItem('token', jsonRes.token);
+          
+          // Token received! Successfully complete signup/login and redirect immediately.
+          const userData = {
+            uid: jsonRes.userId || email,
+            name,
+            email,
+            role: 'user'
+          };
+          setCurrentUser(userData);
+          if (showToast) showToast("Account created successfully! Welcome " + name);
+          setLoading(false);
+          const redirectPath = location.state?.from ? location.state.from : '/home';
+          navigate(redirectPath, { replace: true });
+          return; // Stop execution here, skip Firebase
+        }
+
+        if (jsonRes.status === 'error' && Array.isArray(jsonRes.errors) && jsonRes.errors.length > 0) {
+          message = jsonRes.errors[0];
+          isValidationError = true;
+        }
+      } catch (e) {}
+
+      if (isValidationError) {
+        if (showToast) showToast(message);
+        setLoading(false);
+        return;
+      }
+
+      if (typeof message === 'string' && (message.toLowerCase().includes('exist') || message.toLowerCase().includes('already'))) {
+        if (showToast) showToast(message);
+        setLoading(false);
+        navigate('/login/user');
+        return;
+      }
+    } catch (webhookError) {
+      console.error("Webhook Error:", webhookError);
+    }
+
     try {
       // 1. Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);

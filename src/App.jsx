@@ -60,7 +60,8 @@ function App() {
         <Route path="/admin/edit-product/:id" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditProduct /></ProtectedRoute>} />
         
         {/* Delivery Routes */}
-        <Route path="/delivery" element={<ProtectedRoute allowedRoles={['delivery']}><Delivery /></ProtectedRoute>} />
+        <Route path="/delivery" element={<Navigate to="/delivery/online" replace />} />
+        <Route path="/delivery/:mode" element={<ProtectedRoute allowedRoles={['delivery']}><Delivery /></ProtectedRoute>} />
 
         {/* Auth Routes */}
         <Route path="/signup" element={<Signup />} />

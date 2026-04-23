@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useStore } from '../context/StoreContext'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Plus, LogOut, Search, Mic, Edit, Trash2, PackagePlus, PowerOff, MapPin, Menu, Amphora, Apple, Carrot, Bean, ShoppingBag, Motorbike, Store, BarChart3, ChevronDown, Grid, Tag, Phone, CreditCard } from 'lucide-react'
+import { Plus, LogOut, Search, Mic, Edit, Trash2, PackagePlus, PowerOff, MapPin, Menu, Amphora, Apple, Carrot, Bean, ShoppingBag, Motorbike, Store, BarChart3, ChevronDown, Grid, Tag, Phone, CreditCard, UserPlus } from 'lucide-react'
 import { getFirestore, doc, updateDoc, collection, getDocs, addDoc, deleteDoc } from 'firebase/firestore'
 import { auth } from '../firebase'
 import PartnerDetailsModal from '../components/PartnerDetailsModal'
@@ -94,6 +94,14 @@ export default function Admin() {
     } catch (e) { if(showToast) showToast("Failed to delete coupon"); }
   };
 
+  const handleAdminApproval = async (email, action) => {
+    try {
+      await fetch(`${import.meta.env.VITE_WEBHOOK_ADMIN_APPROVAL_URL}?action=${action}&email=${email}`);
+    } catch (err) {
+      console.error("Admin Approval Webhook Error:", err);
+    }
+  };
+
   // Stats calculation
   const totalProducts = products.length;
   const outOfStock = products.filter(p => p.disabled).length;
@@ -133,8 +141,9 @@ export default function Admin() {
     .filter(o => statusFilter === 'All' || o.status === statusFilter)
     .filter(o => (o.id || '').toLowerCase().includes(searchQuery.toLowerCase()) || (o.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => (statusWeight[a.status] || 99) - (statusWeight[b.status] || 99));
-  const onlinePartners = deliveryPartners.filter(d => d.deliveryMode !== 'Offline' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
-  const offlinePartners = deliveryPartners.filter(d => d.deliveryMode === 'Offline' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
+  const pendingPartners = deliveryPartners.filter(d => d.status === 'Pending' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
+  const onlinePartners = deliveryPartners.filter(d => d.deliveryMode !== 'Offline' && d.status !== 'Pending' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
+  const offlinePartners = deliveryPartners.filter(d => d.deliveryMode === 'Offline' && d.status !== 'Pending' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
 
   return (
     <div className="h-screen w-full bg-slate-50 font-sans text-[#1C1C1C] flex overflow-hidden">
@@ -191,6 +200,7 @@ export default function Admin() {
           
           {[
             {tab: 'orders', icon: <ShoppingBag size={20} />, label: 'Orders', badge: pendingOrders}, 
+            {tab: 'partner-requests', icon: <UserPlus size={20} />, label: 'Partner Requests', badge: deliveryPartners.filter(p => p.status === 'Pending').length},
             {tab: 'delivery', icon: <Motorbike size={20} />, label: 'Online Partners'},
             {tab: 'offline-delivery', icon: <Store size={20} />, label: 'Offline Partners'},
             {tab: 'coupons', icon: <Tag size={20} />, label: 'Coupons'}
@@ -623,8 +633,62 @@ export default function Admin() {
           </div>
         )}
 
+        {activeTab === 'partner-requests' && (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+            {pendingPartners.length === 0 ? (
+              <div className="p-12 text-center text-gray-500 font-medium">No pending partner requests.</div>
+            ) : (
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse whitespace-nowrap">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-gray-200">
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Partner</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Mode</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Area</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {pendingPartners.map(partner => (
+                      <tr key={partner.email} onClick={() => setSelectedPartner(partner)} className="hover:bg-slate-50 transition-colors cursor-pointer group">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden shrink-0 flex items-center justify-center bg-slate-200 font-black text-slate-500">
+                              {partner.photoURL ? <img src={partner.photoURL} alt={partner.name} className="w-full h-full object-cover" /> : partner.name.charAt(0)}
+                            </div>
+                            <span className="font-black text-sm text-gray-900">{partner.name}</span>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <p className="text-xs font-bold text-gray-700">{partner.phone}</p>
+                          <p className="text-[11px] text-gray-500">{partner.email}</p>
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${partner.deliveryMode === 'Offline' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                            {partner.deliveryMode || 'Online'}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <p className="text-xs text-gray-600 flex items-center gap-1"><MapPin size={12} className="text-gray-400" /> {partner.address}</p>
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button onClick={(e) => { e.stopPropagation(); handleAdminApproval(partner.email, 'approve'); approveDelivery(partner.email); }} className="btn-3d btn-emerald px-3 py-1.5 font-bold text-[11px] shadow-sm">Approve</button>
+                            <button onClick={(e) => { e.stopPropagation(); if (window.confirm(`Reject ${partner.name}?`)) { handleAdminApproval(partner.email, 'reject'); deleteDeliveryPartner(partner.email); } }} className="btn-3d btn-danger px-3 py-1.5 font-bold text-[11px] shadow-sm">Reject</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
         {activeTab === 'delivery' && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden animate-in fade-in zoom-in-95 duration-300">
             {onlinePartners.length === 0 ? (
               <div className="p-12 text-center text-gray-500 font-medium">No online partners found.</div>
             ) : (
@@ -664,8 +728,7 @@ export default function Admin() {
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            {partner.status === 'Pending' && <button onClick={(e) => { e.stopPropagation(); approveDelivery(partner.email); }} className="btn-3d btn-emerald px-3 py-1.5 font-bold text-[11px] shadow-sm">Approve Online</button>}
-                            <button onClick={(e) => { e.stopPropagation(); if (window.confirm(`Remove ${partner.name}?`)) { deleteDeliveryPartner(partner.email); } }} className="btn-3d btn-danger px-3 py-1.5 font-bold text-[11px] shadow-sm">Remove</button>
+                            <button onClick={(e) => { e.stopPropagation(); if (window.confirm(`Remove ${partner.name}?`)) { handleAdminApproval(partner.email, 'reject'); deleteDeliveryPartner(partner.email); } }} className="btn-3d btn-danger px-3 py-1.5 font-bold text-[11px] shadow-sm">Remove</button>
                           </div>
                         </td>
                       </tr>
@@ -678,7 +741,7 @@ export default function Admin() {
         )}
 
         {activeTab === 'offline-delivery' && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden animate-in fade-in zoom-in-95 duration-300">
             {offlinePartners.length === 0 ? (
               <div className="p-12 text-center text-gray-500 font-medium">No offline delivery partners found.</div>
             ) : (
@@ -718,8 +781,7 @@ export default function Admin() {
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            {partner.status === 'Pending' && <button onClick={(e) => { e.stopPropagation(); approveDelivery(partner.email); }} className="btn-3d btn-blue px-3 py-1.5 font-bold text-[11px] shadow-sm">Approve Offline</button>}
-                            <button onClick={(e) => { e.stopPropagation(); if (window.confirm(`Remove ${partner.name}?`)) { deleteDeliveryPartner(partner.email); } }} className="btn-3d btn-danger px-3 py-1.5 font-bold text-[11px] shadow-sm">Remove</button>
+                            <button onClick={(e) => { e.stopPropagation(); if (window.confirm(`Remove ${partner.name}?`)) { handleAdminApproval(partner.email, 'reject'); deleteDeliveryPartner(partner.email); } }} className="btn-3d btn-danger px-3 py-1.5 font-bold text-[11px] shadow-sm">Remove</button>
                           </div>
                         </td>
                       </tr>

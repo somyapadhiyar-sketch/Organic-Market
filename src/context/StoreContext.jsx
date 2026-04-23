@@ -60,27 +60,44 @@ export function StoreProvider({ children }) {
       console.error("Error fetching products in real-time:", error);
     });
 
-    // The delivery partners don't need to be real-time for now, so a single fetch is fine.
-    // If they did, this would also be converted to an onSnapshot listener.
-
-        // Fetch Delivery Partners from Firebase
-        const fetchPartners = async () => {
-          try {
-            const db = getFirestore(auth.app);
-            const q = query(collection(db,"users"), where("role","==","delivery"));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-              const fbPartners = querySnapshot.docs.map(doc => doc.data());
-              setDeliveryPartners(fbPartners);
+    // Fetch Delivery Partners from MongoDB Webhook
+    const fetchMongoPartners = async () => {
+      try {
+        const res = await fetch(import.meta.env.VITE_WEBHOOK_GET_PARTNERS_URL);
+        if (res.ok) {
+          const rawData = await res.json();
+          let mdbPartners = Array.isArray(rawData) ? rawData : (rawData && Object.keys(rawData).length > 0 ? [rawData] : []);
+          
+          mdbPartners = mdbPartners.map(p => {
+            let normalizedStatus = "Pending";
+            if (p.status) {
+              const s = String(p.status).toLowerCase().trim();
+              if (s === 'pending') normalizedStatus = 'Pending';
+              else if (s === 'approve' || s === 'approved') normalizedStatus = 'Approved';
+              else if (s === 'reject' || s === 'rejected') normalizedStatus = 'Rejected';
+              else normalizedStatus = p.status;
             }
-          } catch (error) {
-            console.error("Error fetching delivery partners:", error);
-          }
-        };
-        fetchPartners();
 
-    // Cleanup listener on component unmount
-    return () => unsubscribeProducts();
+            return {
+              ...p,
+              name: p.name || 'Unknown Partner',
+              status: normalizedStatus,
+              role: p.role || 'delivery',
+              deliveryMode: p.deliveryMode || p.type || 'online' 
+            };
+          });
+          
+          setDeliveryPartners(mdbPartners);
+        }
+      } catch (err) { }
+    };
+    
+    fetchMongoPartners();
+
+    // Cleanup listeners on component unmount
+    return () => {
+      unsubscribeProducts();
+    };
   }, []); // Empty dependency array ensures this runs only once on mount
 
   // Fetch Orders from Firebase in Real-time
@@ -196,14 +213,6 @@ export function StoreProvider({ children }) {
   // Admin Methods
   const approveDelivery = async (email) => {
     setDeliveryPartners(prev => prev.map(d => d.email === email ? { ...d, status: 'Approved' } : d));
-    try {
-      const db = getFirestore(auth.app);
-      const q = query(collection(db,"users"), where("email","==", email), where("role","==","delivery"));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(async (document) => {
-        await updateDoc(doc(db,"users", document.id), { status: 'Approved' });
-      });
-    } catch(e) { console.error("Error updating approval in Firestore:", e); }
   };
 
   const toggleProductStatus = async (id) => {

@@ -54,6 +54,111 @@ export default function Login() {
 
     setLoading(true);      
              
+    if (activeRole === 'user') {
+      try {
+        const webhookRes = await fetch(import.meta.env.VITE_WEBHOOK_USER_AUTH_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, requestType: "Login" })
+        });
+        
+        const textRes = await webhookRes.text();
+        let message = textRes;
+        let isValidationError = false;
+        try {
+          const jsonRes = JSON.parse(textRes);
+          message = jsonRes.message || jsonRes.output || jsonRes.response || textRes;
+          
+          if (jsonRes.token) {
+            localStorage.setItem('token', jsonRes.token);
+            
+            // Complete login and redirect immediately
+            const userData = { 
+              uid: jsonRes.userId || email, 
+              name: jsonRes.name || email.split('@')[0], 
+              email, 
+              role: 'user' 
+            };
+            setCurrentUser(userData);
+            if (showToast) showToast(`Welcome back, ${userData.name}!`);
+            setLoading(false);
+            const redirectPath = location.state?.from ? location.state.from : '/home';
+            navigate(redirectPath, { replace: true });
+            return;
+          }
+          
+          if (jsonRes.status === 'error' && Array.isArray(jsonRes.errors) && jsonRes.errors.length > 0) {
+            message = jsonRes.errors[0];
+            isValidationError = true;
+          }
+        } catch (e) {}
+        
+        if (isValidationError) {
+          if (showToast) showToast(message);
+          setLoading(false);
+          return;
+        }
+
+        console.log("Login Webhook Response:", message);
+      } catch (webhookError) {
+        console.error("Webhook Error:", webhookError);
+      }
+    }
+
+    if (activeRole === 'delivery') {
+      try {
+        const webhookRes = await fetch(import.meta.env.VITE_WEBHOOK_PARTNER_LOGIN_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const textRes = await webhookRes.text();
+        let message = textRes;
+        try {
+          const jsonRes = JSON.parse(textRes);
+          message = jsonRes.message || jsonRes.output || jsonRes.response || textRes;
+
+          // ✅ SUCCESS — webhook returns { status: "success", user: { name, email, type } }
+          const statusStr = String(jsonRes.status || '').toLowerCase();
+          if (statusStr === 'success' && jsonRes.user) {
+            const userInfo = jsonRes.user;
+            const dMode = userInfo.type || userInfo.deliveryMode || 'online';
+            const userData = {
+              uid: userInfo._id || userInfo.userId || email,
+              name: userInfo.name || email.split('@')[0],
+              email: userInfo.email || email,
+              role: 'delivery',
+              status: 'Approved',
+              deliveryMode: dMode
+            };
+            if (jsonRes.token) localStorage.setItem('deliveryToken', jsonRes.token);
+            setCurrentUser(userData);
+            if (showToast) showToast(`Welcome back, ${userData.name}!`);
+            setLoading(false);
+            navigate(`/delivery/${dMode.toLowerCase()}`, { replace: true });
+            return;
+          }
+
+          // ❌ PENDING / REJECTED / ERROR
+          if (statusStr === 'pending' || statusStr === 'error' || jsonRes.message) {
+            if (showToast) showToast(message || "Login failed. Please try again.");
+            setLoading(false);
+            return;
+          }
+        } catch (e) {}
+        
+        if (showToast) showToast(typeof message === 'string' ? message : "Login failed or pending approval.");
+        setLoading(false);
+        return;
+      } catch (webhookError) {
+        console.error("Webhook Error:", webhookError);
+        if (showToast) showToast("Error connecting to server.");
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       let user;
       try {
