@@ -4,13 +4,20 @@ import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { ArrowRight, Mail, Lock, User, Eye, EyeOff, Phone, MapPin, Map, Leaf, Sparkles } from 'lucide-react';
 import { Country, State, City }  from 'country-state-city';
-import { createUserWithEmailAndPassword, updateProfile } from"firebase/auth";
-import { getFirestore, doc, setDoc } from"firebase/firestore";
-import { auth } from '../firebase';
 
 // Mock Pincode data for validation
-const MOCK_PINCODE_DATA = {"India": {"Gujarat": {"Ahmedabad": ["380001","380006","380009","380015","380052"],"Surat": ["395003","395004","395007","395010"],"Vadodara": ["390001","390002","390007"],"Rajkot": ["360001","360002","360004"],"Gandhinagar": ["382010","382016","382021"]
-    },"Maharashtra": {"Mumbai": ["400001","400002","400011"],"Pune": ["411001","411002","411005"]
+const MOCK_PINCODE_DATA = {
+  "India": {
+    "Gujarat": {
+      "Ahmedabad": ["380001","380006","380009","380015","380052"],
+      "Surat": ["395003","395004","395007","395010"],
+      "Vadodara": ["390001","390002","390007"],
+      "Rajkot": ["360001","360002","360004"],
+      "Gandhinagar": ["382010","382016","382021"]
+    },
+    "Maharashtra": {
+      "Mumbai": ["400001","400002","400011"],
+      "Pune": ["411001","411002","411005"]
     }
   }
 };
@@ -35,10 +42,13 @@ export default function Signup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const [loading, setLoading] = useState(false);
-  const { setCurrentUser, showToast } = useStore();
+  const store = useStore();
   const navigate = useNavigate();
   const location = useLocation();
   const { pathname } = location;
+
+  if (!store) return null;
+  const { setCurrentUser, updateUser, showToast, usersDB } = store;
 
   // Derived state for dropdowns
   const countries = Country.getAllCountries();
@@ -91,12 +101,27 @@ export default function Signup() {
 
     setLoading(true);
 
+    const newUser = {
+      uid: 'user-' + Date.now(),
+      name,
+      email,
+      phone,
+      address,
+      street,
+      city,
+      stateRegion,
+      country,
+      pincode,
+      role: 'user',
+      createdAt: new Date().toISOString()
+    };
+
     // Webhook for User Signup
     try {
       const webhookRes = await fetch(import.meta.env.VITE_WEBHOOK_USER_AUTH_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name, requestType: "Signup" })
+        body: JSON.stringify({ email, password, name, mobile: String(phone), phone: String(phone), requestType: "Signup" })
       });
       
       const textRes = await webhookRes.text();
@@ -108,20 +133,15 @@ export default function Signup() {
 
         if (jsonRes.token) {
           localStorage.setItem('token', jsonRes.token);
+          if (store.clearCart) store.clearCart();
           
-          // Token received! Successfully complete signup/login and redirect immediately.
-          const userData = {
-            uid: jsonRes.userId || email,
-            name,
-            email,
-            role: 'user'
-          };
-          setCurrentUser(userData);
+          newUser.uid = jsonRes.userId || newUser.uid;
+          updateUser(newUser);
           if (showToast) showToast("Account created successfully! Welcome " + name);
           setLoading(false);
           const redirectPath = location.state?.from ? location.state.from : '/home';
           navigate(redirectPath, { replace: true });
-          return; // Stop execution here, skip Firebase
+          return; 
         }
 
         if (jsonRes.status === 'error' && Array.isArray(jsonRes.errors) && jsonRes.errors.length > 0) {
@@ -146,59 +166,19 @@ export default function Signup() {
       console.error("Webhook Error:", webhookError);
     }
 
-    try {
-      // 1. Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // 2. Update Firebase Auth Profile Name
-      await updateProfile(user, { displayName: name });
-
-      // 3. Save User Details to Firestore Backend (Run in background to prevent freezing)
-      const db = getFirestore(auth.app);
-      setDoc(doc(db,"users", user.uid), {
-        uid: user.uid,
-        name,
-        email,
-        phone,
-        address,
-        street,
-        city,
-        stateRegion,
-        country,
-        pincode,
-        role: 'user',
-        createdAt: new Date().toISOString()
-      }).catch(err => console.error("Firestore Database Error:", err));
-
-      // 4. Set user in context
-      const userData = {
-        uid: user.uid,
-        name,
-        email,
-        role: 'user'
-      };
-      setCurrentUser(userData);
-
-      if (user) {
-        if (showToast) showToast("Account created successfully! Welcome" + name);
-        const redirectPath = location.state?.from ? location.state.from : '/home';
-        navigate(redirectPath, { replace: true });
-      } else {
-        if (showToast) showToast("Signup failed. Please try again.");
-      }
-    } catch (error) {
-      console.error("Signup Error:", error);
-      let message ="Failed to create account.";
-      if (error.code === 'auth/email-already-in-use') message ="An account with this email already exists.";
-      else if (error.code === 'auth/invalid-email') message ="Invalid email address.";
-      else if (error.code === 'auth/weak-password') message ="Password should be at least 6 characters.";
-      
-      if (showToast) showToast(message);
-    } finally {
+    // Offline / Dev fallback signup
+    const exists = usersDB.some(u => u.email === email);
+    if (exists) {
+      if (showToast) showToast("An account with this email already exists.");
       setLoading(false);
+      return;
     }
+
+    updateUser(newUser);
+    if (showToast) showToast("Offline Signup: Account created successfully! Welcome " + name);
     setLoading(false);
+    const redirectPath = location.state?.from ? location.state.from : '/home';
+    navigate(redirectPath, { replace: true });
   };
 
   return (
@@ -241,7 +221,7 @@ export default function Signup() {
            </div>
 
            <div className="mb-8">
-         <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2 flex items-center gap-2">Create Account <Sparkles className="text-amber-400" size={28} /></h2>
+             <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2 flex items-center gap-2">Create Account <Sparkles className="text-amber-400" size={28} /></h2>
              <p className="text-slate-500 font-medium">Enter your details to register.</p>
            </div>
 
@@ -283,7 +263,7 @@ export default function Signup() {
                {/* Dropdowns Grid */}
                <div className="grid grid-cols-2 gap-3 mb-3">
                  <div className="relative">
-                   <select required value={country} onChange={(e) => { setCountry(e.target.value); setStateRegion(''); setCity(''); }} className="w-full pl-4 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium appearance-none text-slate-700">
+                   <select required value={country} onChange={(e) => { setCountry(e.target.value); setStateRegion(''); setCity(''); }} className="w-full pl-4 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium appearance-none text-slate-700 text-[14px]">
                      <option value="">Select Country</option>
                      {countries.map(c => <option key={c.isoCode} value={c.isoCode}>{c.name}</option>)}
                    </select>
@@ -291,7 +271,7 @@ export default function Signup() {
                  </div>
                  
                  <div className="relative">
-                   <select required disabled={!country} value={stateRegion} onChange={(e) => { setStateRegion(e.target.value); setCity(''); }} className="w-full pl-4 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium appearance-none text-slate-700 disabled:opacity-50">
+                   <select required disabled={!country} value={stateRegion} onChange={(e) => { setStateRegion(e.target.value); setCity(''); }} className="w-full pl-4 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium appearance-none text-slate-700 disabled:opacity-50 text-[14px]">
                      <option value="">Select State</option>
                      {states.map(s => <option key={s.isoCode} value={s.isoCode}>{s.name}</option>)}
                    </select>
@@ -299,7 +279,7 @@ export default function Signup() {
                  </div>
 
                  <div className="relative">
-                   <select required disabled={!stateRegion} value={city} onChange={(e) => setCity(e.target.value)} className="w-full pl-4 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium appearance-none text-slate-700 disabled:opacity-50">
+                   <select required disabled={!stateRegion} value={city} onChange={(e) => setCity(e.target.value)} className="w-full pl-4 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition-all font-medium appearance-none text-slate-700 disabled:opacity-50 text-[14px]">
                      <option value="">Select City</option>
                      {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
                    </select>
@@ -351,8 +331,8 @@ export default function Signup() {
                Already have an account? <Link to="/login/user" state={{ from: location.state?.from }} className="text-green-600 font-bold hover:underline">Login</Link>
              </p>
            </div>
-        </div>
-      </div>
-    </div>
-  );
+         </div>
+       </div>
+     </div>
+   );
 }

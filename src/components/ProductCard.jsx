@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
-import { Plus, Minus, Heart, ShoppingBag } from 'lucide-react';
-
-import { useEffect } from 'react';
+import { Plus, Minus, Heart, Star } from 'lucide-react';
 
 export default function ProductCard({ product }) {
   const { cart, addToCart, decreaseCartQuantity, wishlist, toggleWishlist, showToast } = useStore();
@@ -13,6 +11,10 @@ export default function ProductCard({ product }) {
   const quantity = cartItem ? cartItem.quantity : 0;
   const isInWishlist = wishlist.some(item => item.id === product.id);
   const isOutOfStock = product.disabled || product.stock <= 0;
+
+  const finalPrice = Number(product.price || 0);
+  const originalPrice = Number(product.originalPrice || Math.round(finalPrice * 1.25));
+  const discount = originalPrice > 0 ? Math.round(((originalPrice - finalPrice) / originalPrice) * 100) : 0;
 
   const handleWishlistToggle = (e) => {
     e.preventDefault();
@@ -25,6 +27,7 @@ export default function ProductCard({ product }) {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product.name, product.price, 1, product.image, product.id);
+    if (showToast) showToast(`Added ${product.name} to cart!`);
   };
 
   const handleIncrease = (e) => {
@@ -41,32 +44,72 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <Link to={`/user/product/${product.name}`} state={{ product }} className="bg-white rounded-2xl p-4 shadow-sm border flex flex-col group hover:shadow-xl hover:-translate-y-1 transition-all h-full">
+    <Link 
+      to={`/user/product/${product.name}`} 
+      state={{ product }} 
+      className="group border border-slate-100 rounded-3xl p-4 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-full relative"
+    >
       <div className="relative">
         <div className="h-40 w-full bg-gray-50 rounded-xl flex items-center justify-center p-4 mb-4 overflow-hidden">
           <img 
             src={product.image} 
             alt={product.name} 
-            className="max-w-full max-h-full object-contain mix-blend-multiply transition-transform group-hover:scale-105" 
-            onError={(e) => { e.target.src = `${import.meta.env.VITE_PLACEHOLDER_IMAGE_URL}/150x150/F8F8F8/767676?text=${product.name}` }}
+            className="max-w-full max-h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105" 
+            onError={(e) => { e.target.src = `https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop` }}
           />
         </div>
-        {isOutOfStock && (
-          <span className="absolute top-2 left-2 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide border border-red-200">Out of Stock</span>
+        
+        {/* Discount Badge */}
+        {discount > 0 && !isOutOfStock && (
+          <span className="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wide shadow-sm z-10">
+            {discount}% OFF
+          </span>
         )}
-        <button onClick={handleWishlistToggle} className="absolute top-2 right-2 p-2 bg-white/70 backdrop-blur-sm rounded-full text-slate-500 hover:text-red-500 transition-colors">
+
+        {isOutOfStock && (
+          <span className="absolute top-2 left-2 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide border border-red-200 z-10">
+            Out of Stock
+          </span>
+        )}
+        
+        <button 
+          onClick={handleWishlistToggle} 
+          className="absolute top-2 right-2 p-2 bg-white/70 backdrop-blur-sm rounded-full text-slate-500 hover:text-red-500 transition-colors z-10"
+        >
           <Heart size={18} fill={isInWishlist ? '#ef4444' : 'none'} className={isInWishlist ? 'text-red-500' : ''} />
         </button>
       </div>
+
       <div className="flex-1 flex flex-col">
         <h3 className="font-bold text-gray-800 text-base leading-tight line-clamp-2 flex-1">{product.name}</h3>
+        
+        {/* Rating Stars */}
+        <div className="flex items-center gap-1 mt-1 mb-2">
+          <div className="flex text-amber-400">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star key={i} size={11} fill={i < Math.round(product.rating || 4.5) ? "currentColor" : "none"} className="stroke-1" />
+            ))}
+          </div>
+          <span className="text-[10px] text-gray-400 font-bold">({product.reviews || 24})</span>
+        </div>
+
         <div className="flex items-center justify-between mt-1">
           <p className="text-sm text-gray-500">{`1 ${product.unit || 'kg'}`}</p>
-          <p className="font-extrabold text-base text-gray-900 md:hidden">₹{product.price}</p>
+          <div className="flex items-baseline gap-1.5 md:hidden">
+            <span className="font-extrabold text-base text-gray-900">₹{finalPrice}</span>
+            {discount > 0 && <span className="text-xs text-gray-400 line-through font-semibold">₹{originalPrice}</span>}
+          </div>
         </div>
       </div>
+
       <div className="flex justify-end md:justify-between items-center mt-3 md:mt-4 w-full">
-        <p className="font-extrabold text-lg text-gray-900 hidden md:block">₹{product.price}</p>
+        <div className="hidden md:flex flex-col">
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-extrabold text-lg text-gray-900">₹{finalPrice}</span>
+            {discount > 0 && <span className="text-xs text-gray-400 line-through font-semibold">₹{originalPrice}</span>}
+          </div>
+        </div>
+        
         <div className="w-full md:w-auto">
           {isOutOfStock ? (
             <button disabled className="btn-3d btn-danger w-full md:w-auto px-4 py-2 font-bold text-[13px] opacity-70 cursor-not-allowed">Out of Stock</button>

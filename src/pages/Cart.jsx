@@ -5,8 +5,7 @@ import { Plus, Minus, MapPin, CreditCard, Banknote, Building, CheckCircle2, Load
 import { Country, State, City } from 'country-state-city'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import { getFirestore, doc, updateDoc, collection, addDoc, getDocs, query, where, arrayUnion } from"firebase/firestore";
-import { auth } from"../firebase";
+
 import ProductCard from '../components/ProductCard';
 
 // Mock Pincode data for validation
@@ -199,62 +198,114 @@ export default function Cart() {
   useEffect(() => {
     if (!currentUser) return;
     
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        try {
-          const db = getFirestore(auth.app);
-          const q = query(collection(db, "coupons"), where("active", "==", true));
-          const querySnapshot = await getDocs(q);
-          const coupons = [];
-          const userId = user.uid || currentUser?.email;
-          const now = new Date().getTime();
+    const fetchCoupons = async () => {
+      try {
+        const userId = currentUser?.email || currentUser?.uid;
+        const res = await fetch(`${import.meta.env.VITE_WEBHOOK_USER_COUPONS_URL}?user_id=${encodeURIComponent(userId)}`, {
+          cache: 'no-store',
+          headers: {
+            'Pragma': 'no-cache',
+            'Cache-Control': 'no-cache'
+          }
+        });
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const responseData = await res.json();
+        
+        // Handle n8n response which might wrap the array in a data property
+        const data = Array.isArray(responseData) ? responseData : (responseData?.data || []);
+        
+        const coupons = [];
+        const now = new Date().getTime();
+        
+        data.forEach((dataObj) => {
+          let isValidNow = true;
           
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            let isValidNow = true;
-            
-            if (data.validFrom) {
-               const fromTime = new Date(data.validFrom).getTime();
-               if (!isNaN(fromTime) && now < fromTime) isValidNow = false;
-            }
-            if (data.validUntil) {
-               const untilTime = new Date(data.validUntil).getTime();
-               if (!isNaN(untilTime) && now > untilTime) isValidNow = false;
-            } else if (data.expiryDate) {
-               // Fallback for old coupons
-               const expDate = new Date(data.expiryDate);
-               if (!isNaN(expDate.getTime()) && expDate.setHours(23, 59, 59, 999) < now) {
-                   isValidNow = false;
-               }
-            }
-            
-            if (isValidNow && !(data.usedBy || []).includes(userId)) {
-               coupons.push({ id: doc.id, ...data });
-            }
-          });
-          setAvailableCoupons(coupons);
-        } catch (e) { console.error("Error fetching coupons", e); }
-      }
-    });
-    return () => unsubscribe();
+          if (dataObj.validFrom || dataObj.valid_from) {
+             const fromTime = new Date(dataObj.validFrom || dataObj.valid_from).getTime();
+             if (!isNaN(fromTime) && now < fromTime) isValidNow = false;
+          }
+          if (dataObj.validUntil || dataObj.valid_until) {
+             const untilTime = new Date(dataObj.validUntil || dataObj.valid_until).getTime();
+             if (!isNaN(untilTime) && now > untilTime) isValidNow = false;
+          }
+          
+          const isActive = dataObj.status ? dataObj.status.toUpperCase() === 'ACTIVE' : dataObj.active === true;
+          
+          if (isActive && isValidNow && !(dataObj.usedBy || []).includes(userId)) {
+             const rawDiscount = dataObj.discountPercent || dataObj.discount || 0;
+             const discountVal = typeof rawDiscount === 'string' ? parseInt(rawDiscount.replace(/[^\d]/g, ''), 10) : rawDiscount;
+             coupons.push({ id: dataObj.id || dataObj._id || dataObj.code, ...dataObj, discountPercent: discountVal });
+          }
+        });
+        setAvailableCoupons(coupons);
+
+        // Auto-invalidate applied coupon if it expired or became inactive
+        setAppliedCoupon(prevApplied => {
+          if (!prevApplied) return null;
+          const stillValid = coupons.find(c => c.code === prevApplied.code);
+          if (!stillValid) {
+            setCouponMessage({ type: "error", text: "The applied coupon has expired or is no longer valid." });
+            setCouponCode('');
+            return null;
+          }
+          return stillValid;
+        });
+
+      } catch (e) { console.error("Error fetching coupons", e); }
+    };
+    
+    fetchCoupons();
+    const interval = setInterval(fetchCoupons, 60000);
+    return () => clearInterval(interval);
   }, [currentUser]);
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     const code = couponCode.trim().toUpperCase();
     if (code === "") { setAppliedCoupon(null); setCouponMessage({ type: "error", text: "Please enter a code." }); return; }
+    
     const found = availableCoupons.find(c => c.code === code);
-    if (found) {
-        setAppliedCoupon(found);
-        setCouponMessage({ type: "success", text: `Coupon applied! ${found.discountPercent}% OFF` });
-    } else {
+    setCouponMessage({ type: "info", text: "Verifying coupon..." });
+    
+    try {
+        const userId = currentUser?.email || currentUser?.uid;
+        const res = await fetch(import.meta.env.VITE_WEBHOOK_APPLY_COUPON_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ coupon_code: code, user_id: userId, code: code, userId: userId })
+        });
+        const data = await res.json();
+        
+        if (data.success || data.message?.toLowerCase().includes("success")) {
+            let discountPercent = found ? found.discountPercent : 0;
+            if (data.discount) {
+                const rawDiscount = data.discount;
+                discountPercent = typeof rawDiscount === 'string' ? parseInt(rawDiscount.replace(/[^\d]/g, ''), 10) : rawDiscount;
+            } else if (data.discountPercent) {
+                discountPercent = data.discountPercent;
+            }
+            
+            if (!discountPercent) {
+                setAppliedCoupon(null);
+                setCouponMessage({ type: "error", text: "Invalid coupon code format." });
+                return;
+            }
+
+            setAppliedCoupon({ code, discountPercent });
+            setCouponMessage({ type: "success", text: data.message || `Coupon applied! ${discountPercent}% OFF` });
+        } else {
+            setAppliedCoupon(null);
+            setCouponMessage({ type: "error", text: data.error || data.message || "Coupon is invalid or already used." });
+        }
+    } catch(err) {
+        console.error("Coupon apply error:", err);
         setAppliedCoupon(null);
-        setCouponMessage({ type: "error", text: "Invalid, expired, or already used coupon." });
+        setCouponMessage({ type: "error", text: "Failed to verify coupon with server." });
     }
   };
 
   const handleApplyCouponDirect = (offer) => {
-    setCouponCode(offer.code); setAppliedCoupon(offer); setShowOffers(false);
-    setCouponMessage({ type: "success", text: `Coupon applied! ${offer.discountPercent}% OFF` });
+    setCouponCode(offer.code);
+    setCouponMessage({ type: "", text: "" });
   };
 
   const discountAmount = appliedCoupon ? Math.round(total * (appliedCoupon.discountPercent / 100)) : 0;
@@ -315,10 +366,7 @@ export default function Cart() {
           if (updateUser) updateUser(updatedUser);
           else currentUser.savedAddresses = updatedSavedAddresses;
           
-          if (currentUser?.uid) {
-            const db = getFirestore(auth.app);
-            updateDoc(doc(db,"users", currentUser.uid), { savedAddresses: updatedSavedAddresses }).catch(console.error);
-          }
+
           
           try {
             localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -371,10 +419,13 @@ export default function Cart() {
       // Mark coupon as used exclusively for this user
       if (result && result.success && appliedCoupon) {
         try {
-          const userId = auth.currentUser?.uid || currentUser?.uid || currentUser?.email;
+          const userId = currentUser?.uid || currentUser?.email;
           if (userId) {
-            const db = getFirestore(auth.app);
-            await updateDoc(doc(db, "coupons", appliedCoupon.id), { usedBy: arrayUnion(userId) });
+            await fetch(import.meta.env.VITE_WEBHOOK_ADMIN_COUPONS_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'update', data: { id: appliedCoupon.id, usedByAdd: userId } })
+            });
           }
         } catch (err) { console.error("Failed to update coupon usage:", err); }
       }
@@ -477,13 +528,13 @@ export default function Cart() {
                         <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 border-b border-slate-100 pb-6 last:border-0 last:pb-0">
                           <div className="flex items-center gap-4 flex-1">
                             <div className="w-16 h-16 sm:w-24 sm:h-24 bg-slate-50 border border-slate-100 rounded-2xl p-2 flex-shrink-0 flex items-center justify-center">
-                              <img src={item.image} className="w-full h-full object-contain mix-blend-multiply" onError={(e) => { e.target.src = `https://placehold.co/100x100/F8F8F8/767676?text=Img` }} />
+                              <img src={product.image || item.image} className="w-full h-full object-contain mix-blend-multiply" onError={(e) => { e.target.src = `https://placehold.co/100x100/F8F8F8/767676?text=Img` }} />
                             </div>
                             <div className="flex-1 flex flex-col">
-                              <h4 className="font-semibold text-base sm:text-lg text-slate-800 leading-tight line-clamp-2">{item.name}</h4>
+                              <h4 className="font-semibold text-base sm:text-lg text-slate-800 leading-tight line-clamp-2">{product.name || item.name}</h4>
                               <p className="text-xs sm:text-sm font-medium text-slate-500 mt-0.5 sm:mt-1">{item.quantity} {unit}</p>
                               <div className="flex items-center justify-between mt-2 sm:mt-2 w-full">
-                                <p className="font-bold text-base sm:text-lg text-slate-900">₹{item.price}</p>
+                                <p className="font-bold text-base sm:text-lg text-slate-900">₹{product.price || item.price}</p>
                                 <div className="flex sm:hidden items-center bg-slate-100 text-slate-800 rounded-xl h-9 shadow-sm border border-slate-200">
                                 <button onClick={() => {
                                     const qtyToRemove = item.quantity >= 1 ? 1 : item.quantity;
@@ -491,7 +542,7 @@ export default function Cart() {
                                   }} className="px-2.5 h-full flex items-center justify-center rounded-l-xl hover:bg-slate-200 transition-colors"><Minus size={14} strokeWidth={3}/></button>
                                   <span className="font-bold text-sm w-7 text-center">{item.quantity}</span>
                                 <button onClick={() => {
-                                    addToCart(item.name, item.price, 1, item.image, item.id);
+                                    addToCart(product.name || item.name, product.price || item.price, 1, product.image || item.image, item.id);
                                   }} className="px-2.5 h-full flex items-center justify-center rounded-r-xl hover:bg-slate-200 transition-colors"><Plus size={14} strokeWidth={3}/></button>
                                 </div>
                               </div>
@@ -505,7 +556,7 @@ export default function Cart() {
                                 }} className="px-3 h-full flex items-center justify-center rounded-l-xl hover:bg-slate-200 transition-colors"><Minus size={16} strokeWidth={3}/></button>
                               <span className="font-bold text-base w-8 text-center">{item.quantity}</span>
                               <button onClick={() => {
-                                addToCart(item.name, item.price, 1, item.image, item.id);
+                                addToCart(product.name || item.name, product.price || item.price, 1, product.image || item.image, item.id);
                                 }} className="px-3 h-full flex items-center justify-center rounded-r-xl hover:bg-slate-200 transition-colors"><Plus size={16} strokeWidth={3}/></button>
                             </div>
                           </div>
@@ -772,12 +823,10 @@ export default function Cart() {
                 <h3 className="font-extrabold text-lg sm:text-xl mb-5 sm:mb-6 text-slate-800 border-b border-slate-100 pb-3 sm:pb-4">Bill Details</h3>
 
                 {/* Coupon Code Section */}
+                {step === 1 && (
                 <div className="mb-6 pb-6 border-b border-dashed border-slate-200">
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="font-bold text-md text-slate-800 flex items-center gap-1.5"><Tag size={16} className="text-green-600"/> Have a coupon?</h3>
-                    <button type="button" onClick={() => setShowOffers(!showOffers)} className="text-xs text-green-600 font-bold hover:underline">
-                      {showOffers ?"Hide offers" :"View offers"}
-                    </button>
                   </div>
                   <div className="flex gap-2">
                   <input type="text" placeholder="ENTER CODE" value={couponCode} onChange={(e) => {
@@ -786,19 +835,50 @@ export default function Cart() {
                   }} className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 font-medium text-sm uppercase"/>
                     <button type="button" onClick={handleApplyCoupon} className="px-4 btn-3d btn-lime font-bold text-xs">APPLY</button>
                   </div>
-                  {showOffers && availableCoupons.length > 0 && (
-                    <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-1">
-                      {availableCoupons.map((offer, idx) => (
-                        <div key={idx} className="border border-dashed border-green-300 bg-green-50 p-3 rounded-lg flex justify-between items-center">
-                          <div><span className="font-bold text-green-700 text-sm block">{offer.code}</span><span className="text-xs text-slate-600">Get {offer.discountPercent}% OFF. {offer.validUntil ? `Valid till ${new Date(offer.validUntil).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : `Valid till ${new Date(offer.expiryDate).toLocaleDateString()}`}</span></div>
-                          <button type="button" onClick={() => handleApplyCouponDirect(offer)} className="bg-white border border-green-200 text-green-600 px-3 py-1.5 rounded-md text-xs font-bold hover:bg-green-100 transition-colors shadow-sm">Use</button>
-                        </div>
-                      ))}
+                  {couponMessage.text && (
+                    <p className={`mt-2 text-xs font-bold ${couponMessage.type === "success" ? "text-green-600" : couponMessage.type === "info" ? "text-blue-500" : "text-red-500"}`}>
+                      {couponMessage.type === "success" ? "✓ " : couponMessage.type === "info" ? "⏳ " : "✕ "}
+                      {couponMessage.text}
+                    </p>
+                  )}
+
+                  {/* Always show active coupons */}
+                  {availableCoupons.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">🎉 Available Offers</p>
+                      <div className="space-y-2">
+                        {availableCoupons.map((offer, idx) => {
+                          const isApplied = appliedCoupon?.code === offer.code;
+                          const expiryLabel = offer.validUntil
+                            ? `Valid till ${new Date(offer.validUntil).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                            : offer.valid_until
+                              ? `Valid till ${new Date(offer.valid_until).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                              : offer.expiryDate
+                                ? `Valid till ${new Date(offer.expiryDate).toLocaleDateString()}`
+                                : '';
+                          return (
+                            <div key={idx} className={`border rounded-xl p-3 flex justify-between items-center transition-all duration-200 ${isApplied ? 'border-green-500 bg-green-50 shadow-md shadow-green-100' : 'border-dashed border-green-300 bg-gradient-to-r from-green-50/80 to-emerald-50/50 hover:shadow-sm'}`}>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-black text-green-700 text-sm tracking-wide bg-white border border-green-200 px-2 py-0.5 rounded-md">{offer.code}</span>
+                                  <span className="bg-green-100 text-green-700 text-[10px] font-black px-2 py-0.5 rounded-full">{offer.discountPercent}% OFF</span>
+                                  {isApplied && <span className="text-[10px] font-black text-green-600 bg-green-100 px-2 py-0.5 rounded-full">✓ APPLIED</span>}
+                                </div>
+                                {expiryLabel && <p className="text-[11px] text-slate-500 font-medium mt-1">{expiryLabel}</p>}
+                              </div>
+                              {!isApplied ? (
+                                <button type="button" onClick={() => handleApplyCouponDirect(offer)} className="bg-green-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-black hover:bg-green-700 transition-colors shadow-sm ml-3 shrink-0">Use</button>
+                              ) : (
+                                <button type="button" onClick={() => { setAppliedCoupon(null); setCouponCode(''); setCouponMessage({ type:"", text:"" }); }} className="bg-red-50 text-red-500 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors ml-3 shrink-0">Remove</button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
-                  {showOffers && availableCoupons.length === 0 && <div className="mt-3 text-xs text-slate-500 italic font-medium bg-slate-50 p-3 rounded-lg text-center">No offers available currently.</div>}
-                  {couponMessage.text && <p className={`mt-2 text-xs font-bold ${couponMessage.type ==="success" ?"text-green-600" :"text-red-500"}`}>{couponMessage.type ==="success" ?"✓" :"✕"} {couponMessage.text}</p>}
                 </div>
+                )}
 
                 <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-slate-600 font-medium mb-5 sm:mb-6">
                   <div className="flex justify-between"><span>Item Total</span><span className="font-bold text-slate-800">₹{total}</span></div>

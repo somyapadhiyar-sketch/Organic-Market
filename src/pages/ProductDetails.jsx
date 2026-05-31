@@ -74,7 +74,7 @@ export default function ProductDetails() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 flex flex-col">
       <Navbar />
       
-      <main className="flex-grow max-w-7xl mx-auto px-4 md:px-8 pt-[140px] pb-0 -mb-10 lg:-mb-16 w-full">
+      <main className="flex-grow max-w-7xl mx-auto px-4 md:px-8 pt-[140px] pb-16 w-full">
         
         {/* Breadcrumb / Back Navigation */}
         <motion.div 

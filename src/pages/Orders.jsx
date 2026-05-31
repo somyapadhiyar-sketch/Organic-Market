@@ -4,8 +4,7 @@ import { useStore } from"../context/StoreContext";
 import Navbar from"../components/Navbar";
 import { ShoppingBag, Package, CreditCard, Motorbike, Search as SearchIcon, Phone, Tag, Download } from 'lucide-react'; 
 import Footer from"../components/Footer";
-import { getFirestore, doc, updateDoc } from "firebase/firestore";
-import { auth } from "../firebase";
+
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -53,7 +52,8 @@ export default function Orders() {
 
   const handleBuyAgain = (order) => {
     (order.items || []).forEach((item) => {
-      addToCart(item.name, item.price, item.quantity || 1, item.image, item.id);
+      const product = products.find(p => p.id === item.id) || {};
+      addToCart(product.name || item.name, product.price || item.price, item.quantity || 1, product.image || item.image, item.id);
     });
     showToast("Items from order added to cart!");
     navigate("/user/cart");
@@ -69,8 +69,6 @@ export default function Orders() {
   const handleCancelOrder = async (order) => {
     if (window.confirm("Are you sure you want to cancel this order?")) {
       try {
-        const db = getFirestore(auth.app);
-        await updateDoc(doc(db, "orders", order.id), { status: 'Cancelled' });
         
         // Hit the n8n webhook to restock the products in MongoDB/Admin
         try {
@@ -89,15 +87,6 @@ export default function Orders() {
         } catch (error) {
           console.error("Error sending cancel order to n8n webhook:", error);
         }
-
-        // Restock products in Firebase to update Admin panel immediately
-        (order.items || []).forEach(item => {
-          const product = products.find(p => p.id === item.id);
-          if (product) {
-            const newStock = Math.round(((product.stock || 0) + item.quantity) * 100) / 100;
-            updateDoc(doc(db, "products", product.id), { stock: newStock }).catch(console.error);
-          }
-        });
 
         showToast("Order cancelled successfully!");
       } catch (error) {
@@ -497,14 +486,14 @@ export default function Orders() {
                               return (
                                 <div key={idx} className="flex items-center gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-1">
                                   <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 p-2 flex-shrink-0">
-                                    <img src={item.image} alt={item.name} className="w-full h-full object-contain mix-blend-multiply" />
+                                    <img src={product.image || item.image} alt={product.name || item.name} className="w-full h-full object-contain mix-blend-multiply" />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="font-bold text-slate-800 text-sm truncate">{item.name}</p>
-                                    <p className="text-xs font-bold text-slate-500 mt-0.5">{item.quantity}{unit} × ₹{item.price}</p>
+                                    <p className="font-bold text-slate-800 text-sm truncate">{product.name || item.name}</p>
+                                    <p className="text-xs font-bold text-slate-500 mt-0.5">{item.quantity}{unit} × ₹{product.price || item.price}</p>
                                   </div>
                                   <div className="text-right shrink-0">
-                                    <p className="font-black text-slate-800 text-sm">₹{Math.round(item.price * item.quantity)}</p>
+                                    <p className="font-black text-slate-800 text-sm">₹{Math.round((product.price || item.price) * item.quantity)}</p>
                                   </div>
                                 </div>
                               )

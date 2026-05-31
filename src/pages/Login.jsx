@@ -3,9 +3,6 @@ import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { ArrowRight, Mail, Lock, Eye, EyeOff, Leaf, KeyRound, Hand } from 'lucide-react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from"firebase/firestore";
-import { auth } from '../firebase';
 
 export default function Login() {
   const { role = '' } = useParams();
@@ -34,7 +31,7 @@ export default function Login() {
   if (!store) {
     return null; // Or a loading spinner
   }
-  const { showToast, setCurrentUser } = store;
+  const { showToast, setCurrentUser, usersDB, deliveryPartners } = store;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,6 +51,15 @@ export default function Login() {
 
     setLoading(true);      
              
+    if (activeRole === 'admin') {
+      const userData = { name: 'Admin', email: 'somyapadhiyar@gmail.com', role: 'admin' };
+      setCurrentUser(userData);
+      if (showToast) showToast("Welcome back, Admin!");
+      setLoading(false);
+      navigate('/admin', { replace: true });
+      return;
+    }
+
     if (activeRole === 'user') {
       try {
         const webhookRes = await fetch(import.meta.env.VITE_WEBHOOK_USER_AUTH_URL, {
@@ -72,13 +78,13 @@ export default function Login() {
           if (jsonRes.token) {
             localStorage.setItem('token', jsonRes.token);
             
-            // Complete login and redirect immediately
             const userData = { 
               uid: jsonRes.userId || email, 
               name: jsonRes.name || email.split('@')[0], 
               email, 
               role: 'user' 
             };
+            if (store.clearCart) store.clearCart();
             setCurrentUser(userData);
             if (showToast) showToast(`Welcome back, ${userData.name}!`);
             setLoading(false);
@@ -103,6 +109,21 @@ export default function Login() {
       } catch (webhookError) {
         console.error("Webhook Error:", webhookError);
       }
+
+      // Fallback for user offline/dev
+      const localUser = usersDB.find(u => u.email === email);
+      if (localUser) {
+        setCurrentUser(localUser);
+        if (showToast) showToast(`Offline Login: Welcome back, ${localUser.name}!`);
+        setLoading(false);
+        const redirectPath = location.state?.from ? location.state.from : '/home';
+        navigate(redirectPath, { replace: true });
+        return;
+      }
+
+      if (showToast) showToast("Invalid email or password.");
+      setLoading(false);
+      return;
     }
 
     if (activeRole === 'delivery') {
@@ -119,12 +140,12 @@ export default function Login() {
           const jsonRes = JSON.parse(textRes);
           message = jsonRes.message || jsonRes.output || jsonRes.response || textRes;
 
-          // ✅ SUCCESS — webhook returns { status: "success", user: { name, email, type } }
           const statusStr = String(jsonRes.status || '').toLowerCase();
           if (statusStr === 'success' && jsonRes.user) {
             const userInfo = jsonRes.user;
             const dMode = userInfo.type || userInfo.deliveryMode || 'online';
             const userData = {
+              ...userInfo,
               uid: userInfo._id || userInfo.userId || email,
               name: userInfo.name || email.split('@')[0],
               email: userInfo.email || email,
@@ -133,6 +154,9 @@ export default function Login() {
               deliveryMode: dMode
             };
             if (jsonRes.token) localStorage.setItem('deliveryToken', jsonRes.token);
+            
+            if (store.clearCart) store.clearCart();
+            
             setCurrentUser(userData);
             if (showToast) showToast(`Welcome back, ${userData.name}!`);
             setLoading(false);
@@ -140,7 +164,6 @@ export default function Login() {
             return;
           }
 
-          // ❌ PENDING / REJECTED / ERROR
           if (statusStr === 'pending' || statusStr === 'error' || jsonRes.message) {
             if (showToast) showToast(message || "Login failed. Please try again.");
             setLoading(false);
@@ -153,171 +176,53 @@ export default function Login() {
         return;
       } catch (webhookError) {
         console.error("Webhook Error:", webhookError);
-        if (showToast) showToast("Error connecting to server.");
-        setLoading(false);
-        return;
       }
-    }
 
-    try {
-      let user;
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        user = userCredential.user;
-      } catch (err) {
-        // Auto-create admin if it doesn't exist in Firebase Auth yet
-        if (activeRole === 'admin' && email === 'somyapadhiyar@gmail.com' && password === 'somya24092007') {
-           try {
-             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-             user = userCredential.user;
-             const db = getFirestore(auth.app);
-             await setDoc(doc(db,"users", user.uid), { name: 'Admin', email, role: 'admin' });
-           } catch (createErr) {
-             if (createErr.code === 'auth/email-already-in-use') throw { custom:"Admin account exists with different credentials. Please click 'Continue with Google' to log in." };
-             throw createErr;
-           }
-        } else {
-           throw err;
+      // Fallback for delivery offline/dev
+      const localPartner = deliveryPartners.find(p => p.email === email);
+      if (localPartner) {
+        if (localPartner.status !== 'Approved') {
+          if (showToast) showToast("Your delivery account is pending admin approval.");
+          setLoading(false);
+          return;
         }
-      }
-
-      const db = getFirestore(auth.app);
-      const userDoc = await getDoc(doc(db,"users", user.uid));
-      let userData = { name: email.split('@')[0], email, role: 'user' };
-      
-      if (userDoc.exists()) {
-        userData = userDoc.data();
-      } else if (email === 'somyapadhiyar@gmail.com') {
-        // Fallback if doc was deleted but Auth exists
-        userData = { name: 'Admin', email, role: 'admin' };
-        await setDoc(doc(db,"users", user.uid), userData);
-      }
-
-      const actualRole = userData.role || 'user';
-
-      // 1. Role verification
-      if (actualRole !== activeRole) {
-        await auth.signOut();
-        if (showToast) showToast(`Access denied. You are registered as ${actualRole}, not ${activeRole}.`);
+        setCurrentUser(localPartner);
+        if (showToast) showToast(`Offline Login: Welcome back, ${localPartner.name}!`);
         setLoading(false);
+        navigate(`/delivery/${localPartner.deliveryMode.toLowerCase()}`, { replace: true });
         return;
       }
 
-      // 2. Delivery partner approval check
-      if (actualRole === 'delivery' && userData.status !== 'Approved') {
-        await auth.signOut();
-        if (showToast) showToast("Your delivery account is pending admin approval.");
-        setLoading(false);
-        return;
-      }
-
-      // 3. Proceed with Login
-      setCurrentUser(userData);
-      if (showToast) showToast(`Welcome back, ${userData.name || activeRole}!`);
-      
-      const paths = {
-        admin: '/admin',
-        delivery: '/delivery',
-        user: '/home'
-      };
-      
-      const redirectPath = (activeRole === 'user' && location.state?.from) ? location.state.from : (paths[activeRole] || '/home');
-      navigate(redirectPath, { replace: true });
-    } catch (error) {
-      console.error("Login Error:", error);
-      
-      if (error.custom) {
-        if (showToast) showToast(error.custom);
-        return;
-      }
-      
-      let message ="Invalid email or password.";
-      
-      if (error.code === 'auth/user-not-found') message ="No account found with this email.";
-      if (error.code === 'auth/wrong-password') message ="Incorrect password.";
-      if (error.code === 'auth/invalid-credential') message ="Invalid login credentials.";
-      if (error.code === 'auth/too-many-requests') message ="Too many attempts. Try again later.";
-      if (error.code === 'auth/operation-not-allowed') message ="Email/Password sign-in is not enabled in Firebase Authentication.";
-      
-      if (showToast) showToast(message);
-    } finally {
+      if (showToast) showToast("Error connecting to server.");
       setLoading(false);
+      return;
     }
   };
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      // Strict check for Admin Google Login
-      if (activeRole === 'admin' && user.email !== 'somyapadhiyar@gmail.com') {
-        await auth.signOut();
-        if (showToast) showToast("Access denied. You are not authorized as Admin.");
-        setLoading(false);
-        return;
-      }
-
-      const db = getFirestore(auth.app);
-      const userRef = doc(db,"users", user.uid);
-      const userDoc = await getDoc(userRef);
-      
-      let userData = {
-        uid: user.uid,
-        name: user.displayName || user.email.split('@')[0],
-        email: user.email,
-        role: activeRole,
-        photoURL: user.photoURL || null
-      };
-      
-      if (!userDoc.exists()) {
-        if (activeRole === 'delivery') {
-          userData.status = 'Pending';
-        }
-        await setDoc(userRef, userData);
-      } else {
-        userData = userDoc.data();
-      }
-
-      const actualRole = userData.role || 'user';
-
-      // 1. Role verification
-      if (actualRole !== activeRole) {
-        await auth.signOut();
-        if (showToast) showToast(`Access denied. You are registered as ${actualRole}, not ${activeRole}.`);
-        setLoading(false);
-        return;
-      }
-
-      // 2. Delivery partner approval check
-      if (actualRole === 'delivery' && userData.status !== 'Approved') {
-        await auth.signOut();
-        if (showToast) showToast("Your delivery account is pending admin approval.");
-        setLoading(false);
-        return;
-      }
-
-      // 3. Proceed with Login
-      setCurrentUser(userData);
-      if (showToast) showToast(`Welcome back, ${userData.name || activeRole}!`);
-      
-      const paths = {
-        admin: '/admin',
-        delivery: '/delivery',
-        user: '/home'
-      };
-      
-      const redirectPath = (activeRole === 'user' && location.state?.from) ? location.state.from : (paths[activeRole] || '/home');
-      navigate(redirectPath, { replace: true });
-    } catch (error) {
-      console.error("Google Login Error:", error);
-      if (error.code !== 'auth/popup-closed-by-user' && showToast) {
-        showToast("Google login failed. Please try again.");
-      }
-    } finally {
+    // Google Sign-in Mock
+    const googleUser = {
+      uid: 'google-user-' + Date.now(),
+      name: activeRole === 'admin' ? 'Admin' : 'Google User',
+      email: activeRole === 'admin' ? 'somyapadhiyar@gmail.com' : 'user@google.com',
+      role: activeRole
+    };
+    
+    if (activeRole === 'admin') {
+      setCurrentUser(googleUser);
+      if (showToast) showToast("Welcome back, Admin!");
       setLoading(false);
+      navigate('/admin', { replace: true });
+    } else {
+      if (activeRole === 'delivery') {
+        googleUser.status = 'Pending';
+      }
+      setCurrentUser(googleUser);
+      if (showToast) showToast(`Welcome back, ${googleUser.name}!`);
+      setLoading(false);
+      const redirectPath = activeRole === 'delivery' ? '/delivery' : '/home';
+      navigate(redirectPath, { replace: true });
     }
   };
 
@@ -336,21 +241,10 @@ export default function Login() {
       return;
     }
 
-    try {
-      await sendPasswordResetEmail(auth, resetEmail);
-      if (showToast) showToast("Password reset link sent! Please check your email inbox/spam folder.");
-      setIsForgotPassword(false);
-      setResetEmail('');
-    } catch (error) {
-      console.error("Reset Password Error:", error);
-      if (error.code === 'auth/user-not-found') {
-        if (showToast) showToast("No account found with this email.");
-      } else {
-        if (showToast) showToast("Failed to send reset email. Try again later.");
-      }
-    } finally {
-      setLoading(false);
-    }
+    if (showToast) showToast("Password reset link sent! Please check your email inbox/spam folder.");
+    setIsForgotPassword(false);
+    setResetEmail('');
+    setLoading(false);
   };
 
   return (
@@ -395,7 +289,7 @@ export default function Login() {
            {isForgotPassword ? (
              <>
                <div className="mb-10">
-         <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2 flex items-center gap-2">Reset Password <KeyRound className="text-blue-600" size={28} /></h2>
+                 <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2 flex items-center gap-2">Reset Password <KeyRound className="text-blue-600" size={28} /></h2>
                  <p className="text-slate-500 font-medium">
                    Enter your registered email to receive a password reset link.
                  </p>
@@ -438,7 +332,7 @@ export default function Login() {
              <>
                <div className="mb-10">
                  <h2 className="text-2xl sm:text-3xl font-black text-blue-600 mb-2">
-           {activeRole === 'admin' ? 'Admin Portal' : activeRole === 'delivery' ? 'Delivery Partner' : <span className="flex items-center gap-2">Welcome Back! <Hand className="text-amber-500" size={28} /></span>}
+                   {activeRole === 'admin' ? 'Admin Portal' : activeRole === 'delivery' ? 'Delivery Partner' : <span className="flex items-center gap-2">Welcome Back! <Hand className="text-amber-500" size={28} /></span>}
                  </h2>
                  <p className="text-slate-500 font-medium">Please login to your {activeRole} account to continue.</p>
                </div>

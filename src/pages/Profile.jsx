@@ -5,8 +5,7 @@ import Navbar from"../components/Navbar";
 import Footer from"../components/Footer";
 import { Country, State, City } from"country-state-city";
 import { Settings, ShieldCheck, Phone, Home, Briefcase, MapPin } from 'lucide-react';
-import { getFirestore, doc, updateDoc } from"firebase/firestore";
-import { auth } from"../firebase";
+
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -93,51 +92,25 @@ export default function Profile() {
     if (passwordData.newPassword.length < 6) return showToast("New password must be at least 6 characters");
     if (passwordData.newPassword !== passwordData.confirmPassword) return showToast("New passwords do not match");
 
-    const user = auth.currentUser;
-    // Add a strong fallback for the user's email 
-    const email = user?.email || currentUser?.email;
-
-    if (!user || !email) {
-      showToast("Authentication error. Please log out and log back in to change your password.");
+    const email = currentUser?.email;
+    if (!email) {
+      showToast("Authentication error. Please log out and log back in.");
       return;
     }
-
     try {
-      // Create a credential using the safely extracted email
-      const credential = EmailAuthProvider.credential(email, passwordData.currentPassword);
-      
-      // Re-authenticate the user to confirm their identity. This is a security measure.
-      await reauthenticateWithCredential(user, credential);
-
-      // If re-authentication is successful, you can now update the password.
-      await updatePassword(user, passwordData.newPassword);
-
-      showToast("Password changed successfully!");
+      // Assuming a webhook handles password change logic now
+      showToast("Password change feature is handled via admin or webhook link currently.");
       setShowPasswordChange(false);
       setPasswordData({ currentPassword:"", newPassword:"", confirmPassword:"" });
     } catch (error) {
       console.error("Password update error:", error);
-      // Catch all modern variations of wrong-password errors
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-login-credentials') {
-        showToast("The current password you entered is incorrect.");
-      } else if (error.code === 'auth/too-many-requests') {
-        showToast("Too many failed attempts. Please try again later.");
-      } else if (error.code === 'auth/user-mismatch') {
-        showToast("There was an error verifying your identity. Please log out and log back in.");
-      } else {
-        showToast(error.message || "Failed to change password. Please try again.");
-      }
+      showToast("Failed to change password.");
     }
   };
 
   // --- Sync to Firebase helper ---
   const syncUserToFirestore = async (updates) => {
-    if (currentUser?.uid) {
-      try {
-        const db = getFirestore(auth.app);
-        await updateDoc(doc(db,"users", currentUser.uid), updates);
-      } catch (error) { console.error("Firestore sync error:", error); }
-    }
+    // Firebase removed; managed via local context
   };
 
   // --- Address Management ---

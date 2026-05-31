@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, where, updateDoc, onSnapshot, increment, runTransaction } from"firebase/firestore";
-import { auth } from '../firebase';
+import initialProducts from '../data/products.json';
+import initialOrders from '../data/orders.json';
+import initialUsers from '../data/users.json';
 
 let hasAlertedQuota = false;
 
@@ -16,8 +17,6 @@ const safeJSONParse = (key, fallback) => {
   }
 };
 
-const defaultProducts = [];
-
 const StoreContext = createContext();
 
 export function StoreProvider({ children }) {
@@ -29,38 +28,23 @@ export function StoreProvider({ children }) {
       return null;
     }
   });
-  const [usersDB, setUsersDB] = useState(() => safeJSONParse('usersDB', []));
+  const [usersDB, setUsersDB] = useState(() => safeJSONParse('usersDB', initialUsers));
   const [deliveryPartners, setDeliveryPartners] = useState(() => safeJSONParse('deliveryPartners', []));
   const [userLocation, setUserLocation] = useState(() => localStorage.getItem('userLocation') || 'Ahmedabad, Gujarat');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Start with default products, but we will overwrite this immediately with Firebase data
-  const [products, setProducts] = useState(defaultProducts); 
-  const [orders, setOrders] = useState(() => safeJSONParse('orders', []));
+  const [products, setProducts] = useState(() => safeJSONParse('products', initialProducts)); 
+  const [orders, setOrders] = useState(() => safeJSONParse('orders', initialOrders));
   const [cart, setCart] = useState(() => safeJSONParse('cart', []));
   const [wishlist, setWishlist] = useState(() => safeJSONParse('wishlist', []));
   const [salesHistory, setSalesHistory] = useState(() => safeJSONParse('salesHistory', []));
   const [toasts, setToasts] = useState([]);
   const [pendingOrderId, setPendingOrderId] = useState(null);
 
-  // Fetch Products from Firebase on App Load
+  // Fetch Delivery Partners from Webhook on App Load
   useEffect(() => {
-    const db = getFirestore(auth.app);
-
-    // Real-time listener for products
-    const unsubscribeProducts = onSnapshot(collection(db, "products"), (snapshot) => {
-      if (!snapshot.empty) {
-        const fbProducts = snapshot.docs.map(doc => doc.data());
-        setProducts(fbProducts);
-      } else {
-        console.log("No products found in Firestore.");
-        setProducts([]); // Set to empty array if collection is empty
-      }
-    }, (error) => {
-      console.error("Error fetching products in real-time:", error);
-    });
-
-    // Fetch Delivery Partners from MongoDB Webhook
+    if (currentUser?.role !== 'admin') return;
+    
     const fetchMongoPartners = async () => {
       try {
         const res = await fetch(import.meta.env.VITE_WEBHOOK_GET_PARTNERS_URL);
@@ -93,47 +77,11 @@ export function StoreProvider({ children }) {
     };
     
     fetchMongoPartners();
+  }, [currentUser]);
 
-    // Cleanup listeners on component unmount
-    return () => {
-      unsubscribeProducts();
-    };
-  }, []); // Empty dependency array ensures this runs only once on mount
-
-  // Fetch Orders from Firebase in Real-time
+  // Compute Sales History dynamically if empty
   useEffect(() => {
-    const db = getFirestore(auth.app);
-    const unsubscribe = onSnapshot(collection(db,"orders"), (snapshot) => {
-      if (!snapshot.empty) {
-        const fbOrders = snapshot.docs.map(doc => doc.data());
-        // Sort orders so newest are first (using the timestamp embedded in ID)
-        fbOrders.sort((a, b) => {
-          const timeA = parseInt((a.id || '').replace('ORD', '')) || 0;
-          const timeB = parseInt((b.id || '').replace('ORD', '')) || 0;
-          return timeB - timeA;
-        });
-        setOrders(fbOrders);
-
-      } else {
-        setOrders([]);
-      }
-    }, (error) => console.error("Error fetching orders:", error));
-    return () => unsubscribe();
-  }, []);
-
-  // Fetch Sales History from Firebase in Real-time for the last 30 days
-  useEffect(() => {
-    const db = getFirestore(auth.app);
-    const salesCollection = collection(db, 'sales');
-
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    thirtyDaysAgo.setHours(0, 0, 0, 0);
-
-    const q = query(salesCollection, where("timestamp",">=", thirtyDaysAgo));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      // Each time we get an update, we'll rebuild the history from scratch
+    if (salesHistory.length === 0) {
       const newHistoryMap = new Map();
       for (let i = 29; i >= 0; i--) {
         const d = new Date();
@@ -143,26 +91,33 @@ export function StoreProvider({ children }) {
         newHistoryMap.set(dateStr, { name: dateStr, date: dateStr, sales: 0, revenue: 0, orders: 0 });
       }
 
-      snapshot.forEach(doc => {
-        const sale = doc.data();
-        // Ensure timestamp exists and is valid before proceeding
-        if (sale.timestamp && sale.timestamp.toDate) {
-            const saleDate = sale.timestamp.toDate();
-            const dateStr = saleDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            if (newHistoryMap.has(dateStr)) {
-                // Overwrite the zeroed-out day with the actual sales data from Firestore
-                newHistoryMap.set(dateStr, { ...sale, name: dateStr, date: dateStr });
+      orders.forEach(order => {
+        if (order.status !== 'Cancelled') {
+          let orderDate = new Date(order.createdAt || order.date);
+          if (isNaN(orderDate.getTime()) && order.date) {
+            const datePart = String(order.date).split(',')[0].trim();
+            const parts = datePart.split(/[\/\-]/);
+            if (parts.length === 3) {
+              orderDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
             }
+          }
+          if (!isNaN(orderDate.getTime())) {
+            const dateStr = orderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            if (newHistoryMap.has(dateStr)) {
+              const entry = newHistoryMap.get(dateStr);
+              entry.sales += Number(order.total || 0);
+              entry.revenue += Number(order.total || 0);
+              entry.orders += 1;
+              newHistoryMap.set(dateStr, entry);
+            }
+          }
         }
       });
       setSalesHistory(Array.from(newHistoryMap.values()));
-    }, (error) => {
-      console.error("Error fetching sales history:", error);
-    });
+    }
+  }, [orders]);
 
-    return () => unsubscribe();
-  }, []);
-
+  // Persist state changes to Local Storage
   useEffect(() => {
     try {
       if (currentUser) {
@@ -174,6 +129,7 @@ export function StoreProvider({ children }) {
       
       localStorage.setItem('usersDB', JSON.stringify(usersDB));
       localStorage.setItem('deliveryPartners', JSON.stringify(deliveryPartners));
+      localStorage.setItem('products', JSON.stringify(products));
       localStorage.setItem('orders', JSON.stringify(orders));
       localStorage.setItem('cart', JSON.stringify(cart));
       localStorage.setItem('wishlist', JSON.stringify(wishlist));
@@ -186,7 +142,7 @@ export function StoreProvider({ children }) {
         hasAlertedQuota = true;
       }
     }
-  }, [currentUser, usersDB, deliveryPartners, orders, cart, wishlist, salesHistory, userLocation]);
+  }, [currentUser, usersDB, deliveryPartners, products, orders, cart, wishlist, salesHistory, userLocation]);
 
   const showToast = (message) => {
     const id = Date.now() + Math.random();
@@ -195,10 +151,16 @@ export function StoreProvider({ children }) {
   };
   const removeToast = (id) => setToasts(prev => prev.filter(t => t.id !== id));
 
-  // Password Reset Methods
+  // User Actions
   const updateUser = (updatedUser) => {
     setCurrentUser(updatedUser);
-    setUsersDB(prev => prev.map(u => u.email === updatedUser.email ? updatedUser : u));
+    setUsersDB(prev => {
+      const exists = prev.some(u => u.email === updatedUser.email);
+      if (exists) {
+        return prev.map(u => u.email === updatedUser.email ? updatedUser : u);
+      }
+      return [...prev, updatedUser];
+    });
   };
   const deleteUser = (email) => {
     setUsersDB(prev => prev.filter(u => u.email !== email));
@@ -206,8 +168,9 @@ export function StoreProvider({ children }) {
   };
   
   const logout = () => {
-    auth.signOut();
-    setCurrentUser(null)
+    setCurrentUser(null);
+    setCart([]);
+    setWishlist([]);
   };
 
   // Admin Methods
@@ -215,22 +178,26 @@ export function StoreProvider({ children }) {
     setDeliveryPartners(prev => prev.map(d => d.email === email ? { ...d, status: 'Approved' } : d));
   };
 
+  const deleteDeliveryPartner = (email) => {
+    setDeliveryPartners(prev => prev.filter(d => d.email !== email));
+  };
+
   const toggleProductStatus = async (id) => {
     let isDisabled;
-    setProducts(prev => prev.map(p => {
-      if (p.id === id) {
-        isDisabled = !p.disabled;
-        return { ...p, disabled: isDisabled };
-      }
-      return p;
-    }));
+    setProducts(prev => {
+      const updated = prev.map(p => {
+        if (p.id === id) {
+          isDisabled = !p.disabled;
+          return { ...p, disabled: isDisabled };
+        }
+        return p;
+      });
+      return updated;
+    });
 
-    if (typeof isDisabled === 'undefined') return; // Product not found
+    if (typeof isDisabled === 'undefined') return;
 
     try {
-      const db = getFirestore(auth.app);
-      await setDoc(doc(db,"products", id), { disabled: isDisabled }, { merge: true });
-      // Webhook for disable/enable
       fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -245,11 +212,8 @@ export function StoreProvider({ children }) {
   const deleteProduct = async (id) => {
     if(window.confirm("Delete this item?")) {
       setProducts(prev => prev.filter(p => p.id !== id));
-      setCart(prev => prev.filter(item => !item.id.startsWith(id))); // Remove variants
+      setCart(prev => prev.filter(item => !item.id.startsWith(id))); 
       try {
-        const db = getFirestore(auth.app);
-        await deleteDoc(doc(db,"products", id));
-        // Webhook for delete
         fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -263,13 +227,8 @@ export function StoreProvider({ children }) {
   };
 
   const addNewProduct = async (product) => {
-    // The product object is now fully-formed from the AdminAddProduct component.
-    // This function just handles adding it to state and Firestore.
     setProducts(prev => [product, ...prev]);
     try {
-      const db = getFirestore(auth.app);
-      await setDoc(doc(db,"products", product.id), product);
-      // Webhook for add
       fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -284,24 +243,19 @@ export function StoreProvider({ children }) {
   const editProduct = async (id, updatedData) => {
     setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updatedData } : p));
     try {
-      const db = getFirestore(auth.app);
-      await setDoc(doc(db,"products", id), updatedData, { merge: true });
-
       const keys = Object.keys(updatedData);
       const isStockUpdate = keys.includes('stock') && (keys.length === 1 || (keys.length === 2 && keys.includes('disabled')));
 
       if (isStockUpdate) {
-        // Webhook for admin stock update
-          fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
+        fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'stock_change',
-              product: { id: id, stock: Math.round(updatedData.stock * 100) / 100 }
+            product: { id: id, stock: Math.round(updatedData.stock * 100) / 100 }
           }),
-          }).catch(error => console.error("Webhook failed for admin stock refill:", error));
+        }).catch(error => console.error("Webhook failed for admin stock refill:", error));
       } else {
-        // Webhook for general edit
         fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -317,18 +271,15 @@ export function StoreProvider({ children }) {
   const isPlacingOrder = useRef(false);
 
   const placeOrder = async (details) => {
-    // 1. Aggressive Anti-Duplicate Protection using a ref-based lock
     if (isPlacingOrder.current) return { success: false, msg: 'An order is already being processed.' };
     if (!details || !details.items || details.items.length === 0) return { success: false, msg: 'Cart is empty' };
 
-    isPlacingOrder.current = true; // Set the lock
+    isPlacingOrder.current = true;
     const orderId = 'ORD' + Date.now();
-    setPendingOrderId(orderId); // For UI feedback
+    setPendingOrderId(orderId);
 
     try {
-      const db = getFirestore(auth.app);
       const now = new Date();
-
       const newOrder = { 
         ...details, 
         id: orderId, 
@@ -337,10 +288,8 @@ export function StoreProvider({ children }) {
         status: 'Pending' 
       };
       
-      // 2. Create the order document in Firebase
-      await setDoc(doc(db,"orders", orderId), newOrder);
+      setOrders(prev => [newOrder, ...prev]);
 
-      // Hit the n8n webhook to sync order to MongoDB & deduct stock
       try {
         await fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
           method: "POST",
@@ -356,10 +305,9 @@ export function StoreProvider({ children }) {
         console.error("Error sending order to n8n webhook:", error);
       }
 
-      // 3. Clear the cart AFTER the order is confirmed
       setCart([]);
 
-      // 4. Update Stock in Local State & Firebase
+      // Update Stock locally
       setProducts(prev => prev.map(p => {
         const cartItem = details.items.find(i => i.id === p.id);
         if (cartItem) {
@@ -368,62 +316,77 @@ export function StoreProvider({ children }) {
         return p;
       }));
 
-      details.items.forEach(cartItem => {
-        const product = products.find(p => p.id === cartItem.id);
-        if (product) {
-          const newStock = Math.round(Math.max(0, (product.stock || 0) - cartItem.quantity) * 100) / 100;
-          setDoc(doc(db,"products", product.id), { stock: newStock }, { merge: true }).catch(console.error);
-        }
-      });
-
-      // 5. Update the sales figures (non-blocking)
+      // Update sales figures locally
       const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      const salesDocRef = doc(db,"sales", dateStr);
-      setDoc(salesDocRef, {
-        sales: increment(details.total || 0),
-        revenue: increment(details.total || 0),
-        orders: increment(1),
-        name: dateStr, date: dateStr, timestamp: now
-      }, { merge: true }).catch(console.error);
+      setSalesHistory(prev => {
+        let exists = false;
+        const mapped = prev.map(day => {
+          if (day.date === dateStr) {
+            exists = true;
+            return {
+              ...day,
+              sales: day.sales + Number(details.total || 0),
+              revenue: day.revenue + Number(details.total || 0),
+              orders: day.orders + 1
+            };
+          }
+          return day;
+        });
+        if (!exists) {
+          mapped.push({
+            name: dateStr,
+            date: dateStr,
+            sales: Number(details.total || 0),
+            revenue: Number(details.total || 0),
+            orders: 1
+          });
+        }
+        return mapped;
+      });
 
       return { success: true, orderId };
     } catch (e) {
       console.error("Error placing order:", e);
       return { success: false, msg: 'Database error' };
     } finally {
-      isPlacingOrder.current = false; // Release the lock
+      isPlacingOrder.current = false;
       setPendingOrderId(null);
     }
   };
+
   const updateOrderStatus = async (id, status, partnerEmail = null) => {
-    const orderToUpdate = orders.find(o => o.id === id);
-    if (!orderToUpdate) {
+    let updatedOrder = null;
+    const updatedOrders = orders.map(o => {
+      if (o.id === id) {
+        let updatedFields = { ...o, status };
+        if (partnerEmail) {
+          updatedFields.deliveryPartnerEmail = partnerEmail;
+          const partner = deliveryPartners.find(d => d.email === partnerEmail);
+          if (partner) {
+            updatedFields.deliveryPartner = { name: partner.name, phone: partner.phone };
+          }
+        }
+        updatedOrder = updatedFields;
+        return updatedFields;
+      }
+      return o;
+    });
+
+    if (!updatedOrder) {
       console.error("Order not found for status update:", id);
       return;
     }
 
-    let updatedFields = { status };
-    if (partnerEmail) {
-      updatedFields.deliveryPartnerEmail = partnerEmail;
-      const partner = deliveryPartners.find(d => d.email === partnerEmail);
-      if (partner) {
-        updatedFields.deliveryPartner = { name: partner.name, phone: partner.phone };
-      }
-    }
+    setOrders(updatedOrders);
 
     try {
-      const db = getFirestore(auth.app);
-      await updateDoc(doc(db,"orders", id), updatedFields);
-
-      // Webhook trigger for when order goes Out for Delivery (n8n will generate OTP & handle updates)
       if (status === 'Out for Delivery') {
         fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'order',
-            ...orderToUpdate,
-            ...updatedFields
+            ...updatedOrder
           })
         })
         .then(async (res) => {
@@ -431,33 +394,30 @@ export function StoreProvider({ children }) {
           if (!text) return;
           try {
             const data = JSON.parse(text);
-            // Dynamically extract OTP from n8n response payload
             const otp = data?.deliveryOtp || data?.otp || data?.[0]?.deliveryOtp || data?.output?.deliveryOtp || data?.body?.deliveryOtp;
             if (otp) {
-              updateDoc(doc(db,"orders", id), { deliveryOtp: String(otp) }).catch(console.error);
+              setOrders(prev => prev.map(o => o.id === id ? { ...o, deliveryOtp: String(otp) } : o));
             }
           } catch(err) { console.error("Could not parse n8n response for OTP", err); }
         })
         .catch(e => console.error("Webhook failed for out_for_delivery:", e));
       }
 
-      // Webhook trigger for when order is Delivered
       if (status === 'Delivered') {
         fetch(import.meta.env.VITE_WEBHOOK_PRODUCT_SYNC_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'order',
-            ...orderToUpdate,
-            ...updatedFields
+            ...updatedOrder
           })
         }).catch(e => console.error("Webhook failed for delivered:", e));
       }
 
-      // If order is cancelled, and it was not cancelled before, decrement sales
-      if (status === 'Cancelled' && orderToUpdate.status !== 'Cancelled') {
+      const orderToUpdate = orders.find(o => o.id === id);
+      if (status === 'Cancelled' && orderToUpdate && orderToUpdate.status !== 'Cancelled') {
         let orderDate = new Date(orderToUpdate.createdAt || orderToUpdate.date);
-        if (isNaN(orderDate) && orderToUpdate.date) {
+        if (isNaN(orderDate.getTime()) && orderToUpdate.date) {
             const datePart = String(orderToUpdate.date).split(',')[0].trim();
             const parts = datePart.split(/[\/\-]/);
             if (parts.length === 3) {
@@ -465,24 +425,26 @@ export function StoreProvider({ children }) {
             }
         }
 
-        if (!isNaN(orderDate)) {
+        if (!isNaN(orderDate.getTime())) {
             const dateStr = orderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            const salesDocRef = doc(db,"sales", dateStr);
-            const saleUpdate = {
-                sales: increment(-orderToUpdate.total),
-                revenue: increment(-orderToUpdate.total),
-                orders: increment(-1)
-            };
-            await setDoc(salesDocRef, saleUpdate, { merge: true });
+            setSalesHistory(prev => prev.map(day => {
+              if (day.date === dateStr) {
+                return {
+                  ...day,
+                  sales: day.sales - Number(orderToUpdate.total || 0),
+                  revenue: day.revenue - Number(orderToUpdate.total || 0),
+                  orders: day.orders - 1
+                };
+              }
+              return day;
+            }));
         }
       }
     } catch (error) {
-      console.error("Error updating order status in Firestore:", error);
+      console.error("Error updating order status:", error);
     }
   };
 
-  // --- ZEPTO STYLE CART LOGIC ---
-  // Add a specific pack (e.g. 500g). Quantity = Number of packs.
   const addToCart = (name, packPrice, qtyToAdd = 1, image, variantId) => {
     const product = products.find(p => p.id === variantId);
     setCart(prev => {
@@ -525,19 +487,19 @@ export function StoreProvider({ children }) {
 
   return (
     <StoreContext.Provider value={{ 
-      currentUser, setCurrentUser, updateUser, deleteUser, logout, deliveryPartners, approveDelivery,
+      currentUser, setCurrentUser, updateUser, deleteUser, logout, deliveryPartners, approveDelivery, deleteDeliveryPartner,
       userLocation, setUserLocation, searchQuery, setSearchQuery,
       products, toggleProductStatus, addNewProduct, deleteProduct, editProduct,
       orders, pendingOrderId, placeOrder, updateOrderStatus, salesHistory, showToast,
       cart, addToCart, removeFromCart, getCartTotal, decreaseCartQuantity, wishlist, toggleWishlist,
     }}>
       {children}
-      <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none">
+      <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-4 z-[9999] flex flex-col gap-2 pointer-events-none items-center sm:items-end">
         <AnimatePresence>
           {toasts.map(toast => (
-            <motion.div layout key={toast.id} initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="pointer-events-auto bg-gray-900 text-white shadow-xl p-4 rounded-xl flex items-center gap-4 min-w-[300px] border border-gray-700">
-              <p className="text-[14px] font-bold flex-1">{toast.message}</p>
-              <button onClick={() => removeToast(toast.id)} className="text-gray-400 hover:text-white">✕</button>
+            <motion.div layout key={toast.id} initial={{ opacity: 0, y: -20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -20, scale: 0.9 }} className="pointer-events-auto bg-slate-900/95 backdrop-blur-sm text-white shadow-xl px-4 py-3 sm:p-4 rounded-xl flex items-center gap-3 w-full sm:w-auto sm:min-w-[280px] max-w-sm border border-slate-700">
+              <p className="text-[13px] sm:text-[14px] font-bold flex-1 text-center sm:text-left leading-snug">{toast.message}</p>
+              <button onClick={() => removeToast(toast.id)} className="text-slate-400 hover:text-white shrink-0 p-1 bg-slate-800 rounded-full w-6 h-6 flex items-center justify-center transition-colors"><span className="text-[10px] font-black">✕</span></button>
             </motion.div>
           ))}
         </AnimatePresence>

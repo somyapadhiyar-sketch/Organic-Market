@@ -1,0 +1,3119 @@
+[
+  {
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "status": "Delivered",
+    "customer": {
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "name": "Richa ",
+      "pincode": "380001",
+      "country": "IN",
+      "phone": "6355086486"
+    },
+    "date": "26/3/2026, 3:53:57 pm",
+    "paymentDetails": null,
+    "createdAt": "2026-03-26T10:23:57.447Z",
+    "paymentMethod": "COD",
+    "id": "ORD1774520637447",
+    "userEmail": "richa1@gmail.com",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773903364/Brinjal_cmpppv.png",
+        "id": "v10",
+        "name": "Brinjal",
+        "price": 50,
+        "total": 250,
+        "quantity": 5
+      }
+    ],
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 285,
+    "couponCode": null
+  },
+  {
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "userEmail": "richa1@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1774525689650",
+    "createdAt": "2026-03-26T11:48:09.654Z",
+    "paymentDetails": null,
+    "customer": {
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "name": "Richa ",
+      "pincode": "380001",
+      "phone": "6355086486",
+      "country": "IN"
+    },
+    "date": "26/3/2026, 5:18:09 pm",
+    "status": "Delivered",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "couponCode": null,
+    "total": 445,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "items": [
+      {
+        "quantity": 4,
+        "name": "Grapes",
+        "price": 90,
+        "total": 360,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838150/grapes_j8xoto.png",
+        "id": "f5"
+      },
+      {
+        "total": 50,
+        "name": "Brinjal",
+        "price": 50,
+        "quantity": 1,
+        "id": "v10",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773903364/Brinjal_cmpppv.png"
+      }
+    ]
+  },
+  {
+    "total": 135,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773903364/Brinjal_cmpppv.png",
+        "id": "v10",
+        "price": 50,
+        "name": "Brinjal",
+        "total": 100,
+        "quantity": 2
+      }
+    ],
+    "couponCode": null,
+    "paymentDetails": null,
+    "createdAt": "2026-03-26T18:22:25.281Z",
+    "customer": {
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "pincode": "380001",
+      "name": "Richa ",
+      "country": "IN",
+      "phone": "6355086486"
+    },
+    "date": "26/3/2026, 11:52:25 pm",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "id": "ORD1774549345281",
+    "paymentMethod": "COD",
+    "userEmail": "richa1@gmail.com"
+  },
+  {
+    "total": 245,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "items": [
+      {
+        "price": 50,
+        "name": "Brinjal",
+        "total": 100,
+        "quantity": 2,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773903364/Brinjal_cmpppv.png",
+        "id": "v10"
+      },
+      {
+        "quantity": 1,
+        "total": 110,
+        "name": "Pineapple",
+        "price": 110,
+        "id": "f10",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/pineapple_qayyq1.png"
+      }
+    ],
+    "couponCode": null,
+    "paymentDetails": null,
+    "createdAt": "2026-03-26T18:37:40.815Z",
+    "customer": {
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "phone": "6355086486",
+      "country": "IN",
+      "name": "Richa ",
+      "pincode": "380001"
+    },
+    "date": "27/3/2026, 12:07:40 am",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "paymentMethod": "COD",
+    "id": "ORD1774550260815",
+    "userEmail": "richa1@gmail.com"
+  },
+  {
+    "couponCode": "ZESTY20",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "id": "f11",
+        "quantity": 1,
+        "price": 180,
+        "name": "Pomegranate",
+        "total": 180
+      }
+    ],
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 179,
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1774584872450",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "status": "Delivered",
+    "discountAmount": 36,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "date": "27/3/2026, 9:44:32 am",
+    "customer": {
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "phone": "7990360899",
+      "country": "IN",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Work"
+    },
+    "createdAt": "2026-03-27T04:14:32.450Z",
+    "paymentDetails": null
+  },
+  {
+    "couponCode": null,
+    "items": [
+      {
+        "quantity": 1,
+        "total": 110,
+        "price": 110,
+        "name": "Pineapple",
+        "id": "f10",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/pineapple_qayyq1.png"
+      },
+      {
+        "quantity": 1,
+        "price": 50,
+        "name": "Brinjal",
+        "total": 50,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773903364/Brinjal_cmpppv.png",
+        "id": "v10"
+      }
+    ],
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 195,
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1774871604332",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "status": "Delivered",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "customer": {
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "phone": "7990360899",
+      "country": "IN",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "type": "Work",
+      "street": "518, softcoding solution "
+    },
+    "date": "30/3/2026, 5:23:24 pm",
+    "createdAt": "2026-03-30T11:53:24.332Z",
+    "paymentDetails": null
+  },
+  {
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1774958480421",
+    "createdAt": "2026-03-31T12:01:20.422Z",
+    "paymentDetails": null,
+    "customer": {
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "country": "IN",
+      "phone": "7990360899",
+      "pincode": "380001",
+      "name": "kenil swadas "
+    },
+    "date": "31/3/2026, 5:31:20 pm",
+    "status": "Delivered",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 340,
+    "couponCode": "ZESTY20",
+    "total": 1365,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3",
+        "price": "850",
+        "name": "Olive Oil",
+        "total": 1700,
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 1705,
+    "items": [
+      {
+        "quantity": 2,
+        "price": "850",
+        "name": "Olive Oil",
+        "total": 1700,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3"
+      }
+    ],
+    "couponCode": null,
+    "customer": {
+      "phone": "7990360899",
+      "country": "IN",
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "city": "Ahmedabad",
+      "state": "GJ"
+    },
+    "date": "31/3/2026, 6:25:40 pm",
+    "paymentDetails": null,
+    "createdAt": "2026-03-31T12:55:40.181Z",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "id": "ORD1774961740180",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com"
+  },
+  {
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3",
+        "quantity": 2,
+        "price": "850",
+        "name": "Olive Oil",
+        "total": 1700
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani",
+    "total": 1705,
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "couponCode": null,
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "status": "Delivered",
+    "paymentDetails": null,
+    "createdAt": "2026-04-01T09:02:10.484Z",
+    "date": "1/4/2026, 2:32:10 pm",
+    "customer": {
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "country": "IN",
+      "phone": "7990360899",
+      "name": "kenil swadas ",
+      "pincode": "380001"
+    },
+    "id": "ORD1775034130483",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com",
+    "deliveryPartner": {
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani",
+      "phone": "7990360899"
+    }
+  },
+  {
+    "id": "ORD1775036406825",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com",
+    "deliveryPartner": {
+      "phone": "7990360899",
+      "name": "abhishek bhavlani",
+      "email": "ab@gmail.com"
+    },
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "status": "Delivered",
+    "customer": {
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "phone": "7990360899",
+      "country": "IN",
+      "pincode": "380001",
+      "name": "kenil swadas "
+    },
+    "date": "1/4/2026, 3:10:06 pm",
+    "paymentDetails": null,
+    "createdAt": "2026-04-01T09:40:06.825Z",
+    "couponCode": null,
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3",
+        "name": "Olive Oil",
+        "price": "850",
+        "total": 1700,
+        "quantity": 2
+      },
+      {
+        "price": "220",
+        "name": "Groundnut Oil",
+        "total": 440,
+        "quantity": 2,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "id": "o1"
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani",
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 2145
+  },
+  {
+    "userEmail": "richa1@gmail.com",
+    "id": "ORD1775038341720",
+    "paymentMethod": "COD",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "status": "Delivered",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 550,
+    "customer": {
+      "country": "IN",
+      "phone": "6355086486",
+      "name": "Richa ",
+      "pincode": "380001",
+      "type": "Home",
+      "street": "518, softcoding solution ",
+      "state": "GJ",
+      "city": "Ahmedabad"
+    },
+    "date": "1/4/2026, 3:42:21 pm",
+    "createdAt": "2026-04-01T10:12:21.721Z",
+    "paymentDetails": null,
+    "couponCode": "WELCOME50",
+    "items": [
+      {
+        "id": "o1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "quantity": 5,
+        "total": 1100,
+        "name": "Groundnut Oil",
+        "price": "220"
+      }
+    ],
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 555
+  },
+  {
+    "deliveryPartner": {
+      "phone": "7990360899",
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani"
+    },
+    "id": "ORD1775103823095",
+    "paymentMethod": "COD",
+    "userEmail": "richa1@gmail.com",
+    "date": "2/4/2026, 9:53:43 am",
+    "customer": {
+      "country": "IN",
+      "phone": "6355086486",
+      "name": "Richa ",
+      "pincode": "380001",
+      "street": "518, softcoding solution ",
+      "type": "Home",
+      "city": "Ahmedabad",
+      "state": "GJ"
+    },
+    "paymentDetails": null,
+    "createdAt": "2026-04-02T04:23:43.095Z",
+    "discountAmount": 0,
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "status": "Delivered",
+    "couponCode": null,
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 1105,
+    "items": [
+      {
+        "quantity": 5,
+        "price": "220",
+        "name": "Groundnut Oil",
+        "total": 1100,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "id": "o1"
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani"
+  },
+  {
+    "deliveryPartner": {
+      "phone": "7990360899",
+      "name": "abhishek bhavlani",
+      "email": "ab@gmail.com"
+    },
+    "id": "ORD1775109889131",
+    "paymentMethod": "COD",
+    "userEmail": "richa1@gmail.com",
+    "customer": {
+      "name": "Richa ",
+      "pincode": "380001",
+      "country": "IN",
+      "phone": "6355086486",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "street": "518, softcoding solution ",
+      "type": "Home"
+    },
+    "date": "4/2/2026, 11:34:49 AM",
+    "paymentDetails": null,
+    "createdAt": "2026-04-02T06:04:49.132Z",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 32,
+    "status": "Delivered",
+    "couponCode": "ZESTY20",
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 163,
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773836115/apple_zomrrx.png",
+        "id": "f1",
+        "quantity": 1,
+        "price": 160,
+        "name": "Apple",
+        "total": 160
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani"
+  },
+  {
+    "status": "Delivered",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "createdAt": "2026-04-02T08:44:08.112Z",
+    "paymentDetails": null,
+    "customer": {
+      "type": "Home",
+      "street": "518, softcoding solution ",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "country": "IN",
+      "phone": "6355086486",
+      "pincode": "380001",
+      "name": "Richa "
+    },
+    "date": "4/2/2026, 2:14:08 PM",
+    "userEmail": "richa1@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1775119448111",
+    "deliveryPartner": {
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani",
+      "phone": "7990360899"
+    },
+    "deliveryPartnerName": "abhishek bhavlani",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838158/papaya_xblqfk.png",
+        "id": "f7",
+        "quantity": 2,
+        "price": 80,
+        "name": "Papaya",
+        "total": 160
+      }
+    ],
+    "total": 195,
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "couponCode": null
+  },
+  {
+    "couponCode": "WELCOME50",
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 115,
+    "deliveryPartnerName": "abhishek bhavlani",
+    "items": [
+      {
+        "quantity": 2,
+        "total": 160,
+        "price": 80,
+        "name": "Broccoli",
+        "id": "v1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773903364/Broccoli_jc02rl.png"
+      }
+    ],
+    "deliveryPartner": {
+      "phone": "7990360899",
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani"
+    },
+    "userEmail": "richa1@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1775120376722",
+    "customer": {
+      "street": "518, softcoding solution ",
+      "type": "Home",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "country": "IN",
+      "phone": "6355086486",
+      "name": "Richa ",
+      "pincode": "380001"
+    },
+    "date": "4/2/2026, 2:29:36 PM",
+    "createdAt": "2026-04-02T08:59:36.722Z",
+    "paymentDetails": null,
+    "status": "Delivered",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 80
+  },
+  {
+    "couponCode": "ZESTY20",
+    "items": [
+      {
+        "id": "p6",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902709/Horse_Gram_us0gs6.png",
+        "quantity": 1,
+        "total": 85,
+        "name": "Horse Gram",
+        "price": 85
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838160/peach_yqbtg9.png",
+        "id": "f14",
+        "quantity": 1,
+        "name": "Peach",
+        "price": 220,
+        "total": 220
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/pineapple_qayyq1.png",
+        "id": "f10",
+        "quantity": 2,
+        "name": "Pineapple",
+        "price": "105",
+        "total": 210
+      }
+    ],
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 447,
+    "paymentMethod": "NetBanking",
+    "id": "ORD1775127244033",
+    "userEmail": "richa1@gmail.com",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 103,
+    "status": "Delivered",
+    "customer": {
+      "name": "Richa ",
+      "pincode": "380001",
+      "phone": "6355086486",
+      "country": "IN",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "type": "Home",
+      "street": "518, softcoding solution "
+    },
+    "date": "4/2/2026, 4:24:04 PM",
+    "paymentDetails": {
+      "bankName": "SBI"
+    },
+    "createdAt": "2026-04-02T10:54:04.037Z"
+  },
+  {
+    "deliveryPartner": {
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani",
+      "phone": "7990360899"
+    },
+    "userEmail": "richa1@gmail.com",
+    "id": "ORD1775209084058",
+    "paymentMethod": "COD",
+    "createdAt": "2026-04-03T09:38:04.059Z",
+    "paymentDetails": null,
+    "date": "4/3/2026, 3:08:04 PM",
+    "customer": {
+      "country": "IN",
+      "phone": "6355086486",
+      "name": "Richa ",
+      "pincode": "380001",
+      "street": "518, softcoding solution ",
+      "type": "Home",
+      "city": "Ahmedabad",
+      "state": "GJ"
+    },
+    "status": "Delivered",
+    "discountAmount": 90,
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "couponCode": "WELCOME50",
+    "total": 125,
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "deliveryPartnerName": "abhishek bhavlani",
+    "items": [
+      {
+        "id": "f11",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "quantity": 1,
+        "total": 180,
+        "price": 180,
+        "name": "Pomegranate"
+      }
+    ]
+  },
+  {
+    "total": 5845,
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773836115/apple_zomrrx.png",
+        "id": "f1",
+        "price": "180",
+        "name": "Apple",
+        "total": 180,
+        "quantity": 1
+      },
+      {
+        "total": 105,
+        "price": "105",
+        "name": "Pineapple",
+        "quantity": 1,
+        "id": "f10",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/pineapple_qayyq1.png"
+      },
+      {
+        "id": "o2",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774948757/d8ljt3osst0tmcuhmi7m.webp",
+        "quantity": 7,
+        "total": 1155,
+        "price": "165",
+        "name": "Sunflower Oil"
+      },
+      {
+        "name": "Groundnut Oil",
+        "price": "220",
+        "total": 4400,
+        "quantity": 20,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "id": "o1"
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani",
+    "couponCode": null,
+    "paymentDetails": null,
+    "createdAt": "2026-04-04T06:17:26.282Z",
+    "customer": {
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "type": "Home",
+      "street": "518, softcoding solution ",
+      "pincode": "380001",
+      "name": "Richa ",
+      "country": "IN",
+      "phone": "6355086486"
+    },
+    "date": "4/4/2026, 11:47:26 AM",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "status": "Delivered",
+    "deliveryPartner": {
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani",
+      "phone": "7990360899"
+    },
+    "id": "ORD1775283446281",
+    "paymentMethod": "COD",
+    "userEmail": "richa1@gmail.com"
+  },
+  {
+    "paymentDetails": null,
+    "createdAt": "2026-04-04T07:32:48.582Z",
+    "customer": {
+      "street": "518, softcoding solution ",
+      "type": "Home",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "country": "IN",
+      "phone": "6355086486",
+      "name": "Richa ",
+      "pincode": "380001"
+    },
+    "date": "4/4/2026, 1:02:48 pm",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "paymentMethod": "COD",
+    "id": "ORD1775287968582",
+    "userEmail": "richa1@gmail.com",
+    "total": 215,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773836115/apple_zomrrx.png",
+        "id": "f1",
+        "name": "Apple",
+        "price": "180",
+        "total": 180,
+        "quantity": 1
+      }
+    ],
+    "couponCode": null
+  },
+  {
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 147,
+    "items": [
+      {
+        "quantity": 1,
+        "total": 35,
+        "name": "Coriander Leaves",
+        "price": 35,
+        "id": "v11",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773903365/coriander_leaves_zlp3jv.png"
+      },
+      {
+        "total": 105,
+        "name": "Pineapple",
+        "price": "105",
+        "quantity": 1,
+        "id": "f10",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/pineapple_qayyq1.png"
+      }
+    ],
+    "couponCode": "ZESTY20",
+    "customer": {
+      "pincode": "380001",
+      "name": "Richa ",
+      "phone": "6355086486",
+      "country": "IN",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Home",
+      "street": "518, softcoding solution "
+    },
+    "date": "5/4/2026, 7:56:33 pm",
+    "createdAt": "2026-04-05T14:26:33.195Z",
+    "paymentDetails": {
+      "bankName": "ICICI"
+    },
+    "status": "Delivered",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 28,
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "userEmail": "richa1@gmail.com",
+    "paymentMethod": "NetBanking",
+    "id": "ORD1775399193195"
+  },
+  {
+    "paymentDetails": null,
+    "createdAt": "2026-04-06T04:48:30.493Z",
+    "date": "6/4/2026, 10:18:30 am",
+    "customer": {
+      "country": "IN",
+      "phone": "6355086486",
+      "pincode": "380001",
+      "name": "Richa ",
+      "type": "Home",
+      "street": "518, softcoding solution ",
+      "city": "Ahmedabad",
+      "state": "GJ"
+    },
+    "discountAmount": 21,
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "id": "ORD1775450910493",
+    "paymentMethod": "COD",
+    "userEmail": "richa1@gmail.com",
+    "total": 119,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "items": [
+      {
+        "id": "f10",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/pineapple_qayyq1.png",
+        "total": 105,
+        "price": "105",
+        "name": "Pineapple",
+        "quantity": 1
+      }
+    ],
+    "couponCode": "ZESTY20"
+  },
+  {
+    "status": "Delivered",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "createdAt": "2026-04-06T08:35:25.854Z",
+    "paymentDetails": null,
+    "customer": {
+      "name": "Richa ",
+      "pincode": "380001",
+      "phone": "6355086486",
+      "country": "IN",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Home"
+    },
+    "date": "6/4/2026, 2:05:25 pm",
+    "userEmail": "richa1@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1775464525854",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "items": [
+      {
+        "total": 90,
+        "price": 90,
+        "name": "Grapes",
+        "quantity": 1,
+        "id": "f5",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838150/grapes_j8xoto.png"
+      },
+      {
+        "name": "Sunflower Oil",
+        "price": "165",
+        "total": 3300,
+        "quantity": 20,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774948757/d8ljt3osst0tmcuhmi7m.webp",
+        "id": "o2"
+      }
+    ],
+    "total": 3395,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "couponCode": null
+  },
+  {
+    "createdAt": "2026-04-06T08:40:14.418Z",
+    "paymentDetails": null,
+    "customer": {
+      "pincode": "380001",
+      "name": "Richa ",
+      "country": "IN",
+      "phone": "6355086486",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Home"
+    },
+    "date": "6/4/2026, 2:10:14 pm",
+    "status": "Delivered",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "deliveryPartner": {
+      "phone": "7990360899",
+      "name": "abhishek bhavlani",
+      "email": "ab@gmail.com"
+    },
+    "userEmail": "richa1@gmail.com",
+    "id": "ORD1775464814417",
+    "paymentMethod": "COD",
+    "total": 590,
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "deliveryPartnerName": "abhishek bhavlani",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773903371/rootbit_rswwcs.png",
+        "id": "v14",
+        "price": 45,
+        "name": "Beetroot",
+        "total": 585,
+        "quantity": 13
+      }
+    ],
+    "couponCode": null
+  },
+  {
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 140,
+    "items": [
+      {
+        "id": "f10",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/pineapple_qayyq1.png",
+        "quantity": 1,
+        "total": 105,
+        "price": "105",
+        "name": "Pineapple"
+      }
+    ],
+    "couponCode": null,
+    "date": "6/4/2026, 2:40:10 pm",
+    "customer": {
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "street": "518, softcoding solution ",
+      "type": "Home",
+      "name": "Richa ",
+      "pincode": "380001",
+      "country": "IN",
+      "phone": "6355086486"
+    },
+    "paymentDetails": null,
+    "createdAt": "2026-04-06T09:10:10.493Z",
+    "discountAmount": 0,
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "paymentMethod": "COD",
+    "id": "ORD1775466610491",
+    "userEmail": "richa1@gmail.com"
+  },
+  {
+    "deliveryPartner": {
+      "phone": "7990360899",
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani"
+    },
+    "paymentMethod": "COD",
+    "id": "ORD1775466714776",
+    "userEmail": "richa1@gmail.com",
+    "customer": {
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Home",
+      "pincode": "380001",
+      "name": "Richa ",
+      "country": "IN",
+      "phone": "6355086486"
+    },
+    "date": "6/4/2026, 2:41:54 pm",
+    "paymentDetails": null,
+    "createdAt": "2026-04-06T09:11:54.776Z",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "status": "Delivered",
+    "couponCode": null,
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 6405,
+    "items": [
+      {
+        "price": "320",
+        "name": "Coconut Oil",
+        "total": 6400,
+        "quantity": 20,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774950067/wk3qb8ii5ltqbk2m267d.webp",
+        "id": "o5"
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani"
+  },
+  {
+    "couponCode": null,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 3605,
+    "items": [
+      {
+        "id": "f1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773836115/apple_zomrrx.png",
+        "quantity": 20,
+        "total": 3600,
+        "name": "Apple",
+        "price": "180"
+      }
+    ],
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "userEmail": "richa1@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1775467139905",
+    "customer": {
+      "street": "518, softcoding solution ",
+      "type": "Home",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "phone": "6355086486",
+      "country": "IN",
+      "pincode": "380001",
+      "name": "Richa "
+    },
+    "date": "6/4/2026, 2:48:59 pm",
+    "createdAt": "2026-04-06T09:18:59.905Z",
+    "paymentDetails": null,
+    "status": "Delivered",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0
+  },
+  {
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 1205,
+    "items": [
+      {
+        "quantity": 10,
+        "total": 1200,
+        "name": "Soybean Oil",
+        "price": "120",
+        "id": "o6",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774950450/za7ohbe4ncqo3ptuwto5.webp"
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani",
+    "couponCode": null,
+    "customer": {
+      "phone": "6355086486",
+      "country": "IN",
+      "name": "Richa ",
+      "pincode": "380001",
+      "street": "518, softcoding solution ",
+      "type": "Home",
+      "state": "GJ",
+      "city": "Ahmedabad"
+    },
+    "date": "6/4/2026, 2:53:57 pm",
+    "paymentDetails": {
+      "bankName": "SBI"
+    },
+    "createdAt": "2026-04-06T09:23:57.996Z",
+    "discountAmount": 0,
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "7990360899",
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani"
+    },
+    "id": "ORD1775467437996",
+    "paymentMethod": "NetBanking",
+    "userEmail": "richa1@gmail.com"
+  },
+  {
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 340,
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838151/cherry_bgsxex.png",
+        "id": "f13",
+        "name": "Cherry",
+        "price": 140,
+        "total": 140,
+        "quantity": 1
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774948757/d8ljt3osst0tmcuhmi7m.webp",
+        "id": "o2",
+        "name": "Sunflower Oil",
+        "price": "165",
+        "total": 165,
+        "quantity": 1
+      }
+    ],
+    "couponCode": null,
+    "customer": {
+      "street": "518, softcoding solution ",
+      "type": "Home",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "phone": "6355086486",
+      "country": "IN",
+      "pincode": "380001",
+      "name": "Richa "
+    },
+    "date": "9/4/2026, 11:46:42 am",
+    "createdAt": "2026-04-09T06:16:42.931Z",
+    "paymentDetails": null,
+    "status": "Delivered",
+    "discountAmount": 0,
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "userEmail": "richa1@gmail.com",
+    "id": "ORD1775715402931",
+    "paymentMethod": "COD"
+  },
+  {
+    "status": "Delivered",
+    "discountAmount": 0,
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "customer": {
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "phone": "6355086486",
+      "country": "IN",
+      "name": "Richa ",
+      "pincode": "380001"
+    },
+    "date": "9/4/2026, 11:51:54 am",
+    "createdAt": "2026-04-09T06:21:54.980Z",
+    "paymentDetails": null,
+    "userEmail": "richa1@gmail.com",
+    "id": "ORD1775715714978",
+    "paymentMethod": "COD",
+    "deliveryPartner": {
+      "phone": "7990360899",
+      "name": "abhishek bhavlani",
+      "email": "ab@gmail.com"
+    },
+    "deliveryPartnerName": "abhishek bhavlani",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773836115/apple_zomrrx.png",
+        "id": "f1",
+        "name": "Apple",
+        "price": "180",
+        "total": 3600,
+        "quantity": 20
+      }
+    ],
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 3605,
+    "couponCode": null
+  },
+  {
+    "date": "10/4/2026, 9:42:43 am",
+    "customer": {
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Home",
+      "street": "518, softcoding solution ",
+      "pincode": "380001",
+      "name": "Richa ",
+      "phone": "6355086486",
+      "country": "IN"
+    },
+    "paymentDetails": null,
+    "createdAt": "2026-04-10T04:12:43.725Z",
+    "discountAmount": 0,
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "paymentMethod": "COD",
+    "id": "ORD1775794363724",
+    "userEmail": "richa1@gmail.com",
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 140,
+    "items": [
+      {
+        "quantity": 1,
+        "total": 105,
+        "name": "Pineapple",
+        "price": "105",
+        "id": "f10",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/pineapple_qayyq1.png"
+      }
+    ],
+    "couponCode": null
+  },
+  {
+    "date": "10/4/2026, 6:11:47 pm",
+    "customer": {
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Home",
+      "pincode": "380001",
+      "name": "Richa ",
+      "country": "IN",
+      "phone": "6355086486"
+    },
+    "paymentDetails": null,
+    "createdAt": "2026-04-10T12:41:47.152Z",
+    "discountAmount": 162,
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "id": "ORD1775824907152",
+    "paymentMethod": "COD",
+    "userEmail": "richa1@gmail.com",
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 1463,
+    "items": [
+      {
+        "price": 180,
+        "name": "Pomegranate",
+        "total": 1620,
+        "quantity": 9,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "id": "f11"
+      }
+    ],
+    "couponCode": "SOMYA24"
+  },
+  {
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1775910462402",
+    "customer": {
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "phone": "7990360899",
+      "country": "IN",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Work",
+      "street": "518, softcoding solution "
+    },
+    "date": "11/4/2026, 5:57:42 pm",
+    "createdAt": "2026-04-11T12:27:42.403Z",
+    "paymentDetails": null,
+    "status": "Delivered",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "couponCode": null,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 5385,
+    "items": [
+      {
+        "quantity": 18,
+        "price": 180,
+        "name": "Pomegranate",
+        "total": 3240,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "id": "f11"
+      },
+      {
+        "id": "o3",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "total": 1700,
+        "name": "Olive Oil",
+        "price": "850",
+        "quantity": 2
+      },
+      {
+        "price": "220",
+        "name": "Groundnut Oil",
+        "total": 440,
+        "quantity": 2,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "id": "o1"
+      }
+    ]
+  },
+  {
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1775910597512",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "status": "Delivered",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 538,
+    "customer": {
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "country": "IN",
+      "phone": "7990360899",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Work"
+    },
+    "date": "11/4/2026, 5:59:57 pm",
+    "createdAt": "2026-04-11T12:29:57.512Z",
+    "paymentDetails": null,
+    "couponCode": "SOMYA24",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "id": "f11",
+        "quantity": 18,
+        "name": "Pomegranate",
+        "price": 180,
+        "total": 3240
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3",
+        "quantity": 2,
+        "name": "Olive Oil",
+        "price": "850",
+        "total": 1700
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "id": "o1",
+        "quantity": 2,
+        "name": "Groundnut Oil",
+        "price": "220",
+        "total": 440
+      }
+    ],
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 4847
+  },
+  {
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 5385,
+    "items": [
+      {
+        "name": "Pomegranate",
+        "price": 180,
+        "total": 3240,
+        "quantity": 18,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "id": "f11"
+      },
+      {
+        "id": "o3",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "quantity": 2,
+        "total": 1700,
+        "price": "850",
+        "name": "Olive Oil"
+      },
+      {
+        "total": 440,
+        "price": "220",
+        "name": "Groundnut Oil",
+        "quantity": 2,
+        "id": "o1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp"
+      }
+    ],
+    "couponCode": null,
+    "deliveryOtp": "8260",
+    "customer": {
+      "country": "IN",
+      "phone": "7990360899",
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "city": "Ahmedabad",
+      "state": "GJ"
+    },
+    "date": "11/4/2026, 7:00:47 pm",
+    "paymentDetails": null,
+    "createdAt": "2026-04-11T13:30:47.924Z",
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    },
+    "id": "ORD1775914247924",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com"
+  },
+  {
+    "items": [
+      {
+        "id": "f11",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "total": 3240,
+        "price": 180,
+        "name": "Pomegranate",
+        "quantity": 18
+      },
+      {
+        "id": "o3",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "total": 1700,
+        "price": "850",
+        "name": "Olive Oil",
+        "quantity": 2
+      },
+      {
+        "id": "o1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "quantity": 2,
+        "total": 440,
+        "name": "Groundnut Oil",
+        "price": "220"
+      }
+    ],
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 5385,
+    "couponCode": null,
+    "deliveryOtp": "5891",
+    "status": "Delivered",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "customer": {
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "country": "IN",
+      "phone": "7990360899",
+      "pincode": "380001",
+      "name": "kenil swadas "
+    },
+    "date": "11/4/2026, 7:16:51 pm",
+    "createdAt": "2026-04-11T13:46:51.379Z",
+    "paymentDetails": null,
+    "userEmail": "kenilswadas@gmail.com",
+    "id": "ORD1775915211378",
+    "paymentMethod": "COD",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni"
+    }
+  },
+  {
+    "couponCode": null,
+    "deliveryOtp": "3963",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "id": "f11",
+        "price": 180,
+        "name": "Pomegranate",
+        "total": 3240,
+        "quantity": 18
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3",
+        "price": "850",
+        "name": "Olive Oil",
+        "total": 1700,
+        "quantity": 2
+      },
+      {
+        "price": "220",
+        "name": "Groundnut Oil",
+        "total": 440,
+        "quantity": 2,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "id": "o1"
+      },
+      {
+        "total": 140,
+        "name": "Toor Dal",
+        "price": 140,
+        "quantity": 1,
+        "id": "p13",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902710/Toor_Dal_kpdnpr.png"
+      },
+      {
+        "total": 3600,
+        "name": "Chickpea",
+        "price": 180,
+        "quantity": 20,
+        "id": "p3",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902708/Chickpea_nk9ixq.png"
+      }
+    ],
+    "deliveryPartnerName": "karan soni",
+    "total": 9125,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1775915877745",
+    "userEmail": "kenilswadas@gmail.com",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni",
+      "email": "karan@gmail.com"
+    },
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "status": "Delivered",
+    "paymentDetails": null,
+    "createdAt": "2026-04-11T13:57:57.745Z",
+    "date": "11/4/2026, 7:27:57 pm",
+    "customer": {
+      "country": "IN",
+      "phone": "7990360899",
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "state": "GJ",
+      "city": "Ahmedabad"
+    }
+  },
+  {
+    "couponCode": null,
+    "deliveryOtp": "6610",
+    "total": 9125,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "items": [
+      {
+        "name": "Pomegranate",
+        "price": 180,
+        "total": 3240,
+        "quantity": 18,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "id": "f11"
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3",
+        "price": "850",
+        "name": "Olive Oil",
+        "total": 1700,
+        "quantity": 2
+      },
+      {
+        "id": "o1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "total": 440,
+        "price": "220",
+        "name": "Groundnut Oil",
+        "quantity": 2
+      },
+      {
+        "id": "p13",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902710/Toor_Dal_kpdnpr.png",
+        "total": 140,
+        "name": "Toor Dal",
+        "price": 140,
+        "quantity": 1
+      },
+      {
+        "total": 3600,
+        "price": 180,
+        "name": "Chickpea",
+        "quantity": 20,
+        "id": "p3",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902708/Chickpea_nk9ixq.png"
+      }
+    ],
+    "deliveryPartnerName": "karan soni",
+    "deliveryPartner": {
+      "name": "karan soni",
+      "email": "karan@gmail.com",
+      "phone": "6355072986"
+    },
+    "id": "ORD1775915891839",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentDetails": null,
+    "createdAt": "2026-04-11T13:58:11.839Z",
+    "customer": {
+      "country": "IN",
+      "phone": "7990360899",
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "state": "GJ",
+      "city": "Ahmedabad"
+    },
+    "date": "11/4/2026, 7:28:11 pm",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "status": "Delivered"
+  },
+  {
+    "couponCode": null,
+    "deliveryOtp": "2552",
+    "deliveryPartnerName": "karan soni",
+    "items": [
+      {
+        "id": "f11",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "total": 3240,
+        "name": "Pomegranate",
+        "price": 180,
+        "quantity": 18
+      },
+      {
+        "quantity": 2,
+        "total": 1700,
+        "price": "850",
+        "name": "Olive Oil",
+        "id": "o3",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp"
+      },
+      {
+        "quantity": 2,
+        "price": "220",
+        "name": "Groundnut Oil",
+        "total": 440,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "id": "o1"
+      },
+      {
+        "id": "p13",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902710/Toor_Dal_kpdnpr.png",
+        "total": 140,
+        "price": 140,
+        "name": "Toor Dal",
+        "quantity": 1
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902708/Chickpea_nk9ixq.png",
+        "id": "p3",
+        "price": 180,
+        "name": "Chickpea",
+        "total": 3600,
+        "quantity": 20
+      }
+    ],
+    "total": 9125,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "userEmail": "kenilswadas@gmail.com",
+    "id": "ORD1775918117020",
+    "paymentMethod": "COD",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni",
+      "email": "karan@gmail.com"
+    },
+    "status": "Delivered",
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "createdAt": "2026-04-11T14:35:17.020Z",
+    "paymentDetails": null,
+    "customer": {
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "phone": "7990360899",
+      "country": "IN",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Work",
+      "street": "518, softcoding solution "
+    },
+    "date": "11/4/2026, 8:05:17 pm"
+  },
+  {
+    "deliveryPartner": {
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani",
+      "phone": "7990360899"
+    },
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1775918237220",
+    "createdAt": "2026-04-11T14:37:17.221Z",
+    "paymentDetails": null,
+    "customer": {
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "phone": "7990360899",
+      "country": "IN",
+      "pincode": "380001",
+      "name": "kenil swadas "
+    },
+    "date": "11/4/2026, 8:07:17 pm",
+    "status": "Delivered",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "couponCode": null,
+    "deliveryOtp": "3580",
+    "total": 9125,
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "deliveryPartnerName": "abhishek bhavlani",
+    "items": [
+      {
+        "quantity": 18,
+        "name": "Pomegranate",
+        "price": 180,
+        "total": 3240,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "id": "f11"
+      },
+      {
+        "quantity": 2,
+        "name": "Olive Oil",
+        "price": "850",
+        "total": 1700,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3"
+      },
+      {
+        "id": "o1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "quantity": 2,
+        "total": 440,
+        "name": "Groundnut Oil",
+        "price": "220"
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902710/Toor_Dal_kpdnpr.png",
+        "id": "p13",
+        "quantity": 1,
+        "name": "Toor Dal",
+        "price": 140,
+        "total": 140
+      },
+      {
+        "id": "p3",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902708/Chickpea_nk9ixq.png",
+        "quantity": 20,
+        "total": 3600,
+        "price": 180,
+        "name": "Chickpea"
+      }
+    ]
+  },
+  {
+    "customer": {
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "country": "IN",
+      "phone": "7990360899"
+    },
+    "date": "11/4/2026, 8:37:23 pm",
+    "paymentDetails": null,
+    "createdAt": "2026-04-11T15:07:23.868Z",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "status": "Delivered",
+    "deliveryPartner": {
+      "email": "karan@gmail.com",
+      "name": "karan soni",
+      "phone": "6355072986"
+    },
+    "paymentMethod": "COD",
+    "id": "ORD1775920043868",
+    "userEmail": "kenilswadas@gmail.com",
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 9125,
+    "items": [
+      {
+        "total": 3240,
+        "name": "Pomegranate",
+        "price": 180,
+        "quantity": 18,
+        "id": "f11",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png"
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3",
+        "price": "850",
+        "name": "Olive Oil",
+        "total": 1700,
+        "quantity": 2
+      },
+      {
+        "total": 440,
+        "name": "Groundnut Oil",
+        "price": "220",
+        "quantity": 2,
+        "id": "o1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp"
+      },
+      {
+        "price": 140,
+        "name": "Toor Dal",
+        "total": 140,
+        "quantity": 1,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902710/Toor_Dal_kpdnpr.png",
+        "id": "p13"
+      },
+      {
+        "name": "Chickpea",
+        "price": 180,
+        "total": 3600,
+        "quantity": 20,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902708/Chickpea_nk9ixq.png",
+        "id": "p3"
+      }
+    ],
+    "deliveryPartnerName": "karan soni",
+    "couponCode": null,
+    "deliveryOtp": "4547"
+  },
+  {
+    "total": 9125,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "items": [
+      {
+        "name": "Pomegranate",
+        "price": 180,
+        "total": 3240,
+        "quantity": 18,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "id": "f11"
+      },
+      {
+        "id": "o3",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "quantity": 2,
+        "total": 1700,
+        "price": "850",
+        "name": "Olive Oil"
+      },
+      {
+        "id": "o1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "quantity": 2,
+        "total": 440,
+        "name": "Groundnut Oil",
+        "price": "220"
+      },
+      {
+        "id": "p13",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902710/Toor_Dal_kpdnpr.png",
+        "quantity": 1,
+        "total": 140,
+        "name": "Toor Dal",
+        "price": 140
+      },
+      {
+        "id": "p3",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902708/Chickpea_nk9ixq.png",
+        "quantity": 20,
+        "total": 3600,
+        "name": "Chickpea",
+        "price": 180
+      }
+    ],
+    "deliveryPartnerName": "karan soni",
+    "couponCode": null,
+    "deliveryOtp": "9895",
+    "paymentDetails": null,
+    "createdAt": "2026-04-11T15:15:05.372Z",
+    "customer": {
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "country": "IN",
+      "phone": "7990360899"
+    },
+    "date": "11/4/2026, 8:45:05 pm",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni",
+      "email": "karan@gmail.com"
+    },
+    "id": "ORD1775920505372",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com"
+  },
+  {
+    "deliveryPartner": {
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani",
+      "phone": "7990360899"
+    },
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1775921075416",
+    "customer": {
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "country": "IN",
+      "phone": "7990360899",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Work",
+      "street": "518, softcoding solution "
+    },
+    "date": "11/4/2026, 8:54:35 pm",
+    "createdAt": "2026-04-11T15:24:35.416Z",
+    "paymentDetails": null,
+    "status": "Delivered",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "couponCode": null,
+    "deliveryOtp": "9612",
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 9125,
+    "deliveryPartnerName": "abhishek bhavlani",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838163/promogrenate_ydqplv.png",
+        "id": "f11",
+        "quantity": 18,
+        "price": 180,
+        "name": "Pomegranate",
+        "total": 3240
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3",
+        "price": "850",
+        "name": "Olive Oil",
+        "total": 1700,
+        "quantity": 2
+      },
+      {
+        "price": "220",
+        "name": "Groundnut Oil",
+        "total": 440,
+        "quantity": 2,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774937110/s2ap8igllm3us7n5rcq8.webp",
+        "id": "o1"
+      },
+      {
+        "name": "Toor Dal",
+        "price": 140,
+        "total": 140,
+        "quantity": 1,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902710/Toor_Dal_kpdnpr.png",
+        "id": "p13"
+      },
+      {
+        "quantity": 20,
+        "total": 3600,
+        "price": 180,
+        "name": "Chickpea",
+        "id": "p3",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902708/Chickpea_nk9ixq.png"
+      }
+    ]
+  },
+  {
+    "couponCode": null,
+    "deliveryOtp": "9172",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773838150/gwava_ib1krq.png",
+        "id": "f12",
+        "quantity": 1,
+        "price": 90,
+        "name": "Guava",
+        "total": 90
+      }
+    ],
+    "total": 125,
+    "paymentMethod": "COD",
+    "id": "ORD1776053096540",
+    "userEmail": "kenilswadas@gmail.com",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "status": "Pending",
+    "paymentDetails": null,
+    "createdAt": "2026-04-13T04:04:56.540Z",
+    "customer": {
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "phone": "7990360899",
+      "country": "IN"
+    },
+    "date": "13/4/2026, 9:34:56 am"
+  },
+  {
+    "paymentDetails": null,
+    "createdAt": "2026-04-13T04:39:35.938Z",
+    "customer": {
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Home",
+      "pincode": "380001",
+      "name": "Richa ",
+      "country": "IN",
+      "phone": "6355086486"
+    },
+    "date": "13/4/2026, 10:09:35 am",
+    "discountAmount": 0,
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "status": "Delivered",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "name": "karan soni",
+      "email": "karan@gmail.com"
+    },
+    "id": "ORD1776055175938",
+    "paymentMethod": "COD",
+    "deliveredAt": "2026-04-13T04:43:42.770Z",
+    "userEmail": "richa1@gmail.com",
+    "total": 85,
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "items": [
+      {
+        "total": 50,
+        "name": "Brinjal",
+        "price": 50,
+        "quantity": 1,
+        "id": "v10",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773903364/Brinjal_cmpppv.png"
+      }
+    ],
+    "deliveryPartnerName": "karan soni",
+    "couponCode": null,
+    "deliveryOtp": "9387"
+  },
+  {
+    "deliveryPartnerEmail": "karan@gmail.com",
+    "total": 8505,
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3",
+        "quantity": 10,
+        "name": "Olive Oil",
+        "price": "850",
+        "total": 8500
+      }
+    ],
+    "deliveryPartnerName": "karan soni",
+    "couponCode": null,
+    "deliveryOtp": "4018",
+    "date": "13/4/2026, 10:14:52 am",
+    "customer": {
+      "pincode": "380001",
+      "name": "Richa ",
+      "country": "IN",
+      "phone": "6355086486",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Home"
+    },
+    "paymentDetails": null,
+    "createdAt": "2026-04-13T04:44:52.411Z",
+    "discountAmount": 0,
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "status": "Return Requested",
+    "deliveryPartner": {
+      "phone": "6355072986",
+      "email": "karan@gmail.com",
+      "name": "karan soni"
+    },
+    "paymentMethod": "COD",
+    "id": "ORD1776055492411",
+    "deliveredAt": "2026-04-13T04:46:57.139Z",
+    "userEmail": "richa1@gmail.com"
+  },
+  {
+    "deliveryPartnerEmail": "online_broadcast",
+    "total": 85,
+    "items": [
+      {
+        "name": "Brinjal",
+        "price": 50,
+        "total": 50,
+        "quantity": 1,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773903364/Brinjal_cmpppv.png",
+        "id": "v10"
+      }
+    ],
+    "deliveryOtp": "9876",
+    "couponCode": null,
+    "customer": {
+      "pincode": "380001",
+      "name": "Richa ",
+      "country": "IN",
+      "phone": "6355086486",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Home"
+    },
+    "date": "13/4/2026, 11:23:42 am",
+    "createdAt": "2026-04-13T05:53:42.540Z",
+    "paymentDetails": null,
+    "status": "Cancelled",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "userEmail": "richa1@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1776059622540"
+  },
+  {
+    "deliveryOtp": "4158",
+    "couponCode": null,
+    "items": [
+      {
+        "total": 50,
+        "price": 50,
+        "name": "Brinjal",
+        "quantity": 1,
+        "id": "v10",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773903364/Brinjal_cmpppv.png"
+      }
+    ],
+    "total": 85,
+    "userEmail": "richa1@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1776069557568",
+    "status": "Pending",
+    "userId": "HHOjGOLjtfN0QTwMqBxondM8H4z1",
+    "discountAmount": 0,
+    "createdAt": "2026-04-13T08:39:17.568Z",
+    "paymentDetails": null,
+    "customer": {
+      "country": "IN",
+      "phone": "6355086486",
+      "pincode": "380001",
+      "name": "Richa ",
+      "type": "Home",
+      "street": "518, softcoding solution ",
+      "city": "Ahmedabad",
+      "state": "GJ"
+    },
+    "date": "13/4/2026, 2:09:17 pm"
+  },
+  {
+    "id": "ORD1776247562379",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentDetails": null,
+    "createdAt": "2026-04-15T10:06:02.379Z",
+    "customer": {
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "phone": "7990360899",
+      "country": "IN",
+      "pincode": "380001",
+      "name": "kenil swadas "
+    },
+    "date": "15/4/2026, 3:36:02 pm",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "status": "Cancelled",
+    "deliveryOtp": "5688",
+    "couponCode": null,
+    "total": 999985,
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776246603/qxhmkm8xav8lztuidqbm.jpg",
+        "id": "f15",
+        "name": "eteesrfedfdfdfd",
+        "price": "49999",
+        "total": 999980,
+        "quantity": 20
+      }
+    ]
+  },
+  {
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776246603/qxhmkm8xav8lztuidqbm.jpg",
+        "id": "f15",
+        "price": "49999",
+        "name": "eteesrfedfdfdfd",
+        "total": 49999,
+        "quantity": 1
+      }
+    ],
+    "total": 50004,
+    "couponCode": null,
+    "deliveryOtp": "9219",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "status": "Cancelled",
+    "customer": {
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "phone": "7990360899",
+      "country": "IN"
+    },
+    "date": "15/4/2026, 4:11:16 pm",
+    "paymentDetails": null,
+    "createdAt": "2026-04-15T10:41:16.694Z",
+    "id": "ORD1776249676694",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com"
+  },
+  {
+    "items": [
+      {
+        "quantity": 6,
+        "price": 110,
+        "name": "Moong Dal",
+        "total": 660,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1773902709/Masoor_Dal_bjuott.png",
+        "id": "p10"
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "id": "o3",
+        "name": "Olive Oil",
+        "price": "850",
+        "total": 1275,
+        "quantity": 1.5
+      }
+    ],
+    "total": 1940,
+    "couponCode": null,
+    "deliveryOtp": "5213",
+    "status": "Pending",
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "customer": {
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "country": "IN",
+      "phone": "7990360899"
+    },
+    "date": "15/4/2026, 10:36:34 pm",
+    "createdAt": "2026-04-15T17:06:34.759Z",
+    "paymentDetails": null,
+    "userEmail": "kenilswadas@gmail.com",
+    "id": "ORD1776272794759",
+    "paymentMethod": "COD"
+  },
+  {
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1776272963253",
+    "customer": {
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "country": "IN",
+      "phone": "7990360899",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "type": "Work",
+      "street": "518, softcoding solution "
+    },
+    "date": "15/4/2026, 10:39:23 pm",
+    "createdAt": "2026-04-15T17:09:23.253Z",
+    "paymentDetails": null,
+    "status": "Pending",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "deliveryOtp": "5872",
+    "couponCode": null,
+    "total": 247.5,
+    "items": [
+      {
+        "id": "o3",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1774949430/icirk4hlmtsf8v3sware.webp",
+        "total": 212.5,
+        "price": "850",
+        "name": "Olive Oil",
+        "quantity": 0.25
+      }
+    ]
+  },
+  {
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1776275556463",
+    "date": "15/4/2026, 11:22:36 pm",
+    "customer": {
+      "phone": "7990360899",
+      "country": "IN",
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "state": "GJ",
+      "city": "Ahmedabad"
+    },
+    "createdAt": "2026-04-15T17:52:36.463Z",
+    "paymentDetails": null,
+    "status": "Pending",
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "couponCode": null,
+    "deliveryOtp": "2782",
+    "total": 725,
+    "items": [
+      {
+        "quantity": 4,
+        "total": 720,
+        "name": "Apple",
+        "price": "180",
+        "id": "f1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776275360/tg6ylzbdyut6metspwih.png"
+      }
+    ]
+  },
+  {
+    "paymentMethod": "COD",
+    "id": "ORD1776313113090",
+    "userEmail": "kenilswadas@gmail.com",
+    "date": "16/4/2026, 9:48:33 am",
+    "customer": {
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "phone": "7990360899",
+      "country": "IN"
+    },
+    "paymentDetails": null,
+    "createdAt": "2026-04-16T04:18:33.090Z",
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "status": "Pending",
+    "deliveryOtp": "2510",
+    "couponCode": null,
+    "total": 685,
+    "items": [
+      {
+        "quantity": 4,
+        "total": 680,
+        "price": "170",
+        "name": "Apple",
+        "id": "f1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776275360/tg6ylzbdyut6metspwih.png"
+      }
+    ]
+  },
+  {
+    "couponCode": null,
+    "deliveryOtp": "9223",
+    "total": 395,
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "items": [
+      {
+        "name": "Apple",
+        "price": "180",
+        "total": 360,
+        "quantity": 2,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png",
+        "id": "f1"
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani",
+    "deliveryPartner": {
+      "name": "abhishek bhavlani",
+      "email": "ab@gmail.com",
+      "phone": "7990360899"
+    },
+    "id": "ORD1776336736886",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentDetails": null,
+    "createdAt": "2026-04-16T10:52:16.886Z",
+    "date": "16/4/2026, 4:22:16 pm",
+    "customer": {
+      "country": "IN",
+      "phone": "7990360899",
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "city": "Ahmedabad",
+      "state": "GJ"
+    },
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "status": "Out for Delivery"
+  },
+  {
+    "status": "Out for Delivery",
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "customer": {
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "country": "IN",
+      "phone": "7990360899",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Work",
+      "street": "518, softcoding solution "
+    },
+    "date": "20/4/2026, 5:44:05 pm",
+    "createdAt": "2026-04-20T12:14:05.884Z",
+    "paymentDetails": null,
+    "userEmail": "kenilswadas@gmail.com",
+    "id": "ORD1776687245884",
+    "paymentMethod": "COD",
+    "deliveryPartner": {
+      "phone": "",
+      "email": "somyapadhiyar4test@gmail.com",
+      "name": "Somya Padhiyar"
+    },
+    "deliveryPartnerName": "Somya Padhiyar",
+    "items": [
+      {
+        "total": 540,
+        "price": "180",
+        "name": "Apple",
+        "quantity": 3,
+        "id": "f1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png"
+      }
+    ],
+    "deliveryPartnerEmail": "somyapadhiyar4test@gmail.com",
+    "total": 545,
+    "couponCode": null,
+    "deliveryOtp": "222991"
+  },
+  {
+    "items": [
+      {
+        "id": "f1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png",
+        "total": 540,
+        "price": "180",
+        "name": "Apple",
+        "quantity": 3
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani",
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 545,
+    "couponCode": null,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "status": "Out for Delivery",
+    "customer": {
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "country": "IN",
+      "phone": "7990360899",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Work",
+      "street": "518, softcoding solution "
+    },
+    "date": "20/4/2026, 5:52:05 pm",
+    "paymentDetails": null,
+    "createdAt": "2026-04-20T12:22:05.473Z",
+    "paymentMethod": "COD",
+    "id": "ORD1776687725473",
+    "userEmail": "kenilswadas@gmail.com",
+    "deliveryPartner": {
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani",
+      "phone": "7990360899"
+    }
+  },
+  {
+    "couponCode": null,
+    "deliveryPartnerName": "abhishek bhavlani",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png",
+        "id": "f1",
+        "name": "Apple",
+        "price": "180",
+        "total": 540,
+        "quantity": 3
+      }
+    ],
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 545,
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1776688176402",
+    "deliveryPartner": {
+      "phone": "7990360899",
+      "name": "abhishek bhavlani",
+      "email": "ab@gmail.com"
+    },
+    "status": "Out for Delivery",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "customer": {
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "country": "IN",
+      "phone": "7990360899",
+      "pincode": "380001",
+      "name": "kenil swadas "
+    },
+    "date": "20/4/2026, 5:59:36 pm",
+    "createdAt": "2026-04-20T12:29:36.402Z",
+    "paymentDetails": null
+  },
+  {
+    "customer": {
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "phone": "7990360899",
+      "country": "IN"
+    },
+    "date": "20/4/2026, 6:03:24 pm",
+    "paymentDetails": null,
+    "createdAt": "2026-04-20T12:33:24.001Z",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "status": "Out for Delivery",
+    "deliveryPartner": {
+      "name": "abhishek bhavlani",
+      "email": "ab@gmail.com",
+      "phone": "7990360899"
+    },
+    "id": "ORD1776688404001",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com",
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 545,
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png",
+        "id": "f1",
+        "quantity": 3,
+        "price": "180",
+        "name": "Apple",
+        "total": 540
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani",
+    "couponCode": null
+  },
+  {
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1776688796040",
+    "deliveryPartner": {
+      "name": "abhishek bhavlani",
+      "email": "ab@gmail.com",
+      "phone": "7990360899"
+    },
+    "status": "Delivered",
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "date": "20/4/2026, 6:09:56 pm",
+    "customer": {
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "country": "IN",
+      "phone": "7990360899",
+      "pincode": "380001",
+      "name": "kenil swadas "
+    },
+    "createdAt": "2026-04-20T12:39:56.040Z",
+    "paymentDetails": null,
+    "couponCode": null,
+    "deliveryOtp": "764374",
+    "deliveryPartnerName": "abhishek bhavlani",
+    "items": [
+      {
+        "price": "180",
+        "name": "Apple",
+        "total": 540,
+        "quantity": 3,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png",
+        "id": "f1"
+      }
+    ],
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 545
+  },
+  {
+    "deliveryPartner": {
+      "name": "abhishek bhavlani",
+      "email": "ab@gmail.com",
+      "phone": "7990360899"
+    },
+    "id": "ORD1776689190529",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentDetails": null,
+    "createdAt": "2026-04-20T12:46:30.529Z",
+    "customer": {
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "name": "kenil swadas ",
+      "pincode": "380001",
+      "country": "IN",
+      "phone": "7990360899"
+    },
+    "date": "20/4/2026, 6:16:30 pm",
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "status": "Delivered",
+    "couponCode": null,
+    "deliveryOtp": "306982",
+    "total": 545,
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "items": [
+      {
+        "id": "f1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png",
+        "total": 540,
+        "name": "Apple",
+        "price": "180",
+        "quantity": 3
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani"
+  },
+  {
+    "createdAt": "2026-04-20T12:48:26.728Z",
+    "paymentDetails": null,
+    "customer": {
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "type": "Work",
+      "street": "518, softcoding solution ",
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "country": "IN",
+      "phone": "7990360899"
+    },
+    "date": "20/4/2026, 6:18:26 pm",
+    "status": "Cancelled",
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "discountAmount": 0,
+    "userEmail": "kenilswadas@gmail.com",
+    "id": "ORD1776689306728",
+    "paymentMethod": "COD",
+    "total": 545,
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png",
+        "id": "f1",
+        "quantity": 3,
+        "price": "180",
+        "name": "Apple",
+        "total": 540
+      }
+    ],
+    "couponCode": null
+  },
+  {
+    "items": [
+      {
+        "total": 540,
+        "name": "Apple",
+        "price": "180",
+        "quantity": 3,
+        "id": "f1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png"
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani",
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "total": 545,
+    "couponCode": null,
+    "deliveryOtp": "172337",
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "status": "Delivered",
+    "date": "21/4/2026, 9:37:48 pm",
+    "customer": {
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "phone": "7990360899",
+      "country": "IN",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "type": "Work",
+      "street": "518, softcoding solution "
+    },
+    "paymentDetails": null,
+    "createdAt": "2026-04-21T16:07:48.999Z",
+    "id": "ORD1776787668998",
+    "paymentMethod": "COD",
+    "userEmail": "kenilswadas@gmail.com",
+    "deliveryPartner": {
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani",
+      "phone": "7990360899"
+    }
+  },
+  {
+    "couponCode": null,
+    "deliveryOtp": "869512",
+    "total": 685,
+    "deliveryPartnerEmail": "ab@gmail.com",
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776275360/tg6ylzbdyut6metspwih.png",
+        "id": "f1",
+        "price": "170",
+        "name": "Apple",
+        "total": 680,
+        "quantity": 4
+      }
+    ],
+    "deliveryPartnerName": "abhishek bhavlani",
+    "deliveryPartner": {
+      "phone": "7990360899",
+      "email": "ab@gmail.com",
+      "name": "abhishek bhavlani"
+    },
+    "paymentMethod": "COD",
+    "id": "ORD1776789075612",
+    "userEmail": "kenilswadas@gmail.com",
+    "paymentDetails": null,
+    "createdAt": "2026-04-21T16:31:15.612Z",
+    "customer": {
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "street": "518, softcoding solution ",
+      "type": "Work",
+      "pincode": "380001",
+      "name": "kenil swadas ",
+      "phone": "7990360899",
+      "country": "IN"
+    },
+    "date": "21/4/2026, 10:01:15 pm",
+    "discountAmount": 0,
+    "userId": "AXBIubFatvgNv3K1bYFsspRRyRu2",
+    "status": "Delivered"
+  },
+  {
+    "total": 395,
+    "items": [
+      {
+        "id": "f10",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776766243/tue4d1se7czdy8d32q02.png",
+        "total": 360,
+        "price": "120",
+        "name": "Pineapple",
+        "quantity": 3
+      }
+    ],
+    "couponCode": null,
+    "customer": {
+      "pincode": "380001",
+      "name": "Vishu patel",
+      "country": "IN",
+      "phone": "7990360899",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "type": "Work",
+      "street": "512, softcoding solution"
+    },
+    "date": "22/4/2026, 11:28:31 am",
+    "createdAt": "2026-04-22T05:58:31.073Z",
+    "paymentDetails": null,
+    "status": "Pending",
+    "userId": "vishupatel89@gmail.com",
+    "discountAmount": 0,
+    "userEmail": "vishupatel89@gmail.com",
+    "id": "ORD1776837511072",
+    "paymentMethod": "COD"
+  },
+  {
+    "total": 310,
+    "items": [
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776771610/pja15xyuquxi6umqxyvo.png",
+        "id": "v11",
+        "quantity": 1,
+        "price": "40",
+        "name": "Coriander Leaves",
+        "total": 40
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776771015/lq2itdnyxzjytin041qb.png",
+        "id": "v5",
+        "quantity": 1,
+        "name": "Onion",
+        "price": "55",
+        "total": 55
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png",
+        "id": "f1",
+        "price": "180",
+        "name": "Apple",
+        "total": 180,
+        "quantity": 1
+      }
+    ],
+    "couponCode": null,
+    "paymentDetails": null,
+    "createdAt": "2026-05-05T19:46:42.565Z",
+    "date": "6/5/2026, 1:16:42 am",
+    "customer": {
+      "country": "IN",
+      "phone": "7990360899",
+      "name": "somyapadhiyar455",
+      "pincode": "380001",
+      "type": "Home",
+      "street": "518, softcoding solution ",
+      "state": "GJ",
+      "city": "Ahmedabad"
+    },
+    "discountAmount": 0,
+    "userId": "somyapadhiyar455@gmail.com",
+    "status": "Pending",
+    "id": "ORD1778010402565",
+    "paymentMethod": "COD",
+    "userEmail": "somyapadhiyar455@gmail.com"
+  },
+  {
+    "total": 310,
+    "items": [
+      {
+        "price": "40",
+        "name": "Coriander Leaves",
+        "total": 40,
+        "quantity": 1,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776771610/pja15xyuquxi6umqxyvo.png",
+        "id": "v11"
+      },
+      {
+        "id": "v5",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776771015/lq2itdnyxzjytin041qb.png",
+        "total": 55,
+        "name": "Onion",
+        "price": "55",
+        "quantity": 1
+      },
+      {
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png",
+        "id": "f1",
+        "quantity": 1,
+        "name": "Apple",
+        "price": "180",
+        "total": 180
+      }
+    ],
+    "couponCode": null,
+    "customer": {
+      "type": "Home",
+      "street": "518, softcoding solution ",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "country": "IN",
+      "phone": "7990360899",
+      "name": "somyapadhiyar455",
+      "pincode": "380001"
+    },
+    "date": "6/5/2026, 1:17:52 am",
+    "createdAt": "2026-05-05T19:47:52.825Z",
+    "paymentDetails": null,
+    "status": "Pending",
+    "discountAmount": 0,
+    "userId": "somyapadhiyar455@gmail.com",
+    "userEmail": "somyapadhiyar455@gmail.com",
+    "id": "ORD1778010472825",
+    "paymentMethod": "COD"
+  },
+  {
+    "userEmail": "somyapadhiyar455@gmail.com",
+    "id": "ORD1778010490450",
+    "paymentMethod": "COD",
+    "deliveryPartner": {
+      "phone": "",
+      "email": "somyapadhiyar4test@gmail.com",
+      "name": "Somya Padhiyar"
+    },
+    "status": "Out for Delivery",
+    "discountAmount": 0,
+    "userId": "somyapadhiyar455@gmail.com",
+    "createdAt": "2026-05-05T19:48:10.450Z",
+    "paymentDetails": null,
+    "date": "6/5/2026, 1:18:10 am",
+    "customer": {
+      "name": "somyapadhiyar455",
+      "pincode": "380001",
+      "phone": "7990360899",
+      "country": "IN",
+      "state": "GJ",
+      "city": "Ahmedabad",
+      "street": "518, softcoding solution ",
+      "type": "Home"
+    },
+    "couponCode": null,
+    "deliveryOtp": "848330",
+    "deliveryPartnerName": "Somya Padhiyar",
+    "items": [
+      {
+        "quantity": 1,
+        "total": 40,
+        "name": "Coriander Leaves",
+        "price": "40",
+        "id": "v11",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776771610/pja15xyuquxi6umqxyvo.png"
+      },
+      {
+        "id": "v5",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776771015/lq2itdnyxzjytin041qb.png",
+        "total": 55,
+        "price": "55",
+        "name": "Onion",
+        "quantity": 1
+      },
+      {
+        "total": 180,
+        "name": "Apple",
+        "price": "180",
+        "quantity": 1,
+        "id": "f1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png"
+      }
+    ],
+    "total": 310,
+    "deliveryPartnerEmail": "somyapadhiyar4test@gmail.com"
+  },
+  {
+    "userEmail": "somyapadhiyar455@gmail.com",
+    "paymentMethod": "COD",
+    "id": "ORD1778012691719",
+    "deliveryPartner": {
+      "phone": "7990360899",
+      "name": "Somya Padhiyar",
+      "email": "somyapadhiyar4test@gmail.com"
+    },
+    "status": "Out for Delivery",
+    "discountAmount": 0,
+    "userId": "somyapadhiyar455@gmail.com",
+    "date": "6/5/2026, 1:54:51 am",
+    "customer": {
+      "pincode": "380001",
+      "name": "somyapadhiyar455",
+      "phone": "7990360899",
+      "country": "IN",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "street": "518, softcoding solution ",
+      "type": "Home"
+    },
+    "createdAt": "2026-05-05T20:24:51.720Z",
+    "paymentDetails": null,
+    "couponCode": null,
+    "deliveryOtp": "362590",
+    "deliveryPartnerName": "Somya Padhiyar",
+    "items": [
+      {
+        "quantity": 1,
+        "name": "Coriander Leaves",
+        "price": "40",
+        "total": 40,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776771610/pja15xyuquxi6umqxyvo.png",
+        "id": "v11"
+      },
+      {
+        "total": 55,
+        "price": "55",
+        "name": "Onion",
+        "quantity": 1,
+        "id": "v5",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776771015/lq2itdnyxzjytin041qb.png"
+      },
+      {
+        "id": "f1",
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776336642/od2zciquydjdbnxofb4d.png",
+        "total": 180,
+        "name": "Apple",
+        "price": "180",
+        "quantity": 1
+      }
+    ],
+    "deliveryPartnerEmail": "somyapadhiyar4test@gmail.com",
+    "total": 310
+  },
+  {
+    "customer": {
+      "pincode": "380001",
+      "name": "somya padhiyar",
+      "country": "IN",
+      "phone": "7990360899",
+      "city": "Ahmedabad",
+      "state": "GJ",
+      "type": "Home",
+      "street": "518, softcoding solution "
+    },
+    "date": "12/5/2026, 10:08:15 am",
+    "paymentDetails": null,
+    "createdAt": "2026-05-12T04:38:15.054Z",
+    "userId": "somyapadhiyar4555@gmail.com",
+    "discountAmount": 0,
+    "status": "Pending",
+    "id": "ORD1778560695054",
+    "paymentMethod": "COD",
+    "userEmail": "somyapadhiyar4555@gmail.com",
+    "total": 2405,
+    "items": [
+      {
+        "quantity": 5,
+        "price": "120",
+        "name": "Pineapple",
+        "total": 600,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776766243/tue4d1se7czdy8d32q02.png",
+        "id": "f10"
+      },
+      {
+        "name": "Olive Oil",
+        "price": "900",
+        "total": 1800,
+        "quantity": 2,
+        "image": "https://res.cloudinary.com/dbnuemnv5/image/upload/v1776772361/o1p4vhezmwxsximrobvm.webp",
+        "id": "o3"
+      }
+    ],
+    "couponCode": null
+  }
+]

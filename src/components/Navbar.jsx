@@ -53,20 +53,26 @@ export default function Navbar() {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       return alert("Voice search is not supported in this browser.");
     }
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'en-US';
-      recognition.interimResults = false; // Set to false to prevent issues from rapid updates
-      recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
-      recognition.onerror = (e) => { console.error(e); setIsListening(false); };
-      recognition.onresult = (event) => {
-        // Remove trailing punctuation that speech recognition sometimes adds.
-        const transcript = event.results[0][0].transcript.replace(/[.?!,;]$/, '').trim();
-        setLocalQuery(transcript);
-        performSearchAndNavigate(transcript); // Search and navigate on voice result.
-      };
-      recognition.start();
+    // Clear existing text immediately so voice replaces it
+    setLocalQuery('');
+    setSearchQuery('');
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false; // single utterance — auto-stops
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript.replace(/[.?!,;]$/, '').trim();
+      setLocalQuery(transcript);
+      performSearchAndNavigate(transcript);
+      recognition.stop(); // force-stop immediately after capture
+    };
+    recognition.start();
   };
 
   // Handles form submission (e.g., pressing Enter).

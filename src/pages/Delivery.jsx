@@ -2,8 +2,7 @@ import { useStore } from '../context/StoreContext'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Search, Camera, Mail, Phone, MapPin, CheckCircle2, Upload, Edit2, Save, X, Wifi, WifiOff, Package, Truck, Tag, CreditCard, Banknote, Motorbike, LogOut } from 'lucide-react'
 import { useState, useRef, useLayoutEffect, useEffect } from 'react'
-import { getFirestore, doc, updateDoc } from 'firebase/firestore'
-import { auth } from '../firebase'
+
 
 export default function Delivery() {
   const { orders, updateOrderStatus, logout, clearCart, currentUser, updateUser, updatePartnerStatus } = useStore()
@@ -18,7 +17,7 @@ export default function Delivery() {
   const [showCamera, setShowCamera] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const isOfflineMode = currentUser?.status === 'Offline' || currentUser?.deliveryMode === 'Offline';
+  const isOfflineMode = String(currentUser?.status || '').toLowerCase() === 'offline' || String(currentUser?.deliveryMode || '').toLowerCase() === 'offline';
   const [subTab, setSubTab] = useState(isOfflineMode ? 'active' : 'new');
   const [otpInputVisible, setOtpInputVisible] = useState(null);
   const [otpInput, setOtpInput] = useState('');
@@ -38,12 +37,14 @@ export default function Delivery() {
       try {
         const updatedUser = { ...currentUser, name: editData.name, phone: editData.phone, email: editData.email, address: editData.address };
         updateUser(updatedUser);
-        if (currentUser?.uid) {
-          const db = getFirestore(auth.app);
-          await updateDoc(doc(db,"users", currentUser.uid), { name: editData.name, phone: editData.phone, email: editData.email, address: editData.address });
-        }
         setIsEditing(false);
-      } catch(e) { console.error(e); alert("Failed to update profile"); }
+        
+        await fetch(import.meta.env.VITE_WEBHOOK_UPDATE_PARTNER_PROFILE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'update', user: updatedUser })
+        });
+      } catch(e) { console.error(e); alert("Failed to update profile via webhook"); }
     } else {
       setEditData({ name: currentUser?.name || '', phone: currentUser?.phone || '', email: currentUser?.email || '', address: currentUser?.address || '' });
       setIsEditing(true);
@@ -55,10 +56,12 @@ export default function Delivery() {
     try {
       const updatedUser = { ...currentUser, photoURL: base64String };
       updateUser(updatedUser);
-      if (currentUser?.uid) {
-        const db = getFirestore(auth.app);
-        await updateDoc(doc(db,"users", currentUser.uid), { photoURL: base64String });
-      }
+      
+      await fetch(import.meta.env.VITE_WEBHOOK_UPDATE_PARTNER_PROFILE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', user: updatedUser })
+      });
     } catch (error) {
       console.error("Error updating photo:", error);
       alert("Failed to save photo.");
@@ -346,17 +349,6 @@ export default function Delivery() {
                         <button onClick={async () => {
                           updateOrderStatus(order.id, 'Out for Delivery', currentUser?.email);
                           try {
-                            const db = getFirestore(auth.app);
-                            await updateDoc(doc(db, "orders", order.id), {
-                              status: 'Out for Delivery',
-                              deliveryPartnerEmail: currentUser?.email,
-                              deliveryPartnerName: currentUser?.name || 'Partner',
-                              deliveryPartner: {
-                                name: currentUser?.name || 'Partner',
-                                phone: currentUser?.phone || '',
-                                email: currentUser?.email || ''
-                              }
-                            });
                           } catch (err) {
                             console.error("Error updating order with partner details:", err);
                           }

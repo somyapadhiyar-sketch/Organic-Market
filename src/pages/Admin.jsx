@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { useStore } from '../context/StoreContext'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Plus, LogOut, Search, Mic, Edit, Trash2, PackagePlus, PowerOff, MapPin, Menu, Amphora, Apple, Carrot, Bean, ShoppingBag, Motorbike, Store, BarChart3, ChevronDown, Grid, Tag, Phone, CreditCard, UserPlus } from 'lucide-react'
-import { getFirestore, doc, updateDoc, collection, getDocs, addDoc, deleteDoc } from 'firebase/firestore'
-import { auth } from '../firebase'
+
 import PartnerDetailsModal from '../components/PartnerDetailsModal'
 import AdminSales from '../components/AdminSales'
 
@@ -27,6 +26,7 @@ export default function Admin() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [coupons, setCoupons] = useState([]);
   const [newCoupon, setNewCoupon] = useState({ code: '', discount: '', validFromDate: '', validFromTime: '', validUntilDate: '', validUntilTime: '' });
+  const [editingCouponId, setEditingCouponId] = useState(null);
 
   const handleTabSwitch = (tab) => { 
     navigate(`/admin/${tab}`);
@@ -45,53 +45,226 @@ export default function Admin() {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (activeTab !== 'coupons') return;
-    
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        try {
-          const db = getFirestore(auth.app);
-          const querySnapshot = await getDocs(collection(db, "coupons"));
-          const couponsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setCoupons(couponsData);
-        } catch (e) {
-          console.error("Error fetching coupons:", e);
+    const triggerCleanup = () => {
+      fetch(import.meta.env.VITE_WEBHOOK_ADMIN_CLEANUP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'cleanup' })
+      }).catch(err => console.warn("Admin cleanup webhook failed:", err));
+    };
+
+    triggerCleanup(); // Run immediately on admin page load
+    const interval = setInterval(triggerCleanup, 60000); // Run every minute
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchCoupons = async () => {
+    try {
+      const res = await fetch(import.meta.env.VITE_WEBHOOK_ADMIN_COUPONS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'fetch' })
+      });
+      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      const responseData = await res.json();
+      
+      const data = Array.isArray(responseData) ? responseData : (responseData?.data || []);
+      
+      const mapped = data.map(c => {
+        const rawDiscount = c.discountPercent || c.discount || 0;
+        const discountVal = typeof rawDiscount === 'string' ? parseInt(rawDiscount.replace(/[^\d]/g, ''), 10) : rawDiscount;
+        const isActive = c.status ? c.status.toUpperCase() === 'ACTIVE' : c.active === true;
+        const expiryDateVal = c.validUntil || c.valid_until || c.expiryDate || null;
+        const isExpired = expiryDateVal ? new Date() > new Date(expiryDateVal) : false;
+        
+        // If active in DB but expired, auto-disable in MongoDB via webhook
+        if (isActive && isExpired && c.code) {
+          fetch(import.meta.env.VITE_WEBHOOK_ADMIN_COUPONS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'disable',
+              data: { code: c.code }
+            })
+          }).catch(err => console.warn("Failed to auto-disable expired coupon in DB:", err));
         }
-      }
-    });
-    return () => unsubscribe();
+
+        const rawId = c._id || c.id;
+        const finalId = (rawId && typeof rawId === 'object')
+          ? (rawId.$oid || JSON.stringify(rawId))
+          : (rawId || c.code || Math.random().toString());
+
+        return {
+          ...c,
+          id: String(finalId),
+          discountPercent: discountVal,
+          validUntil: expiryDateVal,
+          validFrom: c.validFrom || c.valid_from || null,
+          active: isActive && !isExpired,
+          isExpired
+        };
+      }).filter(c => c.code);
+      setCoupons(mapped);
+    } catch (e) {
+      console.error("Error fetching coupons:", e);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'coupons') {
+      fetchCoupons();
+      const interval = setInterval(fetchCoupons, 60000);
+      return () => clearInterval(interval);
+    }
   }, [activeTab]);
+
+  const handleEditClick = (coupon) => {
+    setEditingCouponId(coupon.id);
+    
+    let fromDate = "";
+    let fromTime = "";
+    if (coupon.validFrom) {
+      const d = new Date(coupon.validFrom);
+      fromDate = d.toISOString().split('T')[0];
+      fromTime = d.toTimeString().split(' ')[0].substring(0, 5);
+    }
+    
+    let untilDate = "";
+    let untilTime = "";
+    if (coupon.validUntil) {
+      const d = new Date(coupon.validUntil);
+      untilDate = d.toISOString().split('T')[0];
+      untilTime = d.toTimeString().split(' ')[0].substring(0, 5);
+    }
+    
+    setNewCoupon({
+      code: coupon.code,
+      discount: coupon.discountPercent || coupon.discount || "",
+      validFromDate: fromDate,
+      validFromTime: fromTime,
+      validUntilDate: untilDate,
+      validUntilTime: untilTime
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCouponId(null);
+    setNewCoupon({ code: '', discount: '', validFromDate: '', validFromTime: '', validUntilDate: '', validUntilTime: '' });
+  };
 
   const handleAddCoupon = async (e) => {
     e.preventDefault();
     try {
       const validFrom = newCoupon.validFromDate ? `${newCoupon.validFromDate}T${newCoupon.validFromTime || '00:00'}` : '';
       const validUntil = newCoupon.validUntilDate ? `${newCoupon.validUntilDate}T${newCoupon.validUntilTime || '23:59'}` : '';
-      const db = getFirestore(auth.app);
-      const docRef = await addDoc(collection(db, "coupons"), { code: newCoupon.code.toUpperCase(), discountPercent: Number(newCoupon.discount), validFrom, validUntil, active: true, usedBy: [] });
-      setCoupons([...coupons, { id: docRef.id, code: newCoupon.code.toUpperCase(), discountPercent: Number(newCoupon.discount), validFrom, validUntil, active: true, usedBy: [] }]);
+      
+      const validFromISO = newCoupon.validFromDate
+        ? new Date(`${newCoupon.validFromDate}T${newCoupon.validFromTime || '00:00'}:00`).toISOString()
+        : '';
+      const validUntilISO = newCoupon.validUntilDate
+        ? new Date(`${newCoupon.validUntilDate}T${newCoupon.validUntilTime || '23:59'}:00`).toISOString()
+        : '';
+
+      if (editingCouponId) {
+        setCoupons(prev => prev.map(c => c.id === editingCouponId ? {
+          ...c,
+          code: newCoupon.code.toUpperCase(),
+          discountPercent: Number(newCoupon.discount),
+          validFrom,
+          validUntil
+        } : c));
+        
+        await fetch(import.meta.env.VITE_WEBHOOK_ADMIN_COUPONS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'edit',
+            data: {
+              code: newCoupon.code.toUpperCase(),
+              discount: Number(newCoupon.discount),
+              valid_from: validFromISO,
+              valid_until: validUntilISO,
+            }
+          })
+        });
+        setEditingCouponId(null);
+        if(showToast) showToast("Coupon updated!");
+      } else {
+        const tempId = Date.now().toString();
+        const addedCoupon = { id: tempId, code: newCoupon.code.toUpperCase(), discountPercent: Number(newCoupon.discount), validFrom, validUntil, active: true, usedBy: [] };
+        setCoupons(prev => [...prev, addedCoupon]);
+        
+        if(showToast) showToast("Coupon added!");
+
+        const res = await fetch(import.meta.env.VITE_WEBHOOK_ADMIN_COUPONS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create',
+            data: {
+              code: newCoupon.code.toUpperCase(),
+              discount: Number(newCoupon.discount),
+              valid_from: validFromISO,
+              valid_until: validUntilISO,
+            }
+          })
+        });
+        
+        if (res.ok) {
+          const resData = await res.json();
+          const dbId = resData._id || (resData.data && resData.data._id);
+          if (dbId) {
+            const finalDbId = typeof dbId === 'object' ? (dbId.$oid || JSON.stringify(dbId)) : dbId;
+            setCoupons(prev => prev.map(c => c.id === tempId ? { ...c, id: String(finalDbId) } : c));
+          }
+        }
+      }
       setNewCoupon({ code: '', discount: '', validFromDate: '', validFromTime: '', validUntilDate: '', validUntilTime: '' });
-      if(showToast) showToast("Coupon added!");
-    } catch (e) { if(showToast) showToast("Failed to add coupon"); }
+    } catch (e) {
+      console.error("Failed to add/save coupon", e);
+      if(showToast) showToast("Failed to save coupon");
+    }
   };
 
   const handleToggleCoupon = async (coupon) => {
     try {
-      const db = getFirestore(auth.app);
-      await updateDoc(doc(db, "coupons", coupon.id), { active: !coupon.active });
-      setCoupons(coupons.map(c => c.id === coupon.id ? { ...c, active: !c.active } : c));
-      if(showToast) showToast(`Coupon ${coupon.active ? 'disabled' : 'enabled'}`);
-    } catch (e) { if(showToast) showToast("Failed to update coupon"); }
+      const newActive = !coupon.active;
+      setCoupons(coupons.map(c => c.id === coupon.id ? { ...c, active: newActive } : c));
+      
+      await fetch(import.meta.env.VITE_WEBHOOK_ADMIN_COUPONS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: newActive ? 'enable' : 'disable',
+          data: { code: coupon.code }
+        })
+      });
+      if(showToast) showToast(`Coupon ${newActive ? 'disabled' : 'enabled'}`);
+    } catch (e) {
+      console.error("Failed to toggle coupon:", e);
+      if(showToast) showToast("Failed to update coupon");
+    }
   };
 
   const handleDeleteCoupon = async (id) => {
     if(!window.confirm("Delete this coupon?")) return;
     try {
-      const db = getFirestore(auth.app);
-      await deleteDoc(doc(db, "coupons", id));
+      const couponToDelete = coupons.find(c => c.id === id);
       setCoupons(coupons.filter(c => c.id !== id));
       if(showToast) showToast("Coupon deleted");
-    } catch (e) { if(showToast) showToast("Failed to delete coupon"); }
+
+      await fetch(import.meta.env.VITE_WEBHOOK_ADMIN_COUPONS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          data: { code: couponToDelete?.code }
+        })
+      });
+    } catch (e) {
+      console.error("Failed to delete coupon:", e);
+      if(showToast) showToast("Failed to delete coupon");
+    }
   };
 
   const handleAdminApproval = async (email, action) => {
@@ -113,20 +286,24 @@ export default function Admin() {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       return alert("Voice search is not supported in this browser.");
     }
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'en-US';
-      recognition.interimResults = true;
-      recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
-      recognition.onerror = (e) => { console.error(e); setIsListening(false); };
-      recognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0].transcript)
-          .join('');
-        setSearchQuery(transcript.replace(/[.?!]+$/, ''));
-      };
-      recognition.start();
+    // Clear existing text immediately so voice replaces it
+    setSearchQuery('');
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false; // single utterance — auto-stops
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript.replace(/[.?!,;]$/, '').trim();
+      setSearchQuery(transcript);
+      recognition.stop(); // force-stop immediately after capture
+    };
+    recognition.start();
   };
 
   // Filter Helpers
@@ -142,8 +319,8 @@ export default function Admin() {
     .filter(o => (o.id || '').toLowerCase().includes(searchQuery.toLowerCase()) || (o.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => (statusWeight[a.status] || 99) - (statusWeight[b.status] || 99));
   const pendingPartners = deliveryPartners.filter(d => d.status === 'Pending' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
-  const onlinePartners = deliveryPartners.filter(d => d.deliveryMode !== 'Offline' && d.status !== 'Pending' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
-  const offlinePartners = deliveryPartners.filter(d => d.deliveryMode === 'Offline' && d.status !== 'Pending' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
+  const onlinePartners = deliveryPartners.filter(d => d.deliveryMode !== 'Offline' && d.status === 'Approved' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
+  const offlinePartners = deliveryPartners.filter(d => d.deliveryMode === 'Offline' && d.status === 'Approved' && ((d.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (d.email || '').toLowerCase().includes(searchQuery.toLowerCase())));
 
   return (
     <div className="h-screen w-full bg-slate-50 font-sans text-[#1C1C1C] flex overflow-hidden">
@@ -500,11 +677,6 @@ export default function Admin() {
                                         setAssignmentModes({ ...assignmentModes, [order.id]: mode });
                                         try {
                                           updateOrderStatus(order.id, 'Pending', 'online_broadcast');
-                                          const db = getFirestore(auth.app);
-                                          await updateDoc(doc(db, "orders", order.id), {
-                                            deliveryPartnerEmail: 'online_broadcast',
-                                            status: 'Pending'
-                                          });
                                           if(showToast) showToast('✅ Order is available to all online partners.');
                                         } catch (err) {
                                           console.error(err);
@@ -554,17 +726,6 @@ export default function Admin() {
                                               const partnerEmail = p.email;
                                               try {
                                                 updateOrderStatus(order.id, 'Out for Delivery', partnerEmail);
-                                                const db = getFirestore(auth.app);
-                                                await updateDoc(doc(db, "orders", order.id), {
-                                                  status: 'Out for Delivery',
-                                                  deliveryPartnerEmail: partnerEmail,
-                                                  deliveryPartnerName: p.name || 'Partner',
-                                                  deliveryPartner: {
-                                                    name: p.name || 'Partner',
-                                                    phone: p.phone || '',
-                                                    email: partnerEmail
-                                                  }
-                                                });
                                                 if(showToast) showToast(`✅ Order assigned to ${p.name || 'offline partner'}!`);
                                                 const newModes = {...assignmentModes};
                                                 delete newModes[order.id];
@@ -796,39 +957,70 @@ export default function Admin() {
         {activeTab === 'coupons' && (
           <div className="space-y-6">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 animate-in fade-in zoom-in-95">
-              <h3 className="font-bold text-lg mb-4 text-slate-800 flex items-center gap-2"><Tag size={20} className="text-emerald-600"/> Add New Coupon</h3>
-              <form onSubmit={handleAddCoupon} className="flex flex-col md:flex-row flex-wrap gap-4 items-end">
-                <div className="flex-1 w-full min-w-[120px]">
-                  <label className="text-xs font-bold text-gray-500 uppercase">Coupon Code</label>
-                  <input required type="text" value={newCoupon.code} onChange={e => setNewCoupon({...newCoupon, code: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold uppercase" placeholder="e.g. SAVE20" />
-                </div>
-                <div className="w-full md:w-28">
-                  <label className="text-xs font-bold text-gray-500 uppercase">Discount (%)</label>
-                  <input required type="number" min="1" max="100" value={newCoupon.discount} onChange={e => setNewCoupon({...newCoupon, discount: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold" placeholder="20" />
-                </div>
-                <div className="flex-1 w-full min-w-[180px]">
-                  <label className="text-xs font-bold text-gray-500 uppercase">Valid From</label>
-                  <div className="flex gap-2 mt-1">
-                    <input required type="date" value={newCoupon.validFromDate} onChange={e => setNewCoupon({...newCoupon, validFromDate: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-sm" />
-                    <input required type="time" value={newCoupon.validFromTime} onChange={e => setNewCoupon({...newCoupon, validFromTime: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-sm" />
+              <h3 className="font-bold text-lg mb-4 text-slate-800 flex items-center gap-2">
+                <Tag size={20} className="text-emerald-600"/> {editingCouponId ? "Edit Coupon" : "Add New Coupon"}
+              </h3>
+              
+              <form onSubmit={handleAddCoupon} className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+                {/* Box 1: Coupon Information */}
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 flex flex-col justify-between gap-4">
+                  <div>
+                    <h4 className="font-bold text-sm text-slate-700 flex items-center gap-1.5 border-b border-slate-200/60 pb-2 mb-4">Coupon Information</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 uppercase">Coupon Code</label>
+                        <input required type="text" value={newCoupon.code} onChange={e => setNewCoupon({...newCoupon, code: e.target.value})} className="w-full mt-1.5 p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold uppercase text-sm" placeholder="e.g. SAVE20" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 uppercase">Discount (%)</label>
+                        <input required type="number" min="1" max="100" value={newCoupon.discount} onChange={e => setNewCoupon({...newCoupon, discount: e.target.value})} className="w-full mt-1.5 p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-sm" placeholder="20" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <button type="submit" className="btn-3d btn-emerald px-6 py-3 font-bold flex-1 h-[46px] text-sm">
+                      {editingCouponId ? "Save Changes" : "Generate Coupon"}
+                    </button>
+                    {editingCouponId && (
+                      <button type="button" onClick={handleCancelEdit} className="btn-3d bg-slate-200 border border-slate-300 text-slate-700 hover:bg-slate-300 px-6 py-3 font-bold h-[46px] text-sm">
+                        Cancel
+                      </button>
+                    )}
                   </div>
                 </div>
-                <div className="flex-1 w-full min-w-[180px]">
-                  <label className="text-xs font-bold text-gray-500 uppercase">Valid Until</label>
-                  <div className="flex gap-2 mt-1">
-                    <input required type="date" value={newCoupon.validUntilDate} onChange={e => setNewCoupon({...newCoupon, validUntilDate: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-sm" />
-                    <input required type="time" value={newCoupon.validUntilTime} onChange={e => setNewCoupon({...newCoupon, validUntilTime: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-sm" />
+
+                {/* Box 2: Validity Duration */}
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
+                  <h4 className="font-bold text-sm text-slate-700 flex items-center gap-1.5 border-b border-slate-200/60 pb-2">Validity Duration</h4>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase">Valid From</label>
+                    <div className="flex flex-col sm:flex-row gap-2 mt-1">
+                      <input required type="date" value={newCoupon.validFromDate} onChange={e => setNewCoupon({...newCoupon, validFromDate: e.target.value})} className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-sm" />
+                      <input required type="time" value={newCoupon.validFromTime} onChange={e => setNewCoupon({...newCoupon, validFromTime: e.target.value})} className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-sm sm:w-32 shrink-0" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase">Valid Until</label>
+                    <div className="flex flex-col sm:flex-row gap-2 mt-1">
+                      <input required type="date" value={newCoupon.validUntilDate} onChange={e => setNewCoupon({...newCoupon, validUntilDate: e.target.value})} className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-sm" />
+                      <input required type="time" value={newCoupon.validUntilTime} onChange={e => setNewCoupon({...newCoupon, validUntilTime: e.target.value})} className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold text-sm sm:w-32 shrink-0" />
+                    </div>
                   </div>
                 </div>
-                <button type="submit" className="btn-3d btn-emerald px-6 py-3 font-bold w-full md:w-auto h-[46px]">Generate</button>
               </form>
             </div>
+            
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden animate-in fade-in zoom-in-95 delay-100">
               <div className="overflow-x-auto custom-scrollbar">
                 <table className="w-full text-left border-collapse whitespace-nowrap">
                   <thead>
                     <tr className="bg-slate-50 border-b border-gray-200">
-                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Code</th><th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Discount</th><th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Valid From</th><th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Valid Until</th><th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th><th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Code</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Discount</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Valid From</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Valid Until</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -838,14 +1030,29 @@ export default function Admin() {
                         <td className="p-4 font-bold text-emerald-600">{coupon.discountPercent}% OFF</td>
                         <td className="p-4 text-sm font-medium text-gray-600">{coupon.validFrom ? new Date(coupon.validFrom).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' }) : '-'}</td>
                         <td className="p-4 text-sm font-medium text-gray-600">{coupon.validUntil ? new Date(coupon.validUntil).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' }) : (coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString() : '-')}</td>
-                        <td className="p-4"><span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${coupon.active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{coupon.active ? 'Active' : 'Inactive'}</span></td>
+                        <td className="p-4">
+                          <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${
+                            coupon.isExpired 
+                              ? 'bg-red-100 text-red-700' 
+                              : coupon.active 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-slate-100 text-slate-500'
+                          }`}>
+                            {coupon.isExpired ? 'Expired' : coupon.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
                         <td className="p-4 text-right">
-                          <button onClick={() => handleToggleCoupon(coupon)} className="btn-3d bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-1.5 font-bold text-[11px] shadow-sm mr-2">{coupon.active ? 'Disable' : 'Enable'}</button>
+                          {!coupon.isExpired && (
+                            <>
+                              <button onClick={() => handleEditClick(coupon)} className="btn-3d bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-1.5 font-bold text-[11px] shadow-sm mr-2">Edit</button>
+                              <button onClick={() => handleToggleCoupon(coupon)} className="btn-3d bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-1.5 font-bold text-[11px] shadow-sm mr-2">{coupon.active ? 'Disable' : 'Enable'}</button>
+                            </>
+                          )}
                           <button onClick={() => handleDeleteCoupon(coupon.id)} className="btn-3d btn-danger px-3 py-1.5 font-bold text-[11px] shadow-sm">Delete</button>
                         </td>
                       </tr>
                     ))}
-                    {coupons.length === 0 && <tr><td colSpan="5" className="p-8 text-center text-gray-500 font-medium">No coupons generated yet.</td></tr>}
+                    {coupons.length === 0 && <tr><td colSpan="6" className="p-8 text-center text-gray-500 font-medium">No coupons generated yet.</td></tr>}
                   </tbody>
                 </table>
               </div>

@@ -4,9 +4,7 @@ import { motion } from 'framer-motion';
 import { useStore } from '../context/StoreContext';
 import { ArrowRight, Mail, Lock, User, Eye, EyeOff, Phone, MapPin, Camera, Upload, Wifi, WifiOff, Leaf, Bike } from 'lucide-react';
 import { Country, State, City } from 'country-state-city';
-import { createUserWithEmailAndPassword, updateProfile } from"firebase/auth";
-import { getFirestore, doc, setDoc } from"firebase/firestore";
-import { auth } from '../firebase';
+
 
 export default function DeliverySignup() {
   const [name, setName] = useState('');
